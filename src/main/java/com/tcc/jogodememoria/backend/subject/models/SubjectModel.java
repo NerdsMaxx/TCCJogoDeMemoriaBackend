@@ -23,5 +23,5 @@ public class SubjectModel implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "teacher_id")
-  private TeacherModel teacher;
+  private TeacherModel teacherModel;
 }

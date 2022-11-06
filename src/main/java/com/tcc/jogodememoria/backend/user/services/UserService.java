@@ -19,35 +19,43 @@ public class UserService implements IUserService {
 
     final IUserRepository userRepository;
 
+    @Override
     @Transactional
     public UserModel save(UserModel userModel) {
         return userRepository.save(userModel);
     }
 
+    @Override
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
 
+    @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
 
+    @Override
     public List<UserModel> findAll() {
         return userRepository.findAll();
     }
 
+    @Override
     public Optional<UserModel> findById(UUID id) {
         return userRepository.findById(id);
     }
 
+    @Override
     public Optional<UserModel> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
+    @Override
     public Optional<UserModel> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
+    @Override
     @Transactional
     public void delete(UserModel userModel) {
         userRepository.delete(userModel);

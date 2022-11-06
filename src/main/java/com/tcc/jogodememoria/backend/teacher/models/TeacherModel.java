@@ -3,7 +3,6 @@ package com.tcc.jogodememoria.backend.teacher.models;
 import com.tcc.jogodememoria.backend.user.models.UserModel;
 import java.io.Serializable;
 import java.util.UUID;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,10 +25,9 @@ public class TeacherModel implements Serializable {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
 
-  @Column(nullable = false)
   private String subject;
 
   @OneToOne
   @JoinColumn(name = "user_id")
-  private UserModel user;
+  private UserModel userModel;
 }
