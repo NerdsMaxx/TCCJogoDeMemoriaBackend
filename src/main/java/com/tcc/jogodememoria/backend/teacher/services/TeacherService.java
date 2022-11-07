@@ -9,90 +9,106 @@ import com.tcc.jogodememoria.backend.teacher_subject.interfaces.ITeacherSubjectS
 import com.tcc.jogodememoria.backend.teacher_subject.models.TeacherSubjectModel;
 import com.tcc.jogodememoria.backend.user.interfaces.IUserService;
 import com.tcc.jogodememoria.backend.user.models.UserModel;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.transaction.Transactional;
-import org.springframework.stereotype.Service;
 
 @Service
 public class TeacherService implements ITeacherService {
 
-  TeacherService(
-    ITeacherRepository teacherRepository,
-    IUserService userService,
-    ITeacherSubjectService teacherSubjectService,
-    ISubjectService subjectService
-  ) {
-    this.teacherRepository = teacherRepository;
-    this.userService = userService;
-    this.teacherSubjectService = teacherSubjectService;
-    this.subjectService = subjectService;
-  }
-
-  final ITeacherRepository teacherRepository;
-  final IUserService userService;
-  final ITeacherSubjectService teacherSubjectService;
-  final ISubjectService subjectService;
-
-  @Override
-  @Transactional
-  public TeacherModel save(TeacherModel teacherModel) {
-    return teacherRepository.save(teacherModel);
-  }
-
-  @Override
-  @Transactional
-  public TeacherSubjectModel saveTeacherSubjectModel(
-    TeacherSubjectModel teacherSubjectModel
-  ) {
-    return teacherSubjectService.save(teacherSubjectModel);
-  }
-
-  @Override
-  public boolean existsByUserModel(UserModel userModel) {
-    return teacherRepository.existsByUserModel(userModel);
-  }
-
-  @Override
-  public boolean existsUserByEmail(String email) {
-    Optional<UserModel> optionalUserModel = userService.findByEmail(email);
-
-    if (!optionalUserModel.isPresent()) {
-      return false;
+    TeacherService(
+            ITeacherRepository teacherRepository,
+            IUserService userService,
+            ITeacherSubjectService teacherSubjectService,
+            ISubjectService subjectService
+    ) {
+        this.teacherRepository = teacherRepository;
+        this.userService = userService;
+        this.teacherSubjectService = teacherSubjectService;
+        this.subjectService = subjectService;
     }
 
-    return existsByUserModel(optionalUserModel.get());
-  }
+    final ITeacherRepository teacherRepository;
+    final IUserService userService;
+    final ITeacherSubjectService teacherSubjectService;
+    final ISubjectService subjectService;
 
-  @Override
-  public List<TeacherModel> findAll() {
-    return teacherRepository.findAll();
-  }
+    @Override
+    @Transactional
+    public TeacherModel save(TeacherModel teacherModel) {
+        return teacherRepository.save(teacherModel);
+    }
 
-  @Override
-  public Optional<TeacherModel> findById(UUID id) {
-    return teacherRepository.findById(id);
-  }
+    @Override
+    @Transactional
+    public TeacherSubjectModel saveTeacherSubjectModel(
+            TeacherSubjectModel teacherSubjectModel
+    ) {
+        return teacherSubjectService.save(teacherSubjectModel);
+    }
 
-  @Override
-  public Optional<TeacherModel> findByUserModel(UserModel userModel) {
-    return teacherRepository.findByUserModel(userModel);
-  }
+    @Override
+    public boolean existsByUserModel(UserModel userModel) {
+        return teacherRepository.existsByUserModel(userModel);
+    }
 
-  @Override
-  public Optional<UserModel> findUserByEmail(String email) {
-    return userService.findByEmail(email);
-  }
+    @Override
+    public boolean existsUserByEmail(String email) {
+        Optional<UserModel> optionalUserModel = userService.findByEmail(email);
 
-  @Override
-  public Optional<SubjectModel> findSubjectModelByName(String subjectName) {
-    return subjectService.findBySubjectName(subjectName);
-  }
+        if (!optionalUserModel.isPresent()) {
+            return false;
+        }
 
-  @Override
-  @Transactional
-  public void delete(TeacherModel teacherModel) {
-    teacherRepository.delete(teacherModel);
-  }
+        return existsByUserModel(optionalUserModel.get());
+    }
+
+    @Override
+    public boolean existsTeacherSubjectModelByTeacherModelAndSubjectModel(TeacherModel teacherModel, SubjectModel subjectModel) {
+        return teacherSubjectService.existsByTeacherModelAndSubjectModel(teacherModel, subjectModel);
+    }
+
+    @Override
+    public List<TeacherModel> findAll() {
+        return teacherRepository.findAll();
+    }
+
+    @Override
+    public Optional<TeacherModel> findById(UUID id) {
+        return teacherRepository.findById(id);
+    }
+
+    @Override
+    public Optional<TeacherModel> findByUserModel(UserModel userModel) {
+        return teacherRepository.findByUserModel(userModel);
+    }
+
+    @Override
+    public Optional<UserModel> findUserByEmail(String email) {
+        return userService.findByEmail(email);
+    }
+
+    @Override
+    public Optional<SubjectModel> findSubjectModelByName(String subjectName) {
+        return subjectService.findBySubjectName(subjectName);
+    }
+
+    @Override
+    public Optional<TeacherSubjectModel> findTeacherSubjectModelByTeacherSubejctID(TeacherModel teacherModel, SubjectModel subjectModel) {
+        return teacherSubjectService.findByTeacherModelAndSubjectModel(teacherModel, subjectModel);
+    }
+
+    @Override
+    public void deleteTeacherSubjectModel(TeacherSubjectModel teacherSubjectModel) {
+        teacherSubjectService.delete(teacherSubjectModel);
+    }
+
+    @Override
+    @Transactional
+    public void delete(TeacherModel teacherModel) {
+        teacherRepository.delete(teacherModel);
+    }
 }
