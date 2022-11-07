@@ -7,10 +7,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ISubjectRepository extends JpaRepository<SubjectModel, UUID> {
-  boolean existsBySubjectAndTeacher(String subjectName, TeacherModel teacherModel);
+  boolean existsBySubjectName(String subjectName);
 
-  Optional<SubjectModel> findBySubjectAndTeacher(
-    String subjectName,
-    TeacherModel teacherModel
-  );
+  Optional<SubjectModel> findBySubjectName(String subjectName);
 }

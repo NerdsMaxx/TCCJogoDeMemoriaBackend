@@ -1,26 +1,23 @@
 package com.tcc.jogodememoria.backend.subject.interfaces;
 
-import com.tcc.jogodememoria.backend.subject.models.SubjectModel;
-import com.tcc.jogodememoria.backend.teacher.models.TeacherModel;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.tcc.jogodememoria.backend.subject.models.SubjectModel;
+
 public interface ISubjectService {
-  SubjectModel save(SubjectModel subject);
+  SubjectModel save(SubjectModel subjectModel);
 
   boolean existsById(UUID id);
 
-  boolean existsBySubjectAndTeacher(
-    String subjectName,
-    TeacherModel teacherModel
-  );
+  boolean existsBySubjectName(String subjectName);
+
+  List<SubjectModel> findAll();
 
   Optional<SubjectModel> findById(UUID id);
 
-  Optional<SubjectModel> findBySubjectAndTeacher(
-    String subjectName,
-    TeacherModel teacherModel
-  );
+  Optional<SubjectModel> findBySubjectName(String subjectName);
 
-  void delete(SubjectModel subject);
+  void delete(SubjectModel subjectModel);
 }

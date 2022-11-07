@@ -1,8 +1,12 @@
 package com.tcc.jogodememoria.backend.teacher.services;
 
+import com.tcc.jogodememoria.backend.subject.interfaces.ISubjectService;
+import com.tcc.jogodememoria.backend.subject.models.SubjectModel;
 import com.tcc.jogodememoria.backend.teacher.interfaces.ITeacherRepository;
 import com.tcc.jogodememoria.backend.teacher.interfaces.ITeacherService;
 import com.tcc.jogodememoria.backend.teacher.models.TeacherModel;
+import com.tcc.jogodememoria.backend.teacher_subject.interfaces.ITeacherSubjectService;
+import com.tcc.jogodememoria.backend.teacher_subject.models.TeacherSubjectModel;
 import com.tcc.jogodememoria.backend.user.interfaces.IUserService;
 import com.tcc.jogodememoria.backend.user.models.UserModel;
 import java.util.List;
@@ -16,14 +20,20 @@ public class TeacherService implements ITeacherService {
 
   TeacherService(
     ITeacherRepository teacherRepository,
-    IUserService userService
+    IUserService userService,
+    ITeacherSubjectService teacherSubjectService,
+    ISubjectService subjectService
   ) {
     this.teacherRepository = teacherRepository;
     this.userService = userService;
+    this.teacherSubjectService = teacherSubjectService;
+    this.subjectService = subjectService;
   }
 
   final ITeacherRepository teacherRepository;
   final IUserService userService;
+  final ITeacherSubjectService teacherSubjectService;
+  final ISubjectService subjectService;
 
   @Override
   @Transactional
@@ -32,8 +42,16 @@ public class TeacherService implements ITeacherService {
   }
 
   @Override
-  public boolean existsByUser(UserModel userModel) {
-    return teacherRepository.existsByUser(userModel);
+  @Transactional
+  public TeacherSubjectModel saveTeacherSubjectModel(
+    TeacherSubjectModel teacherSubjectModel
+  ) {
+    return teacherSubjectService.save(teacherSubjectModel);
+  }
+
+  @Override
+  public boolean existsByUserModel(UserModel userModel) {
+    return teacherRepository.existsByUserModel(userModel);
   }
 
   @Override
@@ -44,7 +62,7 @@ public class TeacherService implements ITeacherService {
       return false;
     }
 
-    return existsByUser(optionalUserModel.get());
+    return existsByUserModel(optionalUserModel.get());
   }
 
   @Override
@@ -58,13 +76,18 @@ public class TeacherService implements ITeacherService {
   }
 
   @Override
-  public Optional<TeacherModel> findByUser(UserModel userModel) {
-    return teacherRepository.findByUser(userModel);
+  public Optional<TeacherModel> findByUserModel(UserModel userModel) {
+    return teacherRepository.findByUserModel(userModel);
   }
 
   @Override
   public Optional<UserModel> findUserByEmail(String email) {
     return userService.findByEmail(email);
+  }
+
+  @Override
+  public Optional<SubjectModel> findSubjectModelByName(String subjectName) {
+    return subjectService.findBySubjectName(subjectName);
   }
 
   @Override

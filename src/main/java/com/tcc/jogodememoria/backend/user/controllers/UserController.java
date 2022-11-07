@@ -1,15 +1,12 @@
 package com.tcc.jogodememoria.backend.user.controllers;
 
-import com.tcc.jogodememoria.backend.user.dtos.UserDtoWithPassword;
-import com.tcc.jogodememoria.backend.user.interfaces.IUserController;
-import com.tcc.jogodememoria.backend.user.interfaces.IUserService;
-import com.tcc.jogodememoria.backend.user.models.UserModel;
-import com.tcc.jogodememoria.backend.utils.CustomBeanUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
+
 import javax.validation.Valid;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +18,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.tcc.jogodememoria.backend.user.dtos.UserDtoWithPassword;
+import com.tcc.jogodememoria.backend.user.interfaces.IUserController;
+import com.tcc.jogodememoria.backend.user.interfaces.IUserService;
+import com.tcc.jogodememoria.backend.user.models.UserModel;
+import com.tcc.jogodememoria.backend.utils.CustomBeanUtils;
 
 @RestController
 @RequestMapping("/user")
