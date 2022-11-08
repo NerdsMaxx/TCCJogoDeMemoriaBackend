@@ -1,13 +1,14 @@
 package com.tcc.jogodememoria.backend.subject.interfaces;
 
 import com.tcc.jogodememoria.backend.subject.models.SubjectModel;
-import com.tcc.jogodememoria.backend.teacher.models.TeacherModel;
-import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface ISubjectRepository extends JpaRepository<SubjectModel, UUID> {
-  boolean existsBySubjectName(String subjectName);
+import java.util.Optional;
 
-  Optional<SubjectModel> findBySubjectName(String subjectName);
+@Repository
+public interface ISubjectRepository extends JpaRepository<SubjectModel, Long> {
+    boolean existsBySubjectName(String subjectName);
+
+    Optional<SubjectModel> findBySubjectName(String subjectName);
 }

@@ -5,8 +5,6 @@ import com.tcc.jogodememoria.backend.subject.models.SubjectModel;
 import com.tcc.jogodememoria.backend.teacher.interfaces.ITeacherRepository;
 import com.tcc.jogodememoria.backend.teacher.interfaces.ITeacherService;
 import com.tcc.jogodememoria.backend.teacher.models.TeacherModel;
-import com.tcc.jogodememoria.backend.teacher_subject.interfaces.ITeacherSubjectService;
-import com.tcc.jogodememoria.backend.teacher_subject.models.TeacherSubjectModel;
 import com.tcc.jogodememoria.backend.user.interfaces.IUserService;
 import com.tcc.jogodememoria.backend.user.models.UserModel;
 import org.springframework.stereotype.Service;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class TeacherService implements ITeacherService {
@@ -22,32 +19,21 @@ public class TeacherService implements ITeacherService {
     TeacherService(
             ITeacherRepository teacherRepository,
             IUserService userService,
-            ITeacherSubjectService teacherSubjectService,
             ISubjectService subjectService
     ) {
         this.teacherRepository = teacherRepository;
         this.userService = userService;
-        this.teacherSubjectService = teacherSubjectService;
         this.subjectService = subjectService;
     }
 
     final ITeacherRepository teacherRepository;
-    final IUserService userService;
-    final ITeacherSubjectService teacherSubjectService;
     final ISubjectService subjectService;
+    final IUserService userService;
 
     @Override
     @Transactional
-    public TeacherModel save(TeacherModel teacherModel) {
+    public TeacherModel saveTeacherModel(TeacherModel teacherModel) {
         return teacherRepository.save(teacherModel);
-    }
-
-    @Override
-    @Transactional
-    public TeacherSubjectModel saveTeacherSubjectModel(
-            TeacherSubjectModel teacherSubjectModel
-    ) {
-        return teacherSubjectService.save(teacherSubjectModel);
     }
 
     @Override
@@ -59,7 +45,7 @@ public class TeacherService implements ITeacherService {
     public boolean existsUserByEmail(String email) {
         Optional<UserModel> optionalUserModel = userService.findByEmail(email);
 
-        if (!optionalUserModel.isPresent()) {
+        if (optionalUserModel.isEmpty()) {
             return false;
         }
 
@@ -67,8 +53,8 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public boolean existsTeacherSubjectModelByTeacherModelAndSubjectModel(TeacherModel teacherModel, SubjectModel subjectModel) {
-        return teacherSubjectService.existsByTeacherModelAndSubjectModel(teacherModel, subjectModel);
+    public boolean existsSubjectModelByName(String subjectName) {
+        return subjectService.existsBySubjectName(subjectName);
     }
 
     @Override
@@ -77,7 +63,7 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public Optional<TeacherModel> findById(UUID id) {
+    public Optional<TeacherModel> findById(Long id) {
         return teacherRepository.findById(id);
     }
 
@@ -97,18 +83,8 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public Optional<TeacherSubjectModel> findTeacherSubjectModelByTeacherSubejctID(TeacherModel teacherModel, SubjectModel subjectModel) {
-        return teacherSubjectService.findByTeacherModelAndSubjectModel(teacherModel, subjectModel);
-    }
-
-    @Override
-    public void deleteTeacherSubjectModel(TeacherSubjectModel teacherSubjectModel) {
-        teacherSubjectService.delete(teacherSubjectModel);
-    }
-
-    @Override
     @Transactional
-    public void delete(TeacherModel teacherModel) {
+    public void deleteTeacherModel(TeacherModel teacherModel) {
         teacherRepository.delete(teacherModel);
     }
 }

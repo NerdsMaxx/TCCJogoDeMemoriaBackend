@@ -1,15 +1,13 @@
 package com.tcc.jogodememoria.backend.user.services;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tcc.jogodememoria.backend.user.interfaces.IUserRepository;
 import com.tcc.jogodememoria.backend.user.interfaces.IUserService;
 import com.tcc.jogodememoria.backend.user.models.UserModel;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService implements IUserService {
@@ -21,7 +19,7 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public UserModel save(UserModel userModel) {
+    public UserModel saveUserModel(UserModel userModel) {
         return userRepository.save(userModel);
     }
 
@@ -41,7 +39,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public Optional<UserModel> findById(UUID id) {
+    public Optional<UserModel> findById(Long id) {
         return userRepository.findById(id);
     }
 
@@ -57,7 +55,7 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public void delete(UserModel userModel) {
+    public void deleteUserModel(UserModel userModel) {
         userRepository.delete(userModel);
     }
 }

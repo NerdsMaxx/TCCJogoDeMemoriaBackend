@@ -1,21 +1,22 @@
 package com.tcc.jogodememoria.backend.teacher.controllers;
 
-import com.tcc.jogodememoria.backend.subject.interfaces.ISubjectService;
 import com.tcc.jogodememoria.backend.subject.models.SubjectModel;
 import com.tcc.jogodememoria.backend.teacher.dtos.TeacherDto;
 import com.tcc.jogodememoria.backend.teacher.interfaces.ITeacherController;
 import com.tcc.jogodememoria.backend.teacher.interfaces.ITeacherService;
 import com.tcc.jogodememoria.backend.teacher.models.TeacherModel;
-import com.tcc.jogodememoria.backend.teacher_subject.models.TeacherSubjectModel;
-import com.tcc.jogodememoria.backend.teacher_subject.primary_key.TeacherSubjectId;
 import com.tcc.jogodememoria.backend.user.models.UserModel;
+import com.tcc.jogodememoria.backend.utils.CustomBeanUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.util.HashSet;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/teacher")
@@ -23,51 +24,45 @@ public class TeacherController implements ITeacherController {
 
     private static final String TEACHER_NOT_FOUND_WARNING_STR = "Professor não foi encontrado.";
 
-    public TeacherController(
-            ITeacherService teacherService,
-            ISubjectService subjectService) {
+    public TeacherController(ITeacherService teacherService) {
         this.teacherService = teacherService;
-        this.subjectService = subjectService;
     }
 
     final ITeacherService teacherService;
-    final ISubjectService subjectService;
 
     @Override
     @PostMapping
+    @Transactional
     public ResponseEntity<Object> saveTeacher(
             @RequestBody @Valid TeacherDto teacherDto) {
 
-        if (teacherService.existsUserByEmail(teacherDto.getEmail())) {
+
+        final String email = teacherDto.getEmail();
+        if (teacherService.existsUserByEmail(email)) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body("Professor já está adicionado.");
         }
 
-        Optional<UserModel> optionalUserModel = teacherService.findUserByEmail(teacherDto.getEmail());
+        Optional<UserModel> userModelOptional = teacherService.findUserByEmail(email);
 
-        if (!optionalUserModel.isPresent()) {
+        if (userModelOptional.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body("Não existe usuário com este e-mail.");
         }
 
         TeacherModel teacherModel = new TeacherModel();
-        teacherModel.setUserModel(optionalUserModel.get());
-        teacherModel = teacherService.save(teacherModel);
 
-        for (String subject : teacherDto.getSubjects()) {
-            Optional<SubjectModel> optionalSubjectModel = teacherService.findSubjectModelByName(
-                    subject);
+        teacherModel.setUserModel(userModelOptional.get());
+        teacherModel.setSubjectModelSet(new HashSet<>());
+
+        for (String subject : teacherDto.getSubjectSet()) {
+            Optional<SubjectModel> optionalSubjectModel = teacherService.findSubjectModelByName(subject);
 
             if (optionalSubjectModel.isPresent()) {
                 SubjectModel subjectModel = optionalSubjectModel.get();
-
-                TeacherSubjectModel teacherSubjectModel = new TeacherSubjectModel();
-
-                teacherSubjectModel.setTeacherSubjectId(new TeacherSubjectId(teacherModel.getId(), subjectModel.getId()));
-
-                teacherService.saveTeacherSubjectModel(teacherSubjectModel);
+                teacherModel.getSubjectModelSet().add(subjectModel);
             } else {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(
                         "A matéria " + subject
@@ -76,6 +71,8 @@ public class TeacherController implements ITeacherController {
 
             }
         }
+
+        teacherService.saveTeacherModel(teacherModel);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -91,10 +88,10 @@ public class TeacherController implements ITeacherController {
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<Object> getATeacher(
-            @PathVariable(value = "id") UUID id) {
-        Optional<TeacherModel> teacherModelOptional = teacherService.findById(id);
+            @PathVariable(value = "id") Long id) {
+        Optional<TeacherModel> optionalTeacherModel = teacherService.findById(id);
 
-        if (!teacherModelOptional.isPresent()) {
+        if (optionalTeacherModel.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(TEACHER_NOT_FOUND_WARNING_STR);
@@ -102,96 +99,89 @@ public class TeacherController implements ITeacherController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(teacherModelOptional.get());
+                .body(optionalTeacherModel.get());
     }
 
-//  @Override
-//  @PutMapping("/{id}")
-//  public ResponseEntity<Object> updateATeacher(
-//          @PathVariable(value = "id") UUID id,
-//          @RequestBody TeacherDto teacherDto
-//  ) {
-//    if (CustomBeanUtils.isAllNullProperty(teacherDto)) {
-//      return ResponseEntity
-//              .status(HttpStatus.CONFLICT)
-//              .body("Nenhum dado foi fornecido para atualização do professor.");
-//    }
-//
-//    Optional<TeacherModel> optionalTeacherModel = teacherService.findById(id);
-//
-//    if (!optionalTeacherModel.isPresent()) {
-//      return ResponseEntity
-//              .status(HttpStatus.CONFLICT)
-//              .body(TEACHER_NOT_FOUND_WARNING_STR);
-//    }
-//
-//    TeacherModel teacherModel = new TeacherModel();
-//    BeanUtils.copyProperties(optionalTeacherModel.get(), teacherModel);
-//
-//    final String email = teacherDto.getEmail();
-//    if (email != null) {
-//      Optional<UserModel> optionalUserModel = teacherService.findUserByEmail(email);
-//
-//      if (!optionalUserModel.isPresent()) {
-//        return ResponseEntity
-//                .status(HttpStatus.CONFLICT)
-//                .body("Não existe usuário com este e-mail.");
-//      }
-//
-//      teacherModel.setUserModel(optionalUserModel.get());
-//      teacherService.save(teacherModel);
-//    }
-//
-//    final List<String> subjects = teacherDto.getSubjects();
-//    if (subjects != null) {
-//      for (String subject : subjects) {
-//        Optional<SubjectModel> optionalSubjectModel = teacherService.findSubjectModelByName(subject);
-//
-//        if (optionalSubjectModel.isPresent()) {
-//          SubjectModel subjectModel = optionalSubjectModel.get();
-//
-//          if (teacherService.existsTeacherSubjectModelByTeacherModelAndSubjectModel(teacherModel, subjectModel)) {
-//            continue;
-//          }
-//
-//          TeacherSubjectModel teacherSubjectModel = new TeacherSubjectModel();
-//
-//          //Deletar primeiro
-//          teacherSubjectModel.setTeacherSubjectId(new TeacherSubjectId(teacherModel.getId(), subjectModel.getId()));
-//          teacherService.deleteTeacherSubjectModel(teacherSubjectModel);
-//
-//          //Depois adicionar
-//          teacherSubjectModel.setTeacherSubjectId(new TeacherSubjectId(teacherModel.getId(), subjectModel.getId()));
-//          teacherService.saveTeacherSubjectModel(teacherSubjectModel);
-//        } else {
-//          return ResponseEntity.status(HttpStatus.CONFLICT).body(
-//                  "A matéria " + subject
-//                          + " não existe. Deve adicionar matéria primeiro antes de atualizar"
-//                          + " o professor com tal matéria.");
-//
-//        }
-//      }
-//    }
-//
-//
-//    return ResponseEntity
-//            .status(HttpStatus.OK)
-//            .body("Professor atualizado com sucesso.");
-//  }
+    @Override
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateATeacher(
+            @PathVariable(value = "id") Long id,
+            @RequestBody TeacherDto teacherDto
+    ) {
+        if (CustomBeanUtils.isAllNullProperty(teacherDto)) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("Nenhum dado foi fornecido para atualização do professor.");
+        }
+
+        Optional<TeacherModel> optionalTeacherModel = teacherService.findById(id);
+
+        if (optionalTeacherModel.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(TEACHER_NOT_FOUND_WARNING_STR);
+        }
+
+        TeacherModel teacherModel = new TeacherModel();
+        BeanUtils.copyProperties(optionalTeacherModel.get(), teacherModel);
+
+        final String email = teacherDto.getEmail();
+        if (email != null) {
+            Optional<UserModel> optionalUserModel = teacherService.findUserByEmail(email);
+
+            if (optionalUserModel.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body("Não existe usuário com este e-mail.");
+            }
+
+            teacherModel.setUserModel(optionalUserModel.get());
+        }
+
+        final Set<String> subjectSet = teacherDto.getSubjectSet();
+        if (subjectSet != null) {
+
+            for (String subject : subjectSet) {
+                if (!teacherService.existsSubjectModelByName(subject)) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                            "A matéria " + subject
+                                    + " não existe. Deve adicionar matéria primeiro antes de atualizar"
+                                    + " o professor com tal matéria.");
+                }
+            }
+
+            teacherModel.setSubjectModelSet(new HashSet<>());
+
+            for (String subject : subjectSet) {
+                Optional<SubjectModel> optionalSubjectModel = teacherService.findSubjectModelByName(subject);
+
+                if (optionalSubjectModel.isPresent()) {
+                    SubjectModel subjectModel = optionalSubjectModel.get();
+                    teacherModel.getSubjectModelSet().add(subjectModel);
+                }
+            }
+        }
+
+        teacherService.saveTeacherModel(teacherModel);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Professor atualizado com sucesso.");
+    }
 
     @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteATeacher(
-            @PathVariable(value = "id") UUID id) {
+            @PathVariable(value = "id") Long id) {
         Optional<TeacherModel> optionalTeacherModel = teacherService.findById(id);
 
-        if (!optionalTeacherModel.isPresent()) {
+        if (optionalTeacherModel.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(TEACHER_NOT_FOUND_WARNING_STR);
         }
 
-        teacherService.delete(optionalTeacherModel.get());
+        teacherService.deleteTeacherModel(optionalTeacherModel.get());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
