@@ -28,4 +28,11 @@ public class TeacherModel {
             joinColumns = @JoinColumn(name = "teacher_id"),
             inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private Set<SubjectModel> subjectModelSet;
+
+    @Override
+    public String toString() {
+        return "id = " + id +
+                ", userModel = { " + userModel.toString() + " }" +
+                ", subjectModelSet = { " + subjectModelSet.toString() + " }";
+    }
 }

@@ -10,11 +10,12 @@ import com.tcc.jogodememoria.backend.utils.CustomBeanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -82,7 +83,10 @@ public class TeacherController implements ITeacherController {
     @Override
     @GetMapping
     public ResponseEntity<Object> getAllTeachers() {
-        return ResponseEntity.status(HttpStatus.OK).body(teacherService.findAll());
+        List<String> teacherModelList = teacherService.findAll()
+                .stream().map(TeacherModel::toString).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(teacherModelList);
     }
 
     @Override
@@ -99,11 +103,12 @@ public class TeacherController implements ITeacherController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(optionalTeacherModel.get());
+                .body(optionalTeacherModel.get().toString());
     }
 
     @Override
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<Object> updateATeacher(
             @PathVariable(value = "id") Long id,
             @RequestBody TeacherDto teacherDto
@@ -171,6 +176,7 @@ public class TeacherController implements ITeacherController {
 
     @Override
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Object> deleteATeacher(
             @PathVariable(value = "id") Long id) {
         Optional<TeacherModel> optionalTeacherModel = teacherService.findById(id);

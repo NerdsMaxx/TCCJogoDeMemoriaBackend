@@ -8,11 +8,10 @@ import com.tcc.jogodememoria.backend.utils.CustomBeanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 
 @RestController
@@ -30,6 +29,7 @@ public class UserController implements IUserController {
 
     @Override
     @PostMapping
+    @Transactional
     public ResponseEntity<Object> saveUser(
             @RequestBody @Valid UserDtoWithPassword userDtoWithPassword
     ) {
@@ -41,7 +41,6 @@ public class UserController implements IUserController {
 
         UserModel userModel = new UserModel();
         BeanUtils.copyProperties(userDtoWithPassword, userModel);
-        userModel.setRegistrationDate(LocalDateTime.now(ZoneId.of("UTC")));
 
         userService.saveUserModel(userModel);
 
@@ -72,6 +71,7 @@ public class UserController implements IUserController {
 
     @Override
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<Object> updateAUser(
             @PathVariable(value = "id") Long id,
             @RequestBody UserDtoWithPassword userDtoWithPassword
@@ -103,6 +103,7 @@ public class UserController implements IUserController {
 
     @Override
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Object> deleteAUser(
             @PathVariable(value = "id") Long id
     ) {

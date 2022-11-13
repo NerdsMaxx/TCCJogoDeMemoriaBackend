@@ -7,9 +7,11 @@ import com.tcc.jogodememoria.backend.subject.models.SubjectModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -24,6 +26,7 @@ public class SubjectController implements ISubjectController {
 
     @Override
     @PostMapping
+    @Transactional
     public ResponseEntity<Object> saveSubject(
             @RequestBody @Valid SubjectDto subjectDto
     ) {
@@ -46,13 +49,17 @@ public class SubjectController implements ISubjectController {
     @Override
     @GetMapping
     public ResponseEntity<Object> getAllSubjects() {
-        return ResponseEntity.status(HttpStatus.OK).body(subjectService.findAll());
+        List<String> subjectModelList = subjectService.findAll()
+                .stream().map(SubjectModel::toString).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(subjectModelList);
     }
 
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<Object> getASubject(
-            @PathVariable(value = "id") Long id
+            @PathVariable(value = "id")
+            Long id
     ) {
         Optional<SubjectModel> optionalSubejctModel = subjectService.findById(id);
 
@@ -64,14 +71,17 @@ public class SubjectController implements ISubjectController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(optionalSubejctModel.get());
+                .body(optionalSubejctModel.get().toString());
     }
 
     @Override
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<Object> updateASubject(
-            @PathVariable(value = "id") Long id,
-            @RequestBody @Valid SubjectDto subjectDto
+            @PathVariable(value = "id")
+            Long id,
+            @RequestBody @Valid
+            SubjectDto subjectDto
     ) {
         Optional<SubjectModel> optionalSubejctModel = subjectService.findById(id);
 
@@ -94,6 +104,7 @@ public class SubjectController implements ISubjectController {
 
     @Override
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Object> deleteASubject(@PathVariable(value = "id") Long id) {
         Optional<SubjectModel> optionalSubejctModel = subjectService.findById(id);
 
