@@ -84,19 +84,22 @@ public class MemoryGameController {
         } else {
             Set<SubjectModel> subjects = new HashSet<>();
             for (String name : subjectNames) {
-                if (subjectServ.existsByName(name)) {
-                    Optional<SubjectModel> opSubject = subjectServ.findByName(name);
+                if (!subjectServ.existsByName(name)) {
+                    SubjectModel subject = new SubjectModel(name);
+                    subjects.add(subjectServ.save(subject));
 
-                    if (opSubject.isEmpty()) {
-                        return ResponseEntity
-                                .status(HttpStatus.CONFLICT)
-                                .body("Por algum motivo não foi encontrado a matéria.");
-                    }
-
-                    subjects.add(opSubject.get());
-                } else {
-                    subjects.add(subjectServ.save(new SubjectModel(name)));
+                    continue;
                 }
+
+                Optional<SubjectModel> opSubject = subjectServ.findByName(name);
+
+                if (opSubject.isEmpty()) {
+                    return ResponseEntity
+                            .status(HttpStatus.CONFLICT)
+                            .body("Por algum motivo não foi encontrado a matéria.");
+                }
+
+                subjects.add(opSubject.get());
             }
 
             user.setSubjects(subjects);
@@ -110,14 +113,14 @@ public class MemoryGameController {
         //Setando as cartas para jogo de memória e adicionar na tabela card.
         Set<CardDto> cardDtos = memoryGameDto.getCards();
         if (cardDtos != null) {
-            final MemoryGameModel finalMemoryGame = memoryGame;
-            cardDtos.forEach(cardDto -> cardServ.save(
-                    new CardModel(
-                            cardDto.getQuestion(),
-                            cardDto.getAnswer(),
-                            finalMemoryGame
-                    ))
-            );
+            for (CardDto cardDto : cardDtos) {
+                cardServ.save(
+                        new CardModel(
+                                cardDto.getQuestion(),
+                                cardDto.getAnswer(),
+                                memoryGame
+                        ));
+            }
         }
 
         return ResponseEntity
