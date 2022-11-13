@@ -28,6 +28,11 @@ public class MemoryGameService implements IMemoryGameService {
     }
 
     @Override
+    public boolean existsByUserAndName(UserModel user, String name) {
+        return memoryGameRepo.existsByUserAndName(user, name);
+    }
+
+    @Override
     public MemoryGameModel save(MemoryGameModel memoryGame) {
         return memoryGameRepo.save(memoryGame);
     }

@@ -13,4 +13,6 @@ public interface IMemoryGameRepository extends JpaRepository<MemoryGameModel, UU
     boolean existsByUser(UserModel user);
 
     List<MemoryGameModel> findByUser(UserModel user);
+
+    boolean existsByUserAndName(UserModel user, String name);
 }

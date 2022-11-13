@@ -48,7 +48,9 @@ public class MemoryGameController {
     ) {
         //Setando o nome do jogo da memória.
         MemoryGameModel memoryGame = new MemoryGameModel();
-        memoryGame.setName(memoryGameDto.getName());
+
+        String gameName = memoryGameDto.getName();
+        memoryGame.setName(gameName);
 
         //Verificando se usuário exsite.
         final String username = memoryGameDto.getUsername();
@@ -67,6 +69,12 @@ public class MemoryGameController {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body("Usuário deve ser professor para ter permissão de criar jogo de memória.");
+        }
+
+        if (memoryGameServ.existsByUserAndName(user, gameName)) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("Jogo de memória já está adicionado.");
         }
 
         //Setando matérias para jogo de memória e adicionar na tabela subject.
@@ -114,6 +122,6 @@ public class MemoryGameController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body("Jogo de memória adicionada.");
+                .body("Jogo de memória adicionado com sucesso.");
     }
 }

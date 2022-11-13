@@ -34,12 +34,27 @@ public class UserController {
     public ResponseEntity<Object> saveUser(
             @RequestBody @Valid UserDto userDto
     ) {
-        if (userServ.existsByUsername(userDto.getUsername())) {
+        boolean existsByUsername = userServ.existsByUsername(userDto.getUsername());
+        boolean existsByEmail = userServ.existsByEmail(userDto.getEmail());
+
+        if (existsByUsername && existsByEmail) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body("Usuário já está adicionado.");
         }
 
+        if (existsByUsername) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("Usuário com este nome de usuário já existe.");
+        }
+
+        if (existsByEmail) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("Usuário com este e-mail já existe.");
+        }
+        
         UserModel user = new UserModel();
         BeanUtils.copyProperties(userDto, user);
         user.setSubjects(new HashSet<>());

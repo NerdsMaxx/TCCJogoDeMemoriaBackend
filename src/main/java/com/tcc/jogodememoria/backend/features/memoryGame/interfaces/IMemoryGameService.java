@@ -10,4 +10,6 @@ public interface IMemoryGameService extends IService<MemoryGameModel> {
     boolean existsByUser(UserModel user);
 
     List<MemoryGameModel> findByUser(UserModel user);
+
+    boolean existsByUserAndName(UserModel user, String name);
 }
