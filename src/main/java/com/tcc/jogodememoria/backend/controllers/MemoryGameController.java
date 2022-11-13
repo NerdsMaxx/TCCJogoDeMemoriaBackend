@@ -79,9 +79,9 @@ public class MemoryGameController {
 
         //Setando matérias para jogo de memória e adicionar na tabela subject.
         Set<String> subjectNames = memoryGameDto.getSubjects();
-        if (subjectNames == null) {
-            memoryGame.setSubjects(new HashSet<>());
-        } else {
+        memoryGame.setSubjects(new HashSet<>());
+
+        if (subjectNames != null) {
             Set<SubjectModel> subjects = new HashSet<>();
             for (String name : subjectNames) {
                 if (!subjectServ.existsByName(name)) {
