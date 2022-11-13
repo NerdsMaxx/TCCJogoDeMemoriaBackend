@@ -54,10 +54,6 @@ public class UserController {
                     .status(HttpStatus.CONFLICT)
                     .body("Usuário com este e-mail já existe.");
         }
-        
-        UserModel user = new UserModel();
-        BeanUtils.copyProperties(userDto, user);
-        user.setSubjects(new HashSet<>());
 
         final String type = userDto.getType();
         if (type.compareToIgnoreCase("Professor") != 0
@@ -66,6 +62,12 @@ public class UserController {
                     .status(HttpStatus.CONFLICT)
                     .body("Tipo de usuário não válido. Só pode ser professor ou aluno.");
         }
+
+        UserModel user = new UserModel();
+        BeanUtils.copyProperties(userDto, user);
+
+        //Na primeira vez que salvar, seta para conjunto de matérias vazias.
+        user.setSubjects(new HashSet<>());
 
         UserTypeModel userType = new UserTypeModel(type);
         if (!userTypeServ.existsByType(type)) {
