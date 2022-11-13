@@ -5,6 +5,7 @@ import com.tcc.jogodememoria.backend.features.user.interfaces.IUserService;
 import com.tcc.jogodememoria.backend.features.user.models.UserModel;
 import com.tcc.jogodememoria.backend.features.userType.interfaces.IUserTypeService;
 import com.tcc.jogodememoria.backend.features.userType.models.UserTypeModel;
+import com.tcc.jogodememoria.backend.responses.user.UserSavedResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,8 +89,14 @@ public class UserController {
 
         userServ.save(user);
 
+        UserSavedResponse userResp = new UserSavedResponse();
+        BeanUtils.copyProperties(user, userResp);
+        userResp.setType(type);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body("Usuário adicionado com sucesso.");
+                .body(userResp);
     }
+
+
 }
