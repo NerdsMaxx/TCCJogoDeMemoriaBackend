@@ -31,7 +31,7 @@ public final class CustomBeanUtils {
         
         for ( PropertyDescriptor propertySrc : propertiesSrc ) {
             String propertryNameSrc = propertySrc.getName();
-            if ( propertryNameSrc.compareTo("class") == 0 ) {
+            if ( propertryNameSrc.equals("class") ) {
                 continue;
             }
             

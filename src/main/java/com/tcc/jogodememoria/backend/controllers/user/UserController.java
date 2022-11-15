@@ -115,7 +115,8 @@ public class UserController {
         if ( userDto.getType() != null ) {
             String type = userDto.getType();
             
-            if ( type.compareToIgnoreCase("Aluno") != 0 && type.compareToIgnoreCase("Professor") != 0 ) {
+            if ( type.compareToIgnoreCase("Aluno") != 0
+                 && type.compareToIgnoreCase("Professor") != 0 ) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                                      .body("Tipo de usuário não válido. Só pode ser professor ou aluno.");
             }
