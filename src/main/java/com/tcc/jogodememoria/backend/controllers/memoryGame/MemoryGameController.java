@@ -1,4 +1,4 @@
-package com.tcc.jogodememoria.backend.controllers;
+package com.tcc.jogodememoria.backend.controllers.memoryGame;
 
 import com.tcc.jogodememoria.backend.dtos.CardDto;
 import com.tcc.jogodememoria.backend.dtos.MemoryGameDto;
@@ -27,94 +27,96 @@ import java.util.Set;
 @RestController
 @RequestMapping("/memoryGame")
 public class MemoryGameController {
-
-    MemoryGameController(IMemoryGameService memoryGameServ, IUserService userServ, ISubjectService subjectServ, ICardService cardServ) {
+    
+    MemoryGameController (IMemoryGameService memoryGameServ, IUserService userServ, ISubjectService subjectServ, ICardService cardServ) {
         this.memoryGameServ = memoryGameServ;
         this.userServ = userServ;
         this.subjectServ = subjectServ;
         this.cardServ = cardServ;
     }
-
+    
     final IMemoryGameService memoryGameServ;
     final IUserService userServ;
     final ISubjectService subjectServ;
     final ICardService cardServ;
-
-
+    
+    
     @PostMapping
     @Transactional
-    public ResponseEntity saveMemoryGame(
+    public ResponseEntity<String> saveMemoryGame (
             @RequestBody @Valid
             MemoryGameDto memoryGameDto
-    ) {
+                                                 ) {
         //Setando o nome do jogo da memória.
         MemoryGameModel memoryGame = new MemoryGameModel();
-
+        
         String gameName = memoryGameDto.getName();
         memoryGame.setName(gameName);
-
+        
         //Verificando se usuário exsite.
         final String username = memoryGameDto.getUsername();
         final Optional<UserModel> opUser = userServ.findByUsername(username);
-
-        if (opUser.isEmpty()) {
+        
+        if ( opUser.isEmpty() ) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body("Usuário não encontrado.");
         }
-
+        
         UserModel user = opUser.get();
-
-        String type = user.getUserType().getType();
-        if (type.compareToIgnoreCase("Professor") != 0) {
+        
+        String type = user.getUserType()
+                .getType();
+        
+        if ( type.compareToIgnoreCase("Professor") != 0 ) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body("Usuário deve ser professor para ter permissão de criar jogo de memória.");
         }
-
-        if (memoryGameServ.existsByUserAndName(user, gameName)) {
+        
+        if ( memoryGameServ.existsByUserAndName(user, gameName) ) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body("Jogo de memória já está adicionado.");
         }
-
+        
         //Setando matérias para jogo de memória e adicionar na tabela subject.
         Set<String> subjectNames = memoryGameDto.getSubjects();
         memoryGame.setSubjects(new HashSet<>());
-
-        if (subjectNames != null) {
+        
+        if ( subjectNames != null ) {
             Set<SubjectModel> subjects = new HashSet<>();
-            for (String name : subjectNames) {
-                if (!subjectServ.existsByName(name)) {
+            for ( String name : subjectNames ) {
+                if ( ! subjectServ.existsByName(name) ) {
                     SubjectModel subject = new SubjectModel(name);
                     subjects.add(subjectServ.save(subject));
-
+                    
                     continue;
                 }
-
+                
                 Optional<SubjectModel> opSubject = subjectServ.findByName(name);
-
-                if (opSubject.isEmpty()) {
+                
+                if ( opSubject.isEmpty() ) {
                     return ResponseEntity
                             .status(HttpStatus.CONFLICT)
                             .body("Por algum motivo não foi encontrado a matéria.");
                 }
-
+                
                 subjects.add(opSubject.get());
             }
-
+            
             user.setSubjects(subjects);
             memoryGame.setSubjects(subjects);
         }
-
+        
         memoryGame.setUser(user);
-
+        
         memoryGame = memoryGameServ.save(memoryGame);
-
+        
         //Setando as cartas para jogo de memória e adicionar na tabela card.
         Set<CardDto> cardDtos = memoryGameDto.getCards();
-        if (cardDtos != null) {
-            for (CardDto cardDto : cardDtos) {
+        if ( cardDtos != null ) {
+            for ( CardDto cardDto : cardDtos ) {
                 cardServ.save(
                         new CardModel(
                                 cardDto.getQuestion(),
@@ -123,7 +125,7 @@ public class MemoryGameController {
                         ));
             }
         }
-
+        
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Jogo de memória adicionado com sucesso.");

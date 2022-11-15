@@ -5,12 +5,12 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class UserSavedResponse {
+public class UserResponse {
     private String name;
-
+    
     private String username;
-
+    
     private String email;
-
+    
     private String type;
 }
