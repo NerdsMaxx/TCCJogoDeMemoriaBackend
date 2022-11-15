@@ -48,12 +48,6 @@ public final class CustomBeanUtils {
             
             Object valueTrg = trgImpl.getPropertyValue(propertryNameSrc);
             
-            if ( valueSrc instanceof String valSrcStr
-                 && valueTrg instanceof String valTrgStr
-                 && valSrcStr.compareTo(valTrgStr) != 0 ) {
-                return true;
-            }
-            
             if ( ! valueSrc.equals(valueTrg) ) {
                 return true;
             }
