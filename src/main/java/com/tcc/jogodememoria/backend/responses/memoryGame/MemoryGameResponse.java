@@ -10,6 +10,14 @@ import java.util.Set;
 @Setter
 public class MemoryGameResponse {
     
+    public MemoryGameResponse () {
+    }
+    
+    public MemoryGameResponse (final String username, final String name) {
+        this.username = username;
+        this.name = name;
+    }
+    
     private String username;
     
     private String name;
