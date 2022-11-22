@@ -1,7 +1,28 @@
 package com.tcc.jogodememoria.backend.controllers;
 
-import com.tcc.jogodememoria.backend.dtos.CardDto;
-import com.tcc.jogodememoria.backend.dtos.MemoryGameDto;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.tcc.jogodememoria.backend.dtos.card.CardDto;
+import com.tcc.jogodememoria.backend.dtos.memorygame.MemoryGameDto;
+import com.tcc.jogodememoria.backend.dtos.memorygame.MemoryGameUpdateDto;
 import com.tcc.jogodememoria.backend.interfaces.services.ICardService;
 import com.tcc.jogodememoria.backend.interfaces.services.IMemoryGameService;
 import com.tcc.jogodememoria.backend.interfaces.services.ISubjectService;
@@ -13,247 +34,345 @@ import com.tcc.jogodememoria.backend.models.UserModel;
 import com.tcc.jogodememoria.backend.responses.card.CardResponse;
 import com.tcc.jogodememoria.backend.responses.memoryGame.MemoryGameResponse;
 import com.tcc.jogodememoria.backend.utils.CustomBeanUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/memoryGame")
+@RequestMapping("/memory-game")
 public class MemoryGameController {
-    
-    final IMemoryGameService memoryGameServ;
-    final IUserService userServ;
-    final ISubjectService subjectServ;
-    final ICardService cardServ;
-    
-    MemoryGameController (final IMemoryGameService memoryGameServ,
-                          final IUserService userServ,
-                          final ISubjectService subjectServ,
-                          final ICardService cardServ) {
-        this.memoryGameServ = memoryGameServ;
-        this.userServ = userServ;
-        this.subjectServ = subjectServ;
-        this.cardServ = cardServ;
+
+    final IMemoryGameService memoryGameService;
+    final IUserService userService;
+    final ISubjectService subjectService;
+    final ICardService cardService;
+
+    MemoryGameController(final IMemoryGameService memoryGameService,
+            final IUserService userService,
+            final ISubjectService subjectService,
+            final ICardService cardService) {
+        this.memoryGameService = memoryGameService;
+        this.userService = userService;
+        this.subjectService = subjectService;
+        this.cardService = cardService;
     }
-    
+
     @PostMapping
     @Transactional
-    public ResponseEntity<String> save (@RequestBody @Valid final MemoryGameDto memoryGameDto) {
+    public ResponseEntity<Object> save(@RequestBody @Valid final MemoryGameDto memoryGameDto) {
         // Setando o nome do jogo da memória.
         MemoryGameModel memoryGame = new MemoryGameModel();
-        
-        String gameName = memoryGameDto.getName();
-        memoryGame.setName(gameName);
-        
+
+        final String memoryGameName = memoryGameDto.getName();
+        memoryGame.setName(memoryGameName);
+
         // Verificando se usuário exsite.
         final String username = memoryGameDto.getUsername();
-        final Optional<UserModel> opUser = userServ.findByUsername(username);
-        
-        if ( opUser.isEmpty() ) {
+        final Optional<UserModel> optionalUser = userService.findByUsername(username);
+
+        if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                                 .body("Usuário não encontrado.");
+                    .body("Usuário não encontrado.");
         }
-        
-        UserModel user = opUser.get();
+
+        final UserModel user = optionalUser.get();
         // .ff
-        String type = user.getUserType().getType();
+        final String userTypeName = user.getUserType().getType();
         // .fo
-        if ( type.equalsIgnoreCase("Professor") ) {
+        if (!"Professor".equalsIgnoreCase(userTypeName)) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                                 .body("Usuário deve ser professor para ter permissão de criar jogo de memória.");
+                    .body("Usuário deve ser professor para ter permissão de criar jogo de memória.");
         }
-        
-        if ( memoryGameServ.existsByUserAndName(user, gameName) ) {
+
+        if (memoryGameService.existsByUserAndName(user, memoryGameName)) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                                 .body("Jogo de memória já está adicionado.");
+                    .body("Jogo de memória já está adicionado.");
         }
-        
+
         // Setando matérias para jogo de memória e adicionar na tabela subject.
-        final Set<String> subjectNames = memoryGameDto.getSubjects();
+        final Set<String> subjectNameSet = memoryGameDto.getSubjects();
         memoryGame.setSubjects(new HashSet<>());
-        
-        if ( subjectNames != null ) {
-            
-            final Set<SubjectModel> subjects = new HashSet<>();
-            
-            for ( final String name : subjectNames ) {
-                if ( ! subjectServ.existsByName(name) ) {
-                    final SubjectModel subject = new SubjectModel(name);
-                    subjects.add(subjectServ.save(subject));
-                    
+
+        if (subjectNameSet != null) {
+
+            final Set<SubjectModel> subjectSet = new HashSet<>();
+
+            for (final String subjectName : subjectNameSet) {
+            	if (!subjectService.existsByName(subjectName)) {
+                    final SubjectModel subject = new SubjectModel(subjectName);
+                    subjectSet.add(subjectService.save(subject));
+
                     continue;
                 }
-                
-                final Optional<SubjectModel> opSubject = subjectServ.findByName(name);
-                
-                if ( opSubject.isEmpty() ) {
+
+                final Optional<SubjectModel> opitionalSubject = subjectService.findByName(subjectName);
+
+                if (opitionalSubject.isEmpty()) {
                     return ResponseEntity.status(HttpStatus.CONFLICT)
-                                         .body("Por algum motivo não foi encontrado a matéria.");
+                            .body("Por algum motivo não foi encontrado a matéria.");
                 }
-                
-                subjects.add(opSubject.get());
+
+                subjectSet.add(opitionalSubject.get());
             }
-            
-            user.setSubjects(subjects);
-            memoryGame.setSubjects(subjects);
+
+            user.setSubjects(subjectSet);
+            memoryGame.setSubjects(subjectSet);
         }
-        
+
         memoryGame.setUser(user);
         
-        memoryGame = memoryGameServ.save(memoryGame);
-        
+        memoryGame = memoryGameService.save(memoryGame);
+
         // Setando as cartas para jogo de memória e adicionar na tabela card.
-        final Set<CardDto> cardDtos = memoryGameDto.getCards();
-        if ( cardDtos != null ) {
-            for ( final CardDto cardDto : cardDtos ) {
-                cardServ.save(new CardModel(cardDto.getQuestion(), cardDto.getAnswer(), memoryGame));
-            }
+        final Set<CardDto> cardDtoSet = memoryGameDto.getCards();
+        if (cardDtoSet != null) {
+			for (final CardDto cardDto : cardDtoSet) { 
+				final String question = cardDto.getQuestion(); 
+				final String answer = cardDto.getAnswer();
+			  
+				cardService.save(new CardModel(question, answer, memoryGame));
+			}
         }
         
+
         return ResponseEntity.status(HttpStatus.OK)
-                             .body("Jogo de memória adicionado com sucesso.");
+                .body("Jogo de memória adicionado com sucesso.");
     }
-    
+
+    @PutMapping("/{username}/{memory-game-name}")
+    @Transactional
+    public ResponseEntity<Object> update(
+            @PathVariable(value = "username") final String username,
+            @PathVariable(value = "memory-game-name") final String memoryGameName,
+            @RequestBody final MemoryGameUpdateDto memoryGameUpdateDto) {
+        final Optional<UserModel> optionalUser = userService.findByUsername(username);
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Usuário não encontrado.");
+        }
+
+        final UserModel user = optionalUser.get();
+        // .ff
+        final Optional<MemoryGameModel> optionalMemoryGame = memoryGameService.findByUserAndName(user, memoryGameName);
+        // .fo
+        if (optionalMemoryGame.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Jogo de memória não encontrado.");
+        }
+
+        if (CustomBeanUtils.isAllNullProperty(memoryGameUpdateDto)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Nenhum dado foi fornecido para atualização do jogo de memória.");
+        }
+        
+        MemoryGameModel memoryGame = optionalMemoryGame.get();
+        
+        final String newMemoryGameName = memoryGameUpdateDto.getName();
+        if (newMemoryGameName != null) {
+            memoryGame.setName(newMemoryGameName);
+        }
+
+        final Set<String> subjectNameSet = memoryGameUpdateDto.getSubjects();
+        if (subjectNameSet != null) {
+            final Set<SubjectModel> subjectSet = new HashSet<>();
+
+            for (final String subjectName : subjectNameSet) {
+                if (!subjectService.existsByName(subjectName)) {
+                    final SubjectModel subject = new SubjectModel(subjectName);
+                    subjectSet.add(subjectService.save(subject));
+
+                    continue;
+                }
+
+                final Optional<SubjectModel> opitionalSubject = subjectService.findByName(subjectName);
+
+                if (opitionalSubject.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body("Por algum motivo não foi encontrado a matéria.");
+                }
+
+                subjectSet.add(opitionalSubject.get());
+            }
+
+            user.setSubjects(subjectSet);
+            memoryGame.setSubjects(subjectSet);
+        }
+
+        memoryGame.setUser(user);
+
+        memoryGame = memoryGameService.save(memoryGame);
+
+        // Setando as cartas para jogo de memória e adicionar na tabela card.
+        final Set<CardDto> cardDtoSet = memoryGameUpdateDto.getCards();
+        if (cardDtoSet != null) {
+        	final List<CardModel> cardList = cardService.findByMemoryGame(memoryGame);
+        	cardService.deleteAllInBatch(cardList);
+        	
+			for (final CardDto cardDto : cardDtoSet) { 
+				final String question = cardDto.getQuestion(); 
+				final String answer = cardDto.getAnswer();
+			  
+				cardService.save(new CardModel(question, answer, memoryGame));
+			}
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Jogo de memória atualizado com sucesso.");
+    }
+
     @GetMapping
     @Transactional
-    public ResponseEntity<Object> getAll () {
-        final List<MemoryGameModel> memoryGames = memoryGameServ.findAll();
-        
-        if ( memoryGames.isEmpty() ) {
+    public ResponseEntity<Object> getAll() {
+        final List<MemoryGameModel> memoryGameList = memoryGameService.findAll();
+
+        if (memoryGameList.isEmpty()) {
             return ResponseEntity.status(HttpStatus.OK)
-                                 .body("Não foram encontrados jogos de memória.");
+                    .body("Não foram encontrados jogos de memória.");
         }
-        
-        List<MemoryGameResponse> memoryGameResps = new ArrayList<>();
-        for ( final MemoryGameModel memoryGame : memoryGames ) {
-            //.ff
-            final String name = memoryGame.getName();
+
+        final List<MemoryGameResponse> memoryGameResponseList = new ArrayList<>();
+        for (final MemoryGameModel memoryGame : memoryGameList) {
+            // .ff
+            final String memoryGameName = memoryGame.getName();
             final String username = memoryGame.getUser().getUsername();
-            final Set<SubjectModel> subjects = memoryGame.getSubjects();
-            final Set<CardModel> cards = memoryGame.getCards();
-            //.fo
-            if ( CustomBeanUtils.someObjectIsNull(new Object[]{name, username, subjects, cards}) ) {
+            final Set<SubjectModel> subjectSet = memoryGame.getSubjects();
+            final Set<CardModel> cardSet = memoryGame.getCards();
+            // .fo
+            if (CustomBeanUtils.someObjectIsNull(new Object[] { memoryGameName, username, subjectSet, cardSet })) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                                     .body("Deu algum erro!");
+                        .body("Deu algum erro!");
             }
-            
-            MemoryGameResponse memoryGameResp = new MemoryGameResponse(username, name);
-            
-            memoryGameResp.setSubjects(subjects.stream()
-                                               .map(SubjectModel::getName)
-                                               .collect(Collectors.toSet()));
-            
-            memoryGameResp.setCards(cards.stream()
-                                         .map((card) -> new CardResponse(card.getQuestion(), card.getAnswer()))
-                                         .collect(Collectors.toSet()));
-            
-            memoryGameResps.add(memoryGameResp);
+
+            final MemoryGameResponse memoryGameResponse = new MemoryGameResponse(username, memoryGameName);
+
+            memoryGameResponse.setSubjects(subjectSet.stream()
+                    .map(SubjectModel::getName)
+                    .collect(Collectors.toSet()));
+
+            memoryGameResponse.setCards(cardSet.stream()
+                    .map(card -> new CardResponse(card.getQuestion(), card.getAnswer()))
+                    .collect(Collectors.toSet()));
+
+            memoryGameResponseList.add(memoryGameResponse);
         }
-        
+
         return ResponseEntity.status(HttpStatus.OK)
-                             .body(memoryGameResps);
+                .body(memoryGameResponseList);
     }
-    
+
     @GetMapping("/{username}")
     @Transactional
-    public ResponseEntity<Object> getMemoryGameListByUsername (
+    public ResponseEntity<Object> getMemoryGameListByUsername(
             @PathVariable(value = "username") final String username) {
-        
-        final Optional<UserModel> opUser = userServ.findByUsername(username);
-        
-        if ( opUser.isEmpty() ) {
+
+        final Optional<UserModel> optionalUser = userService.findByUsername(username);
+
+        if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                                 .body("Não foi encontrado usuário com este nome de usuário.");
+                    .body("Não foi encontrado usuário com este nome de usuário.");
         }
-        
-        final List<MemoryGameModel> memoryGames = memoryGameServ.findByUser(opUser.get());
-        final List<MemoryGameResponse> memoryGamesResp = new ArrayList<>();
-        
-        for ( final MemoryGameModel memoryGame : memoryGames ) {
-            final MemoryGameResponse memoryGameResp = new MemoryGameResponse();
-            memoryGameResp.setUsername(username);
-            memoryGameResp.setName(memoryGame.getName());
-            
-            final Set<CardModel> cards = memoryGame.getCards();
-            Set<CardResponse> cardsResp = new HashSet<>();
-            if ( cards != null ) {
-                cardsResp = cards.stream()
-                                 .map((card) -> new CardResponse(card.getQuestion(), card.getAnswer()))
-                                 .collect(Collectors.toSet());
+
+        final List<MemoryGameModel> memoryGameList = memoryGameService.findByUser(optionalUser.get());
+        final List<MemoryGameResponse> memoryGameResponseList = new ArrayList<>();
+
+        for (final MemoryGameModel memoryGame : memoryGameList) {
+            final MemoryGameResponse memoryGameResponse = new MemoryGameResponse();
+            memoryGameResponse.setUsername(username);
+            memoryGameResponse.setName(memoryGame.getName());
+
+            final Set<CardModel> cardSet = memoryGame.getCards();
+            Set<CardResponse> cardsResponse = new HashSet<>();
+            if (cardSet != null) {
+                cardsResponse = cardSet.stream()
+                        .map(card -> new CardResponse(card.getQuestion(), card.getAnswer()))
+                        .collect(Collectors.toSet());
             }
-            
-            memoryGameResp.setCards(cardsResp);
-            
-            final Set<SubjectModel> subjects = memoryGame.getSubjects();
+
+            memoryGameResponse.setCards(cardsResponse);
+
+            final Set<SubjectModel> subjectSet = memoryGame.getSubjects();
             Set<String> subjectsResp = new HashSet<>();
-            if ( subjects != null ) {
-                subjectsResp = subjects.stream()
-                                       .map(SubjectModel::getName)
-                                       .collect(Collectors.toSet());
+            if (subjectSet != null) {
+                subjectsResp = subjectSet.stream()
+                        .map(SubjectModel::getName)
+                        .collect(Collectors.toSet());
             }
-            
-            memoryGameResp.setSubjects(subjectsResp);
-            
-            memoryGamesResp.add(memoryGameResp);
+
+            memoryGameResponse.setSubjects(subjectsResp);
+
+            memoryGameResponseList.add(memoryGameResponse);
         }
-        
-        
+
         return ResponseEntity.status(HttpStatus.OK)
-                             .body(memoryGamesResp);
+                .body(memoryGameResponseList);
     }
-    
-    @GetMapping("/{username}/{memoryGameName}")
+
+    @GetMapping("/{username}/memory-games-name")
     @Transactional
-    public ResponseEntity<Object> getByUsernameAndMemoryGameName (
-            @PathVariable(value = "username") final String username,
-            @PathVariable(value = "memoryGameName") final String memoryGameName) {
-        
-        final Optional<UserModel> opUser = userServ.findByUsername(username);
-        
-        if ( opUser.isEmpty() ) {
+    public ResponseEntity<Object> getMemoryGamesNameByUsername(
+            @PathVariable(value = "username") final String username) {
+        final Optional<UserModel> optionalUser = userService.findByUsername(username);
+
+        if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                                 .body("Não foi encontrado usuário com este nome de usuário.");
+                    .body("Não foi encontrado usuário com este nome de usuário.");
         }
-        
-        final Optional<MemoryGameModel> opMemoryGame = memoryGameServ.findByUserAndName(opUser.get(), memoryGameName);
-        
-        if ( opMemoryGame.isEmpty() ) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                                 .body("Não foi encontrado jogo de memória.");
-        }
-        
-        final MemoryGameModel memoryGame = opMemoryGame.get();
-        
-        final MemoryGameResponse memoryGameResp = new MemoryGameResponse();
-        memoryGameResp.setUsername(username);
-        memoryGameResp.setName(memoryGameName);
-        
-        final Set<CardModel> cards = memoryGame.getCards();
-        Set<CardResponse> cardsResp = new HashSet<>();
-        if ( cards != null ) {
-            cardsResp = cards.stream()
-                             .map((card) -> new CardResponse(card.getQuestion(), card.getAnswer()))
-                             .collect(Collectors.toSet());
-        }
-        
-        memoryGameResp.setCards(cardsResp);
-        
-        final Set<SubjectModel> subjects = memoryGame.getSubjects();
-        Set<String> subjectsResp = new HashSet<>();
-        if ( subjects != null ) {
-            subjectsResp = subjects.stream()
-                                   .map(SubjectModel::getName)
-                                   .collect(Collectors.toSet());
-        }
-        
-        memoryGameResp.setSubjects(subjectsResp);
-        
+
+        final List<MemoryGameModel> memoryGameList = memoryGameService.findByUser(optionalUser.get());
+        final List<String> memoryGameNameSet = memoryGameList.stream()
+                .map(MemoryGameModel::getName)
+                .toList();
+
         return ResponseEntity.status(HttpStatus.OK)
-                             .body(memoryGameResp);
+                .body(memoryGameNameSet);
+    }
+
+    @GetMapping("/{username}/{memory-game-name}")
+    @Transactional
+    public ResponseEntity<Object> getByUsernameAndMemoryGameName(
+            @PathVariable(value = "username") final String username,
+            @PathVariable(value = "memory-game-name") final String memoryGameName) {
+
+        final Optional<UserModel> optionalUser = userService.findByUsername(username);
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Não foi encontrado usuário com este nome de usuário.");
+        }
+
+        final Optional<MemoryGameModel> optionalMemoryGame = memoryGameService.findByUserAndName(optionalUser.get(),
+                memoryGameName);
+
+        if (optionalMemoryGame.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Não foi encontrado jogo de memória.");
+        }
+
+        final MemoryGameModel memoryGame = optionalMemoryGame.get();
+
+        final MemoryGameResponse memoryGameResponse = new MemoryGameResponse();
+        memoryGameResponse.setUsername(username);
+        memoryGameResponse.setName(memoryGameName);
+
+        final Set<CardModel> cardList = memoryGame.getCards();
+        Set<CardResponse> cardResponseSet = new HashSet<>();
+        if (cardList != null) {
+            cardResponseSet = cardList.stream()
+                    .map(card -> new CardResponse(card.getQuestion(), card.getAnswer()))
+                    .collect(Collectors.toSet());
+        }
+
+        memoryGameResponse.setCards(cardResponseSet);
+
+        final Set<SubjectModel> subjectSet = memoryGame.getSubjects();
+        Set<String> subjectResponseSet = new HashSet<>();
+        if (subjectSet != null) {
+            subjectResponseSet = subjectSet.stream()
+                    .map(SubjectModel::getName)
+                    .collect(Collectors.toSet());
+        }
+
+        memoryGameResponse.setSubjects(subjectResponseSet);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(memoryGameResponse);
     }
 }

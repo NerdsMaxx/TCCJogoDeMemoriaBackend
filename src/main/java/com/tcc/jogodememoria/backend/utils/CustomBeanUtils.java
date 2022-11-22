@@ -32,7 +32,7 @@ public final class CustomBeanUtils {
                      .anyMatch(Objects::isNull);
     }
     
-    public static boolean maybeHaveSomethingToPassToTarget (Object src, Object trg) {
+    public static boolean maybeHaveSomethingNewToPassToTarget (Object src, Object trg) {
         final BeanWrapper srcImpl = new BeanWrapperImpl(src);
         final BeanWrapper trgImpl = new BeanWrapperImpl(trg);
         

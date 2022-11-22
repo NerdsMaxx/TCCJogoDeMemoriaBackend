@@ -1,5 +1,6 @@
-package com.tcc.jogodememoria.backend.dtos;
+package com.tcc.jogodememoria.backend.dtos.memorygame;
 
+import com.tcc.jogodememoria.backend.dtos.card.CardDto;
 import lombok.Getter;
 import org.springframework.lang.Nullable;
 
@@ -9,16 +10,16 @@ import java.util.Set;
 
 @Getter
 public class MemoryGameDto {
-
+    
     @NotBlank
     private String name;
-
+    
     @NotBlank
     private String username;
-
+    
     @Nullable
     private Set<String> subjects;
-
+    
     @NotEmpty
     private Set<CardDto> cards;
 }

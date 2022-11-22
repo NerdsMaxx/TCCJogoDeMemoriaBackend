@@ -1,4 +1,4 @@
-package com.tcc.jogodememoria.backend.dtos;
+package com.tcc.jogodememoria.backend.dtos.user;
 
 import lombok.Getter;
 import lombok.Setter;

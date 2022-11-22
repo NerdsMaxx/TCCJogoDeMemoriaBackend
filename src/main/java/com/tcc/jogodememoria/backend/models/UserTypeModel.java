@@ -1,6 +1,5 @@
 package com.tcc.jogodememoria.backend.models;
 
-import com.tcc.jogodememoria.backend.models.UserModel;
 import lombok.Getter;
 import lombok.Setter;
 
