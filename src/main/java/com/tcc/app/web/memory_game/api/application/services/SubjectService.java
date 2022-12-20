@@ -25,7 +25,6 @@ public class SubjectService {
 
             if (optionalSubject.isPresent()) {
                 subject = optionalSubject.get();
-                System.out.println( "Existe esta matéria na tabela!" );
             } else {
                 subject = new SubjectEntity(subjectString);
                 subject.setUserSet(new HashSet<>());
@@ -35,9 +34,6 @@ public class SubjectService {
             var userSet = subject.getUserSet();
             if( !userSet.contains( user )) {
             		userSet.add( user );
-            }
-            else {
-            		System.out.println( "Existe este usuário na tabela user_subject!" );
             }
            
             subject.getMemoryGameSet().add(memoryGame);
