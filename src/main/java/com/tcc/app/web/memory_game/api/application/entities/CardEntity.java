@@ -5,6 +5,7 @@ import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEnt
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,30 +19,31 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Entity
-@Table(name = "card", uniqueConstraints = {@UniqueConstraint(
-                name = "unique_first_content_second_content_memory_game",
-                columnNames = {"first_content", "second_content", "memory_game_id"})})
+@Table( name = "card",
+				uniqueConstraints = { @UniqueConstraint( name = "unique_first_content_second_content_memory_game",
+								columnNames = { "first_content", "second_content", "memory_game_id" } ) } )
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode( of = "id" )
 public class CardEntity {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+		@Id
+		@GeneratedValue( strategy = GenerationType.IDENTITY )
+		private Long id;
 
-        @Column(nullable = false, name = "first_content")
-        private String firstContent;
+		@Column( nullable = false, name = "first_content" )
+		private String firstContent;
 
-        @Column(nullable = false, name = "second_content")
-        private String secondContent;
+		@Column( nullable = false, name = "second_content" )
+		private String secondContent;
 
-        @ManyToOne
-        @JoinColumn(name = "memory_game_id", nullable = false)
-        private MemoryGameEntity memoryGame;
+//        @ManyToOne
+//        @JoinColumn(name = "memory_game_id", nullable = false)
+		@ManyToOne( fetch = FetchType.EAGER )
+		@JoinColumn( name = "memory_game_id", insertable = false, updatable = false )
+		private MemoryGameEntity memoryGame;
 
 }

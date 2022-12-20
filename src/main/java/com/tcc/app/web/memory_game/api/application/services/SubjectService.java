@@ -12,39 +12,39 @@ import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEnt
 @Service
 public class SubjectService {
 
-    @Autowired
-    private SubjectRepository subjectRepository;
+		@Autowired
+		private SubjectRepository subjectRepository;
 
-    public Set<SubjectEntity> registerNewSubjects(Set<String> subjectStringSet,
-            MemoryGameEntity memoryGame, UserEntity user) {
-        var subjectSet = new HashSet<SubjectEntity>();
+		public Set<SubjectEntity> registerNewSubjects( Set<String> subjectStringSet, MemoryGameEntity memoryGame,
+						UserEntity user ) {
+				var subjectSet = new HashSet<SubjectEntity>();
 
-        for (var subjectString : subjectStringSet) {
-            var optionalSubject = subjectRepository.findByName(subjectString);
-            SubjectEntity subject;
+				for ( var subjectString : subjectStringSet ) {
+						var optionalSubject = subjectRepository.findByName( subjectString );
+						SubjectEntity subject;
 
-            if (optionalSubject.isPresent()) {
-                subject = optionalSubject.get();
-            } else {
-                subject = new SubjectEntity(subjectString);
-                subject.setUserSet(new HashSet<>());
-                subject.setMemoryGameSet(new HashSet<>());
-            }
+						if ( optionalSubject.isPresent() ) {
+								subject = optionalSubject.get();
+						} else {
+								subject = new SubjectEntity( subjectString );
+								subject.setUserSet( new HashSet<>() );
+								subject.setMemoryGameSet( new HashSet<>() );
+						}
 
-            var userSet = subject.getUserSet();
-            if( !userSet.contains( user )) {
-            		userSet.add( user );
-            }
-           
-            subject.getMemoryGameSet().add(memoryGame);
+//						var userSet = subject.getUserSet();
+//						if ( !userSet.contains( user ) ) {
+//								userSet.add( user );
+//						}
 
-            if (optionalSubject.isEmpty()) {
-                subject = subjectRepository.save(subject);
-            }
+//						subject.getMemoryGameSet().add( memoryGame );
+//
+//						if ( optionalSubject.isEmpty() ) {
+//								subject = subjectRepository.save( subject );
+//						}
 
-            subjectSet.add(subject);
-        }
+						subjectSet.add( subject );
+				}
 
-        return subjectSet;
-    }
+				return subjectSet;
+		}
 }

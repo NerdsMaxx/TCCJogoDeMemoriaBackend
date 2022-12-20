@@ -24,9 +24,8 @@ public class CardService {
 
 				for ( var cardInsertDto : cardInsertDtoSet ) {
 						var card = cardMapper.convertInsertDtoToEntity( cardInsertDto );
-						card.setMemoryGame( memoryGame );
-
-						card = cardRepository.save( card );
+						//card.setMemoryGame( memoryGame );
+						//card = cardRepository.save( card );
 						cardSet.add( card );
 				}
 

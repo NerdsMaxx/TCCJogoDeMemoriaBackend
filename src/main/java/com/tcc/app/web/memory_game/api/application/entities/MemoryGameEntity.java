@@ -24,33 +24,34 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "memory_game")
+@Table( name = "memory_game" )
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode( of = "id" )
 public class MemoryGameEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+		@Id
+		@GeneratedValue( strategy = GenerationType.IDENTITY )
+		private Long id;
 
-	@NotBlank
-	@Column(nullable = false)
-	private String name;
+		@NotBlank
+		@Column( nullable = false )
+		private String name;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id", nullable = false)
-	private UserEntity user;
+		@ManyToOne
+		@JoinColumn( name = "user_id", nullable = false )
+		private UserEntity user;
 
-	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "MEMORY_GAME_SUBJECT", joinColumns = @JoinColumn(name = "memory_game_id"),
-			inverseJoinColumns = @JoinColumn(name = "subject_id"))
-	private Set<SubjectEntity> subjectSet;
+		@ManyToMany( fetch = FetchType.EAGER )
+		@JoinTable( name = "MEMORY_GAME_SUBJECT", joinColumns = @JoinColumn( name = "memory_game_id" ),
+						inverseJoinColumns = @JoinColumn( name = "subject_id" ) )
+		private Set<SubjectEntity> subjectSet;
 
-	@OneToMany(mappedBy = "memoryGame", fetch = FetchType.EAGER)
-	private Set<CardEntity> cardSet;
+		@OneToMany( fetch = FetchType.EAGER )
+		@JoinColumn(name = "memory_game_id")
+		private Set<CardEntity> cardSet;
 
-	@OneToMany(mappedBy = "memoryGame", fetch = FetchType.EAGER)
-	private Set<ScoreEntity> scoreSet;
+		@OneToMany( mappedBy = "memoryGame", fetch = FetchType.EAGER )
+		private Set<ScoreEntity> scoreSet;
 }

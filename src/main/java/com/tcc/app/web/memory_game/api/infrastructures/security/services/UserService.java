@@ -1,11 +1,14 @@
 package com.tcc.app.web.memory_game.api.infrastructures.security.services;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
 import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserInsertDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import com.tcc.app.web.memory_game.api.infrastructures.security.mappers.UserMapper;
@@ -37,6 +40,13 @@ public class UserService {
 				
 				userRepository.save( user );
 
+				return userRepository.save( user );
+		}
+		
+		public UserEntity addSubjectSet( Set<SubjectEntity> subjectSet ) {
+				UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+				user.getSubjectSet().addAll( subjectSet );
+				
 				return userRepository.save( user );
 		}
 

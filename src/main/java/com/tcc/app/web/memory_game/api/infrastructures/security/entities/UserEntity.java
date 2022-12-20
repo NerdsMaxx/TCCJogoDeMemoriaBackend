@@ -36,7 +36,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode( of = "id" )
 public class UserEntity implements UserDetails {
 		@Id
 		@GeneratedValue( strategy = GenerationType.IDENTITY )
@@ -54,7 +54,10 @@ public class UserEntity implements UserDetails {
 		@Column( nullable = false )
 		private UserTypeEnum userType;
 
-		@ManyToMany( mappedBy = "userSet", fetch = FetchType.EAGER )
+//		@ManyToMany( mappedBy = "userSet", fetch = FetchType.EAGER )
+		@ManyToMany( fetch = FetchType.EAGER )
+		@JoinTable( name = "user_subject", joinColumns = @JoinColumn( name = "user_id" ),
+						inverseJoinColumns = @JoinColumn( name = "subject_id" ) )
 		private Set<SubjectEntity> subjectSet;
 
 		@OneToMany( mappedBy = "user" )

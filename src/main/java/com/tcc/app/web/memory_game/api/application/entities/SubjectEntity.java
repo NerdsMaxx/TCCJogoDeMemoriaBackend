@@ -31,7 +31,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode( of = "id" )
 public class SubjectEntity {
 
 		@Id
@@ -42,12 +42,13 @@ public class SubjectEntity {
 		@Column( nullable = false, unique = true )
 		private String name;
 
-		@ManyToMany(fetch = FetchType.EAGER)
-		@JoinTable( name = "user_subject", joinColumns = @JoinColumn( name = "subject_id" ),
-		inverseJoinColumns = @JoinColumn( name = "user_id" ) )
+//		@ManyToMany(fetch = FetchType.EAGER)
+//		@JoinTable( name = "user_subject", joinColumns = @JoinColumn( name = "subject_id" ),
+//		inverseJoinColumns = @JoinColumn( name = "user_id" ) )
+		@ManyToMany( mappedBy = "subjectSet", fetch = FetchType.EAGER )
 		private Set<UserEntity> userSet;
 
-		@ManyToMany( mappedBy = "subjectSet", fetch = FetchType.EAGER)
+		@ManyToMany( mappedBy = "subjectSet", fetch = FetchType.EAGER )
 		private Set<MemoryGameEntity> memoryGameSet;
 
 }
