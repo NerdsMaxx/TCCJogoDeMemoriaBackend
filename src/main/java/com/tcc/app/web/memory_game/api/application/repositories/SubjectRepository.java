@@ -7,5 +7,5 @@ import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
 
 @Repository
 public interface SubjectRepository extends JpaRepository<SubjectEntity, Long>{
-    Optional<SubjectEntity> findByName(String name);
+    Optional<SubjectEntity> findBySubject(String subject);
 }

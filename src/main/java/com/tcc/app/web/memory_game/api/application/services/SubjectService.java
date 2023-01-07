@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
 import com.tcc.app.web.memory_game.api.application.repositories.SubjectRepository;
@@ -15,12 +17,13 @@ public class SubjectService {
     @Autowired
     private SubjectRepository subjectRepository;
 
-    public Set<SubjectEntity> registerNewSubjects(Set<String> subjectStringSet,
+    @Transactional
+    public Set<SubjectEntity> registerNewSubjectsForMemoryGame(Set<String> subjectStringSet,
             MemoryGameEntity memoryGame, UserEntity user) {
         var subjectSet = new HashSet<SubjectEntity>();
 
         for (var subjectString : subjectStringSet) {
-            var optionalSubject = subjectRepository.findByName(subjectString);
+            var optionalSubject = subjectRepository.findBySubject(subjectString);
             SubjectEntity subject;
 
             if (optionalSubject.isPresent()) {
@@ -32,9 +35,7 @@ public class SubjectService {
             }
 
             var userSet = subject.getUserSet();
-            if( !userSet.contains( user )) {
-            		userSet.add( user );
-            }
+            userSet.add( user );
            
             subject.getMemoryGameSet().add(memoryGame);
 

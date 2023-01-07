@@ -26,7 +26,6 @@ public class MemoryGameController {
 		@Autowired
 		private MemoryGameMapper memoryGameMapper;
 
-		@Transactional
 		@PostMapping
 		public ResponseEntity insertNewMemoryGame( @RequestBody @Valid MemoryGameInsertDto memoryGameInsertDto,
 						UriComponentsBuilder uriBuilder ) {

@@ -2,7 +2,6 @@ package com.tcc.app.web.memory_game.api.infrastructures.security.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +26,6 @@ public class UserController {
 		@Autowired
 		private UserMapper userMapper;
 
-		@Transactional
 		@PostMapping
 		public ResponseEntity insertNewUser( @RequestBody @Valid UserInsertDto userInsertDto,
 						UriComponentsBuilder uriBuilder ) throws Exception {

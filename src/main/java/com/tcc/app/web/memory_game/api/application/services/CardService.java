@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.tcc.app.web.memory_game.api.application.dtos.requests.CardInsertDto;
 import com.tcc.app.web.memory_game.api.application.entities.CardEntity;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
@@ -19,7 +21,8 @@ public class CardService {
 		@Autowired
 		private CardMapper cardMapper;
 
-		public Set<CardEntity> registerNewCards( Set<CardInsertDto> cardInsertDtoSet, MemoryGameEntity memoryGame ) {
+		@Transactional
+		public Set<CardEntity> registerNewCardsForMemoryGame( Set<CardInsertDto> cardInsertDtoSet, MemoryGameEntity memoryGame ) {
 				var cardSet = new HashSet<CardEntity>();
 
 				for ( var cardInsertDto : cardInsertDtoSet ) {

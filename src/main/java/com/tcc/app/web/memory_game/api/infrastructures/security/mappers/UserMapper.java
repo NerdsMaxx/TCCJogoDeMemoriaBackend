@@ -11,44 +11,25 @@ import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEn
 
 @Component
 public final class UserMapper implements MapperInsertDtoToEntityInterface<UserInsertDto, UserEntity>,
-				MapperEntityToDetailsDtoInterface<UserEntity, UserDetailsDto> {
-
-		public UserEntity convertInsertDtoToEntity( UserInsertDto userInsertDto ) {
-				var user = new UserEntity();
-
-				user.setName( userInsertDto.name() );
-				user.setUsername( userInsertDto.username() );
-				user.setEmail( userInsertDto.email() );
-
-				var userType = getTypeCorrect( userInsertDto.type() );
-				user.setUserType( userType );
-
-				return user;
-		}
-
-		public UserDetailsDto convertEntityToDetailsDto( UserEntity user ) {
-
-				return new UserDetailsDto( user.getId(),
-																	 user.getName(),
-																	 user.getUsername(),
-																	 user.getEmail(),
-																	 user.getUserType().getTypeStr() );
-		}
-
-		private UserTypeEnum getTypeCorrect( String type ) {
-				if ( UserTypeEnum.ADMIN.getTypeStr().equalsIgnoreCase( type ) ) {
-						return UserTypeEnum.ADMIN;
-				}
-
-				if ( UserTypeEnum.TEACHER.getTypeStr().equalsIgnoreCase( type ) ) {
-						return UserTypeEnum.TEACHER;
-				}
-
-				if ( UserTypeEnum.STUDENT.getTypeStr().equalsIgnoreCase( type ) ) {
-						return UserTypeEnum.STUDENT;
-				}
-
-				return null;
-		}
-
+        MapperEntityToDetailsDtoInterface<UserEntity, UserDetailsDto> {
+    
+    public UserEntity convertInsertDtoToEntity( UserInsertDto userInsertDto ) {
+        var user = new UserEntity();
+        
+        user.setName( userInsertDto.name() );
+        user.setUsername( userInsertDto.username() );
+        user.setEmail( userInsertDto.email() );
+        
+        return user;
+    }
+    
+    public UserDetailsDto convertEntityToDetailsDto( UserEntity user ) {
+        
+        return new UserDetailsDto( user.getId(),
+                                   user.getName(),
+                                   user.getUsername(),
+                                   user.getEmail(),
+                                   user.getUserType().getType() );
+    }
+    
 }
