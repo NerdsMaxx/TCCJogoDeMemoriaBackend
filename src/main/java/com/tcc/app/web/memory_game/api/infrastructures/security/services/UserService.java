@@ -1,18 +1,20 @@
 package com.tcc.app.web.memory_game.api.infrastructures.security.services;
 
-import java.util.HashSet;
-
+import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserInsertDto;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.mappers.UserMapper;
+import com.tcc.app.web.memory_game.api.infrastructures.security.repositories.UserRepository;
 import com.tcc.app.web.memory_game.api.infrastructures.security.repositories.UserTypeRepository;
+import com.tcc.app.web.memory_game.api.infrastructures.security.utils.UserTypeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserInsertDto;
-import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
-import com.tcc.app.web.memory_game.api.infrastructures.security.mappers.UserMapper;
-import com.tcc.app.web.memory_game.api.infrastructures.security.repositories.UserRepository;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -33,10 +35,12 @@ public class UserService {
     public UserEntity registerNewUser( UserInsertDto userInsertDto ) throws Exception {
         var user = userMapper.convertInsertDtoToEntity( userInsertDto );
         
-        var optionalUserType = userTypeRepository.findByType( userInsertDto.type() );
+        var type = UserTypeUtil.getType( userInsertDto.type() );
+        var optionalUserType = userTypeRepository.findByType( type );
         
-        if(optionalUserType.isEmpty()){
-            throw new Exception("O tipo de usuário inválido. Usuário deve ser Administrador, Professor ou Aluno");
+        if ( optionalUserType.isEmpty() ) {
+            throw new Exception(
+                    "O tipo de usuário inválido. Usuário deve ser Administrador, Professor ou Aluno" );
         }
         
         user.setUserType( optionalUserType.get() );
@@ -58,4 +62,8 @@ public class UserService {
                                                  .getPrincipal();
     }
     
+    public UserEntity addSubjectSetForUser( UserEntity user, Set<SubjectEntity> subjectSet ) {
+        user.getSubjectSet().addAll( subjectSet );
+        return userRepository.save( user );
+    }
 }

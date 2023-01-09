@@ -1,8 +1,9 @@
 package com.tcc.app.web.memory_game.api.application.mappers;
 
+import com.tcc.app.web.memory_game.api.application.dtos.requests.update.CardUpdateDto;
 import org.springframework.stereotype.Component;
 
-import com.tcc.app.web.memory_game.api.application.dtos.requests.CardInsertDto;
+import com.tcc.app.web.memory_game.api.application.dtos.requests.insert.CardInsertDto;
 import com.tcc.app.web.memory_game.api.application.dtos.responses.CardDetailsDto;
 import com.tcc.app.web.memory_game.api.application.entities.CardEntity;
 import com.tcc.app.web.memory_game.api.application.interfaces.MapperEntityToDetailsDtoInterface;
@@ -20,6 +21,15 @@ public class CardMapper implements MapperInsertDtoToEntityInterface<CardInsertDt
 				cardEntity.setSecondContent( cardInsertDto.secondContent() );
 
 				return cardEntity;
+		}
+		
+		public CardEntity convertUpdateDtoToEntity( CardUpdateDto cardUpdateDto ) {
+			var cardEntity = new CardEntity();
+			
+			cardEntity.setFirstContent( cardUpdateDto.firstContent() );
+			cardEntity.setSecondContent( cardUpdateDto.secondContent() );
+			
+			return cardEntity;
 		}
 
 		@Override

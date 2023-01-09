@@ -7,7 +7,6 @@ import com.tcc.app.web.memory_game.api.application.interfaces.MapperInsertDtoToE
 import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserInsertDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.responses.UserDetailsDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
-import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEnum;
 
 @Component
 public final class UserMapper implements MapperInsertDtoToEntityInterface<UserInsertDto, UserEntity>,

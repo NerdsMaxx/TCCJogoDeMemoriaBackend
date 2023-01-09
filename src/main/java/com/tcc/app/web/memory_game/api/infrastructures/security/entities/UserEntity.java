@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.entities.ScoreEntity;
 import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
-import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -45,7 +44,9 @@ public class UserEntity implements UserDetails {
 		@JoinColumn(name = "user_type_id")
 		private UserTypeEntity userType;
 
-		@ManyToMany( mappedBy = "userSet", fetch = FetchType.EAGER )
+		@ManyToMany( fetch = FetchType.EAGER )
+		@JoinTable( name = "user_subject", joinColumns = @JoinColumn( name = "user_id" ),
+					inverseJoinColumns = @JoinColumn( name = "subject_id" ) )
 		private Set<SubjectEntity> subjectSet;
 
 		@OneToMany( mappedBy = "user" )
