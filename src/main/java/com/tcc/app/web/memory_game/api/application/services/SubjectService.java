@@ -94,6 +94,6 @@ public class SubjectService {
     
     private boolean verifyIfUserHasNoMoreMemoryGameWithSubject(UserEntity user, SubjectEntity subject) {
         return user.getMemoryGameList().stream()
-                   .anyMatch((memoryGame) -> memoryGame.getSubjectList().contains(subject));
+                   .noneMatch((memoryGame) -> memoryGame.getSubjectList().contains(subject));
     }
 }
