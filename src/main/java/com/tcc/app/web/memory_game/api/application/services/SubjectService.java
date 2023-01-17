@@ -3,14 +3,16 @@ package com.tcc.app.web.memory_game.api.application.services;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
 import com.tcc.app.web.memory_game.api.application.repositories.SubjectRepository;
+import com.tcc.app.web.memory_game.api.application.utils.ListUtil;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SubjectService {
@@ -21,61 +23,67 @@ public class SubjectService {
     @Autowired
     private UserService userService;
     
-    @Transactional
-    public Set<SubjectEntity> registerNewSubjectsForMemoryGame( Set<String> subjectNameSet,
-                                                                MemoryGameEntity memoryGame, UserEntity user ) {
-        var subjectSet = new HashSet<SubjectEntity>();
-        
-        for ( var subjectName : subjectNameSet ) {
-            var optionalSubject = subjectRepository.findBySubject( subjectName );
-            SubjectEntity subject;
-            
-            if ( optionalSubject.isPresent() ) {
-                subject = optionalSubject.get();
-            } else {
-                subject = new SubjectEntity( subjectName );
-                subject.setUserSet( new HashSet<>() );
-                subject.setMemoryGameSet( new HashSet<>() );
-            }
-            
-            subject.getUserSet().add( user );
-            subject.getMemoryGameSet().add( memoryGame );
-            
-            if ( optionalSubject.isEmpty() ) {
-                subject = subjectRepository.save( subject );
-            }
-            
-            subjectSet.add( subject );
-        }
-        
-        return subjectSet;
+    
+    Optional<SubjectEntity> findBySubjectName(String subjectName) {
+        return subjectRepository.findBySubject(subjectName);
     }
     
-    public Set<SubjectEntity> updateSubjectsForMemoryGame( Set<String> subjectNameSet, MemoryGameEntity memoryGame, UserEntity user ) {
-        var subjectSet = new HashSet<SubjectEntity>();
+    @Transactional
+    public List<SubjectEntity> saveSubjects(List<String> subjectNameSet, MemoryGameEntity memoryGame, UserEntity user) {
+        var subjectList = new LinkedList<SubjectEntity>();
         
-        for ( var subjectName : subjectNameSet ) {
-            var optionalSubject = subjectRepository.findBySubject( subjectName );
-            SubjectEntity subject;
+        for (var subjectName : subjectNameSet) {
+            var subject = subjectRepository.findBySubject(subjectName)
+                                           .orElseGet(() -> new SubjectEntity(subjectName));
             
-            if ( optionalSubject.isPresent() ) {
-                subject = optionalSubject.get();
-                subjectSet.add( subject );
-                continue;
-            }
+            ListUtil.addElementIfNotExist(memoryGame, subject.getMemoryGameList());
+            ListUtil.addElementIfNotExist(user, subject.getUserList());
             
-            subject = new SubjectEntity( subjectName );
-            subject.setUserSet( new HashSet<>() );
-            subject.setMemoryGameSet( new HashSet<>() );
+            subjectRepository.save(subject);
             
-            subject.getUserSet().add( user );
-            subject.getMemoryGameSet().add( memoryGame );
-            
-            subjectRepository.save( subject );
-            
-            subjectSet.add( subject );
+            subjectList.add(subject);
         }
         
-        return subjectSet;
+        return subjectList;
+    }
+    
+    @Transactional
+    public List<SubjectEntity> updateSubjects(List<String> subjectNameList, MemoryGameEntity memoryGame, UserEntity user) throws Exception {
+        removeMemoryGameIfNotUsed(subjectNameList, memoryGame, user);
+        
+        var subjectList = new LinkedList<SubjectEntity>();
+        
+        for (var subjectName : subjectNameList) {
+            var subject = subjectRepository.findBySubject(subjectName).orElse(new SubjectEntity(subjectName));
+            
+            ListUtil.addElementIfNotExist(memoryGame, subject.getMemoryGameList());
+            ListUtil.addElementIfNotExist(user, subject.getUserList());
+            subjectRepository.save(subject);
+            
+            subjectList.add(subject);
+        }
+        
+        return subjectList;
+    }
+    
+    @Transactional
+    public void deleteSubjectsByMemoryGameAndUser(MemoryGameEntity memoryGame, UserEntity user) {
+        List<String> empty = List.of();
+        removeMemoryGameIfNotUsed(empty, memoryGame, user);
+    }
+    
+    @Transactional
+    private void removeMemoryGameIfNotUsed(List<String> subjectNameList, MemoryGameEntity memoryGame, UserEntity user) {
+        for (var subject : memoryGame.getSubjectList()) {
+            if (! subjectNameList.contains(subject.getSubject())) {
+                subject.getMemoryGameList().remove(memoryGame);
+                
+                if (subject.getMemoryGameList().isEmpty()) {
+                    subjectRepository.delete(subject);
+                } else {
+                    subjectRepository.save(subject);
+                }
+            }
+        }
     }
 }

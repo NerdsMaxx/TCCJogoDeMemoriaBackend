@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserInsertDto;
+import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserRequestDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.mappers.UserMapper;
 import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
 
@@ -27,12 +27,12 @@ public class UserController {
 		private UserMapper userMapper;
 
 		@PostMapping
-		public ResponseEntity insertNewUser( @RequestBody @Valid UserInsertDto userInsertDto,
+		public ResponseEntity insertNewUser( @RequestBody @Valid UserRequestDto userRequestDto,
 						UriComponentsBuilder uriBuilder ) throws Exception {
-				var user = userService.registerNewUser( userInsertDto );
+				var user = userService.saveUser(userRequestDto);
 
 				var uri = uriBuilder.path( "/usuario/{id}" ).buildAndExpand( user.getId() ).toUri();
 
-				return ResponseEntity.created( uri ).body( userMapper.convertEntityToDetailsDto( user ) );
+				return ResponseEntity.created( uri ).body( userMapper.toUserResponseDto( user ) );
 		}
 }

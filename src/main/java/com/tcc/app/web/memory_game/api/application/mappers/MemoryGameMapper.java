@@ -1,39 +1,22 @@
 package com.tcc.app.web.memory_game.api.application.mappers;
 
-import com.tcc.app.web.memory_game.api.application.dtos.responses.MemoryGameDetailsDto;
+import com.tcc.app.web.memory_game.api.application.dtos.responses.MemoryGameResponseDto;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
-import com.tcc.app.web.memory_game.api.application.interfaces.MapperEntityToDetailsDtoInterface;
-import com.tcc.app.web.memory_game.api.infrastructures.security.mappers.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
-@Component
-public class MemoryGameMapper
-        implements MapperEntityToDetailsDtoInterface<MemoryGameEntity, MemoryGameDetailsDto> {
+@Mapper(componentModel = "spring")
+public interface MemoryGameMapper {
     
-    @Autowired
-    private CardMapper cardMapper;
+    @Mapping(source = "memoryGame.memoryGame", target = "name")
+    @Mapping(target = "subjectList", expression = "java(toSubjectNameList(memoryGame.getSubjectList()))")
+    @Mapping(source = "memoryGame.user.userType.type", target = "user.type")
+    MemoryGameResponseDto toMemoryGameResponseDto(MemoryGameEntity memoryGame);
     
-    @Autowired
-    private UserMapper userMapper;
-    
-    @Override
-    public MemoryGameDetailsDto convertEntityToDetailsDto( MemoryGameEntity memoryGame ) {
-        var userDetailsDto = userMapper.convertEntityToDetailsDto( memoryGame.getUser() );
-        
-        var name = memoryGame.getMemoryGame();
-        
-        var subjectSet = memoryGame.getSubjectSet().stream()
-                                   .map( SubjectEntity::getSubject )
-                                   .collect( Collectors.toSet() );
-        
-        var cardSet = memoryGame.getCardSet().stream()
-                                .map( card -> cardMapper.convertEntityToDetailsDto( card ) )
-                                .collect( Collectors.toSet() );
-        
-        return new MemoryGameDetailsDto( userDetailsDto, name, subjectSet, cardSet );
+    default List<String> toSubjectNameList(List<SubjectEntity> subjectList) {
+        return subjectList.stream().map(SubjectEntity::getSubject).toList();
     }
 }

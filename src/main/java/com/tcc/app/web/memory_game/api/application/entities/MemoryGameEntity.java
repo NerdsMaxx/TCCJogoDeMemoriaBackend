@@ -5,39 +5,38 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
-@Table( name = "memory_game",
-        uniqueConstraints = { @UniqueConstraint( name = "unique_memory_game_user",
-                                                 columnNames = { "memory_game", "user_id" } ) }
+@Table(name = "memory_game",
+       uniqueConstraints = {@UniqueConstraint(name = "unique_memory_game_user",
+                                              columnNames = {"memory_game", "user_id"})}
 )
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode( of = "id" )
+@EqualsAndHashCode(of = "id")
 public class MemoryGameEntity {
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @NotBlank
-    @Column( name = "memory_game", nullable = false )
+    @Column(name = "memory_game", nullable = false)
     private String memoryGame;
     
     @ManyToOne
-    @JoinColumn( name = "user_id", nullable = false )
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
     
-    @ManyToMany( fetch = FetchType.EAGER )
-    @JoinTable( name = "memory_game_subject", joinColumns = @JoinColumn( name = "memory_game_id" ),
-                inverseJoinColumns = @JoinColumn( name = "subject_id" ) )
-    private Set<SubjectEntity> subjectSet;
+    @ManyToMany(mappedBy = "memoryGameList")
+    private List<SubjectEntity> subjectList = new LinkedList<>();
     
-    @OneToMany( mappedBy = "memoryGame", fetch = FetchType.EAGER )
-    private Set<CardEntity> cardSet;
+    @OneToMany(mappedBy = "memoryGame")
+    private List<CardEntity> cardList = new LinkedList<>();
     
-    @OneToMany( mappedBy = "memoryGame", fetch = FetchType.EAGER )
-    private Set<ScoreEntity> scoreSet;
+    @OneToMany(mappedBy = "memoryGame")
+    private List<ScoreEntity> scoreList = new LinkedList<>();
 }

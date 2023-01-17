@@ -1,40 +1,10 @@
 package com.tcc.app.web.memory_game.api.application.mappers;
 
-import com.tcc.app.web.memory_game.api.application.dtos.requests.update.CardUpdateDto;
-import org.springframework.stereotype.Component;
-
-import com.tcc.app.web.memory_game.api.application.dtos.requests.insert.CardInsertDto;
-import com.tcc.app.web.memory_game.api.application.dtos.responses.CardDetailsDto;
+import com.tcc.app.web.memory_game.api.application.dtos.requests.CardRequestDto;
 import com.tcc.app.web.memory_game.api.application.entities.CardEntity;
-import com.tcc.app.web.memory_game.api.application.interfaces.MapperEntityToDetailsDtoInterface;
-import com.tcc.app.web.memory_game.api.application.interfaces.MapperInsertDtoToEntityInterface;
+import org.mapstruct.Mapper;
 
-@Component
-public class CardMapper implements MapperInsertDtoToEntityInterface<CardInsertDto, CardEntity>,
-				MapperEntityToDetailsDtoInterface<CardEntity, CardDetailsDto> {
-
-		@Override
-		public CardEntity convertInsertDtoToEntity( CardInsertDto cardInsertDto ) {
-				var cardEntity = new CardEntity();
-
-				cardEntity.setFirstContent( cardInsertDto.firstContent() );
-				cardEntity.setSecondContent( cardInsertDto.secondContent() );
-
-				return cardEntity;
-		}
-		
-		public CardEntity convertUpdateDtoToEntity( CardUpdateDto cardUpdateDto ) {
-			var cardEntity = new CardEntity();
-			
-			cardEntity.setFirstContent( cardUpdateDto.firstContent() );
-			cardEntity.setSecondContent( cardUpdateDto.secondContent() );
-			
-			return cardEntity;
-		}
-
-		@Override
-		public CardDetailsDto convertEntityToDetailsDto( CardEntity cardEntity ) {
-				return new CardDetailsDto( cardEntity.getId(), cardEntity.getFirstContent(), cardEntity.getSecondContent() );
-		}
-
+@Mapper(componentModel = "spring")
+public interface CardMapper {
+    CardEntity toCardEntity(CardRequestDto cardRequestDto);
 }

@@ -1,11 +1,15 @@
 package com.tcc.app.web.memory_game.api.application.services;
 
-import com.tcc.app.web.memory_game.api.application.dtos.requests.insert.MemoryGameInsertDto;
-import com.tcc.app.web.memory_game.api.application.dtos.requests.update.MemoryGameUpdateDto;
+import com.tcc.app.web.memory_game.api.application.dtos.requests.MemoryGameRequestDto;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
+import com.tcc.app.web.memory_game.api.application.mappers.CardMapper;
 import com.tcc.app.web.memory_game.api.application.repositories.MemoryGameRepository;
 import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,73 +28,76 @@ public class MemoryGameService {
     @Autowired
     private MemoryGameRepository memoryGameRepository;
     
+    @Autowired
+    private CardMapper cardMapper;
+    
+    public Page<MemoryGameEntity> findAllByUser(Pageable pageable) throws Exception {
+        var user = userService.getCurrentUser();
+        return memoryGameRepository.findAllByUser(pageable, user);
+    }
+    
     @Transactional
-    public MemoryGameEntity registerNewMemoryGame( MemoryGameInsertDto memoryGameInsertDto ) {
+    public MemoryGameEntity saveMemoryGame(MemoryGameRequestDto memoryGameRequestDto) throws Exception {
         var user = userService.getCurrentUser();
         
+        //verify if memory game exists
+        if (memoryGameRepository.existsByUserAndMemoryGame(user, memoryGameRequestDto.name())) {
+            throw new EntityExistsException("Já existe o jogo de memória com este nome.");
+        }
+        
+        //memory game and user
         var memoryGame = new MemoryGameEntity();
-        memoryGame.setMemoryGame( memoryGameInsertDto.name() );
-        memoryGame.setUser( user );
+        memoryGame.setMemoryGame(memoryGameRequestDto.name());
+        memoryGame.setUser(user);
         
-        memoryGameRepository.save( memoryGame );
+        memoryGameRepository.save(memoryGame);
         
-        var cardSet = cardService.registerNewCardsForMemoryGame( memoryGameInsertDto.cardSet(),
-                                                                 memoryGame, user );
-        var subjectSet = subjectService.registerNewSubjectsForMemoryGame(
-                memoryGameInsertDto.subjectSet(), memoryGame, user );
+        var cardList = cardService.saveCards(memoryGameRequestDto.cardList(), memoryGame, user);
+        memoryGame.setCardList(cardList);
         
-        memoryGame.setCardSet( cardSet );
-        memoryGame.setSubjectSet( subjectSet );
-        
-        userService.addSubjectSetForUser( user, subjectSet );
+        var subjectList = subjectService.saveSubjects(memoryGameRequestDto.subjectList(), memoryGame, user);
+        memoryGame.setSubjectList(subjectList);
         
         return memoryGame;
     }
     
     @Transactional
-    public MemoryGameEntity updateMemoryGame( String memoryGameName, MemoryGameUpdateDto memoryGameUpdateDto ) throws Exception {
+    public MemoryGameEntity updateMemoryGame(String memoryGameName, MemoryGameRequestDto memoryGameRequestDto) throws Exception {
         var user = userService.getCurrentUser();
         
-        var optionalMemoryGame = memoryGameRepository.findByUserAndMemoryGame( user,
-                                                                               memoryGameName );
-        if ( optionalMemoryGame.isEmpty() ) {
-            throw new Exception( "Não foi encontrado jogo de memória." );
-        }
-        System.out.println("Aqui passa?");
+        var memoryGame = memoryGameRepository.findByUserAndMemoryGame(user, memoryGameName)
+                                             .orElseThrow(() -> new EntityNotFoundException(
+                                                     "Não foi encontrado jogo de memória."));
         
-        var memoryGame = optionalMemoryGame.get();
-        
-        if ( memoryGameUpdateDto.name() != null ) {
-            memoryGame.setMemoryGame( memoryGameUpdateDto.name() );
-            System.out.println("Aqui nome foi alterado!!");
+        if (memoryGameRequestDto.name() != null) {
+            memoryGame.setMemoryGame(memoryGameRequestDto.name());
+            memoryGameRepository.save(memoryGame);
         }
         
-        if ( memoryGameUpdateDto.cardSet() != null ) {
-            memoryGame.getCardSet().clear();
-            
-            var cardSet = cardService.updateCardsForMemoryGame(
-                    memoryGameUpdateDto.cardSet(), memoryGame, user );
-            
-            memoryGame.setCardSet( cardSet );
-            System.out.println("Aqui as cartas foram alterados!!");
+        if (memoryGameRequestDto.cardList() != null) {
+            var cardList = cardService.updateCards(memoryGameRequestDto.cardList(), memoryGame, user);
+            memoryGame.setCardList(cardList);
         }
         
-        if ( memoryGameUpdateDto.subjectSet() != null ) {
-            memoryGame.getSubjectSet().clear();
-            
-            var subjectSet = subjectService.updateSubjectsForMemoryGame(
-                    memoryGameUpdateDto.subjectSet(), memoryGame, user );
-            
-            memoryGame.setSubjectSet( subjectSet );
-            userService.addSubjectSetForUser( user, subjectSet );
-            
-            System.out.println("Aqui as matérias foram alteradas!!");
+        if (memoryGameRequestDto.subjectList() != null) {
+            var subjectList = subjectService.updateSubjects(memoryGameRequestDto.subjectList(), memoryGame, user);
+            memoryGame.setSubjectList(subjectList);
         }
-        
-        memoryGameRepository.save( memoryGame );
-        System.out.println("Foi atualizado o jogo de memoria");
         
         return memoryGame;
     }
     
+    @Transactional
+    public void deleteMemoryGame(String memoryGameName) throws Exception {
+        var user = userService.getCurrentUser();
+    
+        var memoryGame = memoryGameRepository.findByUserAndMemoryGame(user, memoryGameName)
+                                             .orElseThrow(() -> new EntityNotFoundException(
+                                                     "Não foi encontrado jogo de memória."));
+        
+        subjectService.deleteSubjectsByMemoryGameAndUser(memoryGame, user);
+        cardService.deleteCardsByMemoryGameAndUser(memoryGame, user);
+        
+        memoryGameRepository.delete(memoryGame);
+    }
 }
