@@ -49,7 +49,7 @@ public class SubjectService {
     
     @Transactional
     public List<SubjectEntity> updateSubjects(List<String> subjectNameList, MemoryGameEntity memoryGame, UserEntity user) throws Exception {
-        removeMemoryGameIfNotUsed(subjectNameList, memoryGame, user);
+        removeMemoryGameAndUserIfNotUsed(subjectNameList, memoryGame, user);
         
         var subjectList = new LinkedList<SubjectEntity>();
         
@@ -69,11 +69,11 @@ public class SubjectService {
     @Transactional
     public void deleteSubjectsByMemoryGameAndUser(MemoryGameEntity memoryGame, UserEntity user) {
         List<String> empty = List.of();
-        removeMemoryGameIfNotUsed(empty, memoryGame, user);
+        removeMemoryGameAndUserIfNotUsed(empty, memoryGame, user);
     }
     
     @Transactional
-    private void removeMemoryGameIfNotUsed(List<String> subjectNameList, MemoryGameEntity memoryGame, UserEntity user) {
+    private void removeMemoryGameAndUserIfNotUsed(List<String> subjectNameList, MemoryGameEntity memoryGame, UserEntity user) {
         for (var subject : memoryGame.getSubjectList()) {
             if (! subjectNameList.contains(subject.getSubject())) {
                 subject.getMemoryGameList().remove(memoryGame);

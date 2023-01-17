@@ -16,7 +16,7 @@ public class ListUtil {
     }
     
     public static <T> List<T> addElementIfNotExist( T element, List<T> list, Predicate<T> predicate ) {
-        if ( list.stream().filter( predicate ).toList().isEmpty() ) {
+        if ( list.stream().noneMatch(predicate) ) {
             list.add( element );
         }
         
