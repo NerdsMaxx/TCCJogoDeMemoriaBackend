@@ -78,6 +78,11 @@ public class SubjectService {
             if (! subjectNameList.contains(subject.getSubject())) {
                 subject.getMemoryGameList().remove(memoryGame);
                 
+                user.getMemoryGameList().remove(memoryGame);
+                if (verifyIfUserHasNoMoreMemoryGameWithSubject(user, subject)) {
+                    subject.getUserList().remove(user);
+                }
+                
                 if (subject.getMemoryGameList().isEmpty()) {
                     subjectRepository.delete(subject);
                 } else {
@@ -85,5 +90,12 @@ public class SubjectService {
                 }
             }
         }
+    }
+    
+    private boolean verifyIfUserHasNoMoreMemoryGameWithSubject(UserEntity user, SubjectEntity subject) {
+        var memoryGameStream = user.getMemoryGameList().stream()
+                                 .filter((memoryGame) -> memoryGame.getSubjectList().contains(subject));
+        
+        return memoryGameStream.findFirst().isEmpty();
     }
 }

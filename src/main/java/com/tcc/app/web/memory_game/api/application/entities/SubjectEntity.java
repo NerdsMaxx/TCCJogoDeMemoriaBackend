@@ -33,5 +33,4 @@ public class SubjectEntity {
     @JoinTable(name = "memory_game_subject", joinColumns = @JoinColumn(name = "subject_id"),
                inverseJoinColumns = @JoinColumn(name = "memory_game_id"))
     private List<MemoryGameEntity> memoryGameList = new LinkedList<>();
-    
 }
