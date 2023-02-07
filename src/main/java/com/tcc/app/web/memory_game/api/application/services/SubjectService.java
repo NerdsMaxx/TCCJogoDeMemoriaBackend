@@ -36,8 +36,8 @@ public class SubjectService {
             var subject = subjectRepository.findBySubject(subjectName)
                                            .orElseGet(() -> new SubjectEntity(subjectName));
             
-            ListUtil.addElementIfNotExist(memoryGame, subject.getMemoryGameList());
-            ListUtil.addElementIfNotExist(user, subject.getUserList());
+            subject.addMemoryGame(memoryGame);
+            subject.addUser(user);
             
             subjectRepository.save(subject);
             
@@ -56,8 +56,8 @@ public class SubjectService {
         for (var subjectName : subjectNameList) {
             var subject = subjectRepository.findBySubject(subjectName).orElse(new SubjectEntity(subjectName));
             
-            ListUtil.addElementIfNotExist(memoryGame, subject.getMemoryGameList());
-            ListUtil.addElementIfNotExist(user, subject.getUserList());
+            subject.addMemoryGame(memoryGame);
+            subject.addUser(user);
             subjectRepository.save(subject);
             
             subjectList.add(subject);
@@ -76,24 +76,15 @@ public class SubjectService {
     private void removeMemoryGameAndUserIfNotUsed(List<String> subjectNameList, MemoryGameEntity memoryGame, UserEntity user) {
         for (var subject : memoryGame.getSubjectList()) {
             if (! subjectNameList.contains(subject.getSubject())) {
-                subject.getMemoryGameList().remove(memoryGame);
-                
-                user.getMemoryGameList().remove(memoryGame);
-                if (verifyIfUserHasNoMoreMemoryGameWithSubject(user, subject)) {
-                    subject.getUserList().remove(user);
-                }
+                subject.removeUserAndMemoryGame(user, memoryGame);
                 
                 if (subject.getMemoryGameList().isEmpty()) {
                     subjectRepository.delete(subject);
-                } else {
-                    subjectRepository.save(subject);
+                    continue;
                 }
+                
+                subjectRepository.save(subject);
             }
         }
-    }
-    
-    private boolean verifyIfUserHasNoMoreMemoryGameWithSubject(UserEntity user, SubjectEntity subject) {
-        return user.getMemoryGameList().stream()
-                   .noneMatch((memoryGame) -> memoryGame.getSubjectList().contains(subject));
     }
 }

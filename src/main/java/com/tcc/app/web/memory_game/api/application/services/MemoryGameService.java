@@ -90,7 +90,7 @@ public class MemoryGameService {
     @Transactional
     public void deleteMemoryGame(String memoryGameName) throws Exception {
         var user = userService.getCurrentUser();
-    
+        
         var memoryGame = memoryGameRepository.findByUserAndMemoryGame(user, memoryGameName)
                                              .orElseThrow(() -> new EntityNotFoundException(
                                                      "Não foi encontrado jogo de memória."));
