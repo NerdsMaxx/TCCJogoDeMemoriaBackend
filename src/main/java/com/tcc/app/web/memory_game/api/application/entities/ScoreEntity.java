@@ -6,8 +6,8 @@ import lombok.*;
 
 @Entity
 @Table( name = "score",
-        uniqueConstraints = { @UniqueConstraint( name = "unique_score_user_memory_game",
-                                                 columnNames = { "score", "user_id", "memory_game_id" } ) }
+        uniqueConstraints = { @UniqueConstraint( name = "unique_score_memory_game",
+                                                 columnNames = { "score", "memory_game_id" } ) }
 )
 @Getter
 @Setter
@@ -23,9 +23,9 @@ public class ScoreEntity {
     @Column( nullable = false )
     private Integer score;
     
-    @ManyToOne
-    @JoinColumn( name = "user_id", nullable = false )
-    private UserEntity user;
+//    @ManyToOne
+//    @JoinColumn( name = "user_id", nullable = false )
+//    private UserEntity user;
     
     @ManyToOne
     @JoinColumn( name = "memory_game_id", nullable = false )

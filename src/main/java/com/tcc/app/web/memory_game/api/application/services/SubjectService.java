@@ -3,7 +3,6 @@ package com.tcc.app.web.memory_game.api.application.services;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
 import com.tcc.app.web.memory_game.api.application.repositories.SubjectRepository;
-import com.tcc.app.web.memory_game.api.application.utils.ListUtil;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,6 @@ public class SubjectService {
                                            .orElseGet(() -> new SubjectEntity(subjectName));
             
             subject.addMemoryGame(memoryGame);
-            subject.addUser(user);
             
             subjectRepository.save(subject);
             
@@ -48,8 +46,8 @@ public class SubjectService {
     }
     
     @Transactional
-    public List<SubjectEntity> updateSubjects(List<String> subjectNameList, MemoryGameEntity memoryGame, UserEntity user) throws Exception {
-        removeMemoryGameAndUserIfNotUsed(subjectNameList, memoryGame, user);
+    public List<SubjectEntity> updateSubjects(List<String> subjectNameList, MemoryGameEntity memoryGame) throws Exception {
+        removeMemoryGameIfNotUsed(subjectNameList, memoryGame);
         
         var subjectList = new LinkedList<SubjectEntity>();
         
@@ -57,7 +55,6 @@ public class SubjectService {
             var subject = subjectRepository.findBySubject(subjectName).orElse(new SubjectEntity(subjectName));
             
             subject.addMemoryGame(memoryGame);
-            subject.addUser(user);
             subjectRepository.save(subject);
             
             subjectList.add(subject);
@@ -67,23 +64,19 @@ public class SubjectService {
     }
     
     @Transactional
-    public void deleteSubjectsByMemoryGameAndUser(MemoryGameEntity memoryGame, UserEntity user) {
-        List<String> empty = List.of();
-        removeMemoryGameAndUserIfNotUsed(empty, memoryGame, user);
+    public void deleteSubjectsByMemoryGameAndUser(MemoryGameEntity memoryGame) {
+        List<String> empty = new LinkedList<>();
+        removeMemoryGameIfNotUsed(empty, memoryGame);
     }
     
     @Transactional
-    private void removeMemoryGameAndUserIfNotUsed(List<String> subjectNameList, MemoryGameEntity memoryGame, UserEntity user) {
+    private void removeMemoryGameIfNotUsed(List<String> subjectNameList, MemoryGameEntity memoryGame) {
         for (var subject : memoryGame.getSubjectList()) {
             if (! subjectNameList.contains(subject.getSubject())) {
-                subject.removeUserAndMemoryGame(user, memoryGame);
+                subject.removeMemoryGame(memoryGame);
                 
-                if (subject.getMemoryGameList().isEmpty()) {
-                    subjectRepository.delete(subject);
-                    continue;
-                }
-                
-                subjectRepository.save(subject);
+                if (subject.getMemoryGameList().isEmpty()) {subjectRepository.delete(subject);}
+                else {subjectRepository.save(subject);}
             }
         }
     }

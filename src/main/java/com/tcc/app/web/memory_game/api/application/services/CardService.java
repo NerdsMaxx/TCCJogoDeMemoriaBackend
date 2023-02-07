@@ -23,12 +23,12 @@ public class CardService {
     private CardMapper cardMapper;
     
     @Transactional
-    public List<CardEntity> saveCards(List<CardRequestDto> cardRequestDtoList, MemoryGameEntity memoryGame, UserEntity user) {
+    public List<CardEntity> saveCards(List<CardRequestDto> cardRequestDtoList, MemoryGameEntity memoryGame) {
         var cardList = new LinkedList<CardEntity>();
         
         for (var cardRequestDto : cardRequestDtoList) {
             var card = cardMapper.toCardEntity(cardRequestDto);
-            saveCard(card, memoryGame, user);
+            saveCard(card, memoryGame);
             cardList.add(card);
         }
         
@@ -38,7 +38,7 @@ public class CardService {
     @Transactional
     public List<CardEntity> updateCards(List<CardRequestDto> cardRequestDtoList, MemoryGameEntity memoryGame, UserEntity user) {
         deleteCardsByMemoryGameAndUserInBatch(memoryGame, user);
-        return saveCards(cardRequestDtoList, memoryGame, user);
+        return saveCards(cardRequestDtoList, memoryGame);
     }
     
     @Transactional
@@ -54,9 +54,8 @@ public class CardService {
     }
     
     @Transactional
-    private void saveCard(CardEntity card, MemoryGameEntity memoryGame, UserEntity user) {
+    private void saveCard(CardEntity card, MemoryGameEntity memoryGame) {
         card.setMemoryGame(memoryGame);
-        card.setUser(user);
         cardRepository.save(card);
     }
 }

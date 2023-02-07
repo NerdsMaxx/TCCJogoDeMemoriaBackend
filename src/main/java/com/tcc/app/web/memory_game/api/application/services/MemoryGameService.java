@@ -52,7 +52,7 @@ public class MemoryGameService {
         
         memoryGameRepository.save(memoryGame);
         
-        var cardList = cardService.saveCards(memoryGameRequestDto.cardList(), memoryGame, user);
+        var cardList = cardService.saveCards(memoryGameRequestDto.cardList(), memoryGame);
         memoryGame.setCardList(cardList);
         
         var subjectList = subjectService.saveSubjects(memoryGameRequestDto.subjectList(), memoryGame, user);
@@ -80,7 +80,7 @@ public class MemoryGameService {
         }
         
         if (memoryGameRequestDto.subjectList() != null) {
-            var subjectList = subjectService.updateSubjects(memoryGameRequestDto.subjectList(), memoryGame, user);
+            var subjectList = subjectService.updateSubjects(memoryGameRequestDto.subjectList(), memoryGame);
             memoryGame.setSubjectList(subjectList);
         }
         
@@ -95,7 +95,7 @@ public class MemoryGameService {
                                              .orElseThrow(() -> new EntityNotFoundException(
                                                      "Não foi encontrado jogo de memória."));
         
-        subjectService.deleteSubjectsByMemoryGameAndUser(memoryGame, user);
+        subjectService.deleteSubjectsByMemoryGameAndUser(memoryGame);
         cardService.deleteCardsByMemoryGameAndUser(memoryGame, user);
         
         memoryGameRepository.delete(memoryGame);

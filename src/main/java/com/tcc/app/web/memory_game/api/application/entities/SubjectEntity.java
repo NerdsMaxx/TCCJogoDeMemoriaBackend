@@ -25,21 +25,21 @@ public class SubjectEntity {
     @Column(nullable = false, unique = true)
     private String subject;
     
-    @ManyToMany
-    @JoinTable( name = "user_subject", joinColumns = @JoinColumn( name = "subject_id" ),
-                inverseJoinColumns = @JoinColumn( name = "user_id" ) )
-    private List<UserEntity> userList = new LinkedList<>();
+//    @ManyToMany
+//    @JoinTable( name = "user_subject", joinColumns = @JoinColumn( name = "subject_id" ),
+//                inverseJoinColumns = @JoinColumn( name = "user_id" ) )
+//    private List<UserEntity> userList = new LinkedList<>();
     
     @ManyToMany
     @JoinTable(name = "memory_game_subject", joinColumns = @JoinColumn(name = "subject_id"),
                inverseJoinColumns = @JoinColumn(name = "memory_game_id"))
     private List<MemoryGameEntity> memoryGameList = new LinkedList<>();
     
-    public SubjectEntity addUser(UserEntity user) {
-        ListUtil.addElementIfNotExist(this, user.getSubjectList());
-        ListUtil.addElementIfNotExist(user, userList);
-        return this;
-    }
+//    public SubjectEntity addUser(UserEntity user) {
+//        ListUtil.addElementIfNotExist(this, user.getSubjectList());
+//        ListUtil.addElementIfNotExist(user, userList);
+//        return this;
+//    }
     
     public SubjectEntity addMemoryGame(MemoryGameEntity memoryGame) {
         ListUtil.addElementIfNotExist(this, memoryGame.getSubjectList());
@@ -47,22 +47,27 @@ public class SubjectEntity {
         return this;
     }
     
-    public SubjectEntity removeUserAndMemoryGame(UserEntity user, MemoryGameEntity memoryGame) {
+    public SubjectEntity removeMemoryGame(MemoryGameEntity memoryGame) {
         memoryGameList.remove(memoryGame);
-        memoryGame.getSubjectList().remove(this);
-        
-        final var userMemoryGameList = user.getMemoryGameList();
-        
-        userMemoryGameList.remove(memoryGame);
-        final var result = userMemoryGameList.stream()
-                                             .noneMatch((memoryGame1 -> memoryGame1.getSubjectList().contains(this)));
-        
-        if(result) {
-            userList.remove(user);
-            user.getSubjectList().remove(this);
-        }
-        
         return this;
     }
+    
+//    public SubjectEntity removeUserAndMemoryGame(UserEntity user, MemoryGameEntity memoryGame) {
+//        memoryGameList.remove(memoryGame);
+//        memoryGame.getSubjectList().remove(this);
+//
+//        final var userMemoryGameList = user.getMemoryGameList();
+//
+//        userMemoryGameList.remove(memoryGame);
+//        final var result = userMemoryGameList.stream()
+//                                             .noneMatch((memoryGame1 -> memoryGame1.getSubjectList().contains(this)));
+//
+//        if(result) {
+//            userList.remove(user);
+//            user.getSubjectList().remove(this);
+//        }
+//
+//        return this;
+//    }
     
 }

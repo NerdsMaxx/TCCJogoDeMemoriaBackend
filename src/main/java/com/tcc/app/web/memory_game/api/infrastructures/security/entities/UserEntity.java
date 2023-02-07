@@ -39,17 +39,17 @@ public class UserEntity implements UserDetails {
     @JoinColumn(name = "user_type_id")
     private UserTypeEntity userType;
     
-    @ManyToMany(mappedBy = "userList")
-    private List<SubjectEntity> subjectList = new LinkedList<>();
+//    @ManyToMany(mappedBy = "userList")
+//    private List<SubjectEntity> subjectList = new LinkedList<>();
     
     @OneToMany(mappedBy = "user")
     private List<MemoryGameEntity> memoryGameList = new LinkedList<>();
     
-    @OneToMany(mappedBy = "user")
-    private List<ScoreEntity> scoreList = new LinkedList<>();
-    
-    @OneToMany(mappedBy = "user")
-    private List<CardEntity> cardList = new LinkedList<>();
+//    @OneToMany(mappedBy = "user")
+//    private List<ScoreEntity> scoreList = new LinkedList<>();
+//
+//    @OneToMany(mappedBy = "user")
+//    private List<CardEntity> cardList = new LinkedList<>();
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

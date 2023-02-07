@@ -7,8 +7,8 @@ import lombok.*;
 
 @Entity
 @Table( name = "card",
-        uniqueConstraints = { @UniqueConstraint( name = "unique_first_content_second_content_memory_game_user",
-                                                 columnNames = { "first_content", "second_content", "memory_game_id", "user_id" } ) } )
+        uniqueConstraints = { @UniqueConstraint( name = "unique_first_content_second_content_memory_game",
+                                                 columnNames = { "first_content", "second_content", "memory_game_id" } ) } )
 @Getter
 @Setter
 @AllArgsConstructor
@@ -26,9 +26,9 @@ public class CardEntity {
     @Column( nullable = false, name = "second_content" )
     private String secondContent;
     
-    @ManyToOne
-    @JoinColumn( name = "user_id", nullable = false )
-    private UserEntity user;
+//    @ManyToOne
+//    @JoinColumn( name = "user_id", nullable = false )
+//    private UserEntity user;
     
     @ManyToOne
     @JoinColumn( name = "memory_game_id", nullable = false )
