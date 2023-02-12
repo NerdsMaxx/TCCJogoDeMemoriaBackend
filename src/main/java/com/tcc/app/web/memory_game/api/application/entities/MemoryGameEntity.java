@@ -1,6 +1,6 @@
 package com.tcc.app.web.memory_game.api.application.entities;
 
-import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
+import com.tcc.app.web.memory_game.api.application.entities.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -10,8 +10,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "memory_game",
-       uniqueConstraints = {@UniqueConstraint(name = "unique_memory_game_user",
-                                              columnNames = {"memory_game", "user_id"})}
+       uniqueConstraints = {@UniqueConstraint(name = "unique_memory_game_creator",
+                                              columnNames = {"memory_game", "creator_id"})}
 )
 @Getter
 @Setter
@@ -27,9 +27,12 @@ public class MemoryGameEntity {
     @Column(name = "memory_game", nullable = false)
     private String memoryGame;
     
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    private CreatorEntity creator;
+    
+    @ManyToMany(mappedBy = "memoryGameList")
+    private List<PlayerEntity> playerList = new LinkedList<>();
     
     @ManyToMany(mappedBy = "memoryGameList")
     private List<SubjectEntity> subjectList = new LinkedList<>();
@@ -38,5 +41,5 @@ public class MemoryGameEntity {
     private List<CardEntity> cardList = new LinkedList<>();
     
     @OneToMany(mappedBy = "memoryGame")
-    private List<ScoreEntity> scoreList = new LinkedList<>();
+    private List<GameplayEntity> gameplayList = new LinkedList<>();
 }

@@ -27,7 +27,7 @@ public class TokenService {
 			var algorithm = Algorithm.HMAC256(secret);
 
 			return JWT.create().withIssuer(issuer).withSubject(user.getUsername())
-					.withExpiresAt(getExpirationDate()).sign(algorithm);
+					  .withExpiresAt(_getExpirationDate()).sign(algorithm);
 
 		} catch (JWTCreationException exception) {
 			throw new RuntimeException("Erro ao gerar token jwt ou expirado!", exception);
@@ -45,7 +45,7 @@ public class TokenService {
 		}
 	}
 
-	private Instant getExpirationDate() {
+	private Instant _getExpirationDate() {
 		return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
 	}
 }

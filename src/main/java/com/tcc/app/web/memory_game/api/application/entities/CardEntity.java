@@ -1,6 +1,5 @@
 package com.tcc.app.web.memory_game.api.application.entities;
 
-import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,11 +25,7 @@ public class CardEntity {
     @Column( nullable = false, name = "second_content" )
     private String secondContent;
     
-//    @ManyToOne
-//    @JoinColumn( name = "user_id", nullable = false )
-//    private UserEntity user;
-    
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "memory_game_id", nullable = false )
     private MemoryGameEntity memoryGame;
     

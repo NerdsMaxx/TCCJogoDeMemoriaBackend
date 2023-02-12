@@ -3,7 +3,9 @@ package com.tcc.app.web.memory_game.api.application.utils;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class ListUtil {
+public final class ListUtilStatic {
+    
+    private ListUtilStatic() {}
     
     public static <T> List<T> addIfNotExist(List<T> list, List<T> otherList) {
         for (var element : otherList) {

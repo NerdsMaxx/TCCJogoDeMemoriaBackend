@@ -1,9 +1,8 @@
 package com.tcc.app.web.memory_game.api.infrastructures.security.entities;
 
-import com.tcc.app.web.memory_game.api.application.entities.CardEntity;
-import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
-import com.tcc.app.web.memory_game.api.application.entities.ScoreEntity;
-import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
+import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
+import com.tcc.app.web.memory_game.api.application.entities.PlayerEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,7 +10,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -29,31 +27,36 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private String name;
     
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
     
+    @Column(nullable = false, unique = true)
     private String username;
+    
+    @Column(nullable = false)
     private String password;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_type_id")
     private UserTypeEntity userType;
     
-//    @ManyToMany(mappedBy = "userList")
-//    private List<SubjectEntity> subjectList = new LinkedList<>();
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private PlayerEntity player;
     
-    @OneToMany(mappedBy = "user")
-    private List<MemoryGameEntity> memoryGameList = new LinkedList<>();
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private CreatorEntity creator;
     
-//    @OneToMany(mappedBy = "user")
-//    private List<ScoreEntity> scoreList = new LinkedList<>();
-//
-//    @OneToMany(mappedBy = "user")
-//    private List<CardEntity> cardList = new LinkedList<>();
+    public boolean isCreator() {
+        return UserTypeEnum.CRIADOR.equals(userType.getType());
+    }
+    
+    public boolean isPlayer() {
+        return UserTypeEnum.JOGADOR.equals(userType.getType());
+    }
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(this.userType);
     }
     
     @Override

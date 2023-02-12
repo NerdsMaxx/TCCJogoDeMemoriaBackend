@@ -2,10 +2,10 @@ package com.tcc.app.web.memory_game.api.application.services;
 
 import com.tcc.app.web.memory_game.api.application.dtos.requests.CardRequestDto;
 import com.tcc.app.web.memory_game.api.application.entities.CardEntity;
+import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.mappers.CardMapper;
 import com.tcc.app.web.memory_game.api.application.repositories.CardRepository;
-import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Service
+@Transactional
 public class CardService {
     
     @Autowired
@@ -22,12 +23,11 @@ public class CardService {
     @Autowired
     private CardMapper cardMapper;
     
-    @Transactional
     public List<CardEntity> saveCards(List<CardRequestDto> cardRequestDtoList, MemoryGameEntity memoryGame) {
-        var cardList = new LinkedList<CardEntity>();
+        List<CardEntity> cardList = new LinkedList<>();
         
-        for (var cardRequestDto : cardRequestDtoList) {
-            var card = cardMapper.toCardEntity(cardRequestDto);
+        for (CardRequestDto cardRequestDto : cardRequestDtoList) {
+            CardEntity card = cardMapper.toCardEntity(cardRequestDto);
             saveCard(card, memoryGame);
             cardList.add(card);
         }
@@ -35,25 +35,21 @@ public class CardService {
         return cardList;
     }
     
-    @Transactional
-    public List<CardEntity> updateCards(List<CardRequestDto> cardRequestDtoList, MemoryGameEntity memoryGame, UserEntity user) {
-        deleteCardsByMemoryGameAndUserInBatch(memoryGame, user);
+    public List<CardEntity> updateCards(List<CardRequestDto> cardRequestDtoList, MemoryGameEntity memoryGame, CreatorEntity creator) {
+        deleteCardsByMemoryGameAndUserInBatch(memoryGame, creator);
         return saveCards(cardRequestDtoList, memoryGame);
     }
     
-    @Transactional
-    public void deleteCardsByMemoryGameAndUserInBatch(MemoryGameEntity memoryGame, UserEntity user) {
-        List<CardEntity> cardList = cardRepository.findAllByMemoryGameAndUser(memoryGame, user);
+    public void deleteCardsByMemoryGameAndUserInBatch(MemoryGameEntity memoryGame, CreatorEntity creator) {
+        List<CardEntity> cardList = cardRepository.findAllByMemoryGameAndCreator(memoryGame, creator);
         cardRepository.deleteAllInBatch(cardList);
     }
     
-    @Transactional
-    public void deleteCardsByMemoryGameAndUser(MemoryGameEntity memoryGame, UserEntity user) {
-        List<CardEntity> cardList = cardRepository.findAllByMemoryGameAndUser(memoryGame, user);
+    public void deleteCardsByMemoryGameAndUser(MemoryGameEntity memoryGame, CreatorEntity creator) {
+        List<CardEntity> cardList = cardRepository.findAllByMemoryGameAndCreator(memoryGame, creator);
         cardRepository.deleteAll(cardList);
     }
     
-    @Transactional
     private void saveCard(CardEntity card, MemoryGameEntity memoryGame) {
         card.setMemoryGame(memoryGame);
         cardRepository.save(card);

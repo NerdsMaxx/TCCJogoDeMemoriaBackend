@@ -1,8 +1,8 @@
 package com.tcc.app.web.memory_game.api.application.repositories;
 
 import com.tcc.app.web.memory_game.api.application.entities.CardEntity;
+import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
-import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,8 +15,8 @@ public interface CardRepository extends JpaRepository<CardEntity, Long> {
     @Query("SELECT c " +
            "FROM CardEntity c " +
            "JOIN c.memoryGame mg " +
-           "JOIN mg.user u " +
-           "WHERE u = :user " +
+           "JOIN mg.creator cr " +
+           "WHERE cr = :creator " +
            "AND mg = :memoryGame ")
-    List<CardEntity> findAllByMemoryGameAndUser( MemoryGameEntity memoryGame, UserEntity user );
+    List<CardEntity> findAllByMemoryGameAndCreator(MemoryGameEntity memoryGame, CreatorEntity creator);
 }

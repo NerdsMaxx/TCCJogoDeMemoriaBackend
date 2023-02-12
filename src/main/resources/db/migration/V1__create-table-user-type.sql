@@ -3,6 +3,5 @@ CREATE TABLE user_type (
      type VARCHAR NOT NULL UNIQUE
 );
 
-INSERT INTO user_type(type) VALUES('Administrador');
-INSERT INTO user_type(type) VALUES('Professor');
-INSERT INTO user_type(type) VALUES('Aluno');
+INSERT INTO user_type(type) VALUES('CRIADOR');
+INSERT INTO user_type(type) VALUES('JOGADOR');
