@@ -5,7 +5,6 @@ import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
 import com.tcc.app.web.memory_game.api.application.repositories.SubjectRepository;
 import com.tcc.app.web.memory_game.api.infrastructures.security.utils.AuthenticatedUserUtil;
-import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,11 +33,11 @@ public class SubjectService {
     
     public List<SubjectEntity> findAllByPlayer(String username) throws Exception {
         Optional<CreatorEntity> optionalCreator = authenticatedUserUtil.getCurrentOptionalCreator();
-        if(optionalCreator.isPresent()){
+        if (optionalCreator.isPresent()) {
             return _findAllByPlayerAndCreator(username, optionalCreator.get());
         }
         
-       return subjectRepository.findAllByUsernamePlayer(username);
+        return subjectRepository.findAllByUsernamePlayer(username);
     }
     
     public List<SubjectEntity> save(List<String> subjectNameSet, MemoryGameEntity memoryGame) {
@@ -46,7 +45,7 @@ public class SubjectService {
         
         for (String subjectName : subjectNameSet) {
             SubjectEntity subject = subjectRepository.findBySubject(subjectName)
-                                           .orElseGet(() -> new SubjectEntity(subjectName));
+                                                     .orElseGet(() -> new SubjectEntity(subjectName));
             
             subject.addMemoryGame(memoryGame);
             
@@ -64,7 +63,8 @@ public class SubjectService {
         List<SubjectEntity> subjectList = new LinkedList<>();
         
         for (String subjectName : subjectNameList) {
-            var subject = subjectRepository.findBySubject(subjectName).orElse(new SubjectEntity(subjectName));
+            SubjectEntity subject = subjectRepository.findBySubject(subjectName)
+                                                     .orElse(new SubjectEntity(subjectName));
             
             subject.addMemoryGame(memoryGame);
             subjectRepository.save(subject);
@@ -85,14 +85,15 @@ public class SubjectService {
             if (! subjectNameList.contains(subject.getSubject())) {
                 subject.removeMemoryGame(memoryGame);
                 
-                if (subject.getMemoryGameList().isEmpty()) {subjectRepository.delete(subject);}
-                else {subjectRepository.save(subject);}
+                if (subject.getMemoryGameList().isEmpty()) {subjectRepository.delete(subject);} else {
+                    subjectRepository.save(subject);
+                }
             }
         }
     }
     
     private List<SubjectEntity> _findAllByPlayerAndCreator(String username, CreatorEntity creator) throws Exception {
-        if(!playerService.existsByUsernameAndCreator(username, creator)) {
+        if (! playerService.existsByUsernameAndCreator(username, creator)) {
             throw new EntityNotFoundException("Este usuário não foi adicionado pelo professor.");
         }
         

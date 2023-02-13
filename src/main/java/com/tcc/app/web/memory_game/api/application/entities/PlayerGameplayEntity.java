@@ -23,13 +23,13 @@ public class PlayerGameplayEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column
+    @Column(nullable = false)
     private Integer score;
     
-    @Column(name = "correct")
+    @Column(name = "correct", nullable = false)
     private Integer numberCardCorrect;
     
-    @Column(name = "wrong")
+    @Column(name = "wrong", nullable = false)
     private Integer numberCardWrong;
     
     @NonNull
