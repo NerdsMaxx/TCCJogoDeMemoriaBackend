@@ -13,11 +13,6 @@ import java.util.Optional;
 @Repository
 public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity, Long> {
     
-    @Query("SELECT mg " +
-           "FROM MemoryGameEntity mg " +
-           "JOIN mg.creator cr " +
-           "WHERE cr = :creator " +
-           "AND mg.memoryGame = :memoryGame")
     Optional<MemoryGameEntity> findByCreatorAndMemoryGame(CreatorEntity creator, String memoryGame);
     
     Page<MemoryGameEntity> findAllByCreator(Pageable pageable, CreatorEntity creator);

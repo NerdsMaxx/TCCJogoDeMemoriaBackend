@@ -21,6 +21,9 @@ public class TokenService {
 
 	@Value("${api.security.token.secret}")
 	private String secret;
+	
+	@Value("${api.security.token.very_long}")
+	private Boolean veryLong;
 
 	public String generateToken(UserEntity user) {
 		try {
@@ -46,6 +49,10 @@ public class TokenService {
 	}
 
 	private Instant _getExpirationDate() {
+		if(veryLong) {
+			return LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("-03:00"));
+		}
+		
 		return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
 	}
 }
