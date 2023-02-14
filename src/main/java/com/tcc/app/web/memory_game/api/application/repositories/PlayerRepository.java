@@ -23,8 +23,8 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity,Long> {
     
     @Query("SELECT pl " +
            "FROM CreatorEntity cr " +
-           "JOIN cr.memoryGameList mg " +
-           "JOIN mg.playerList pl " +
+           "JOIN cr.memoryGameSet mg " +
+           "JOIN mg.playerSet pl " +
            "JOIN pl.user us " +
            "WHERE cr = :creator " +
            "AND us.username = :username")
@@ -34,8 +34,8 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity,Long> {
     @Query("SELECT CASE WHEN COUNT(pl) > 0 " +
            "THEN TRUE ELSE FALSE END " +
            "FROM CreatorEntity cr " +
-           "JOIN cr.memoryGameList mg " +
-           "JOIN mg.playerList pl " +
+           "JOIN cr.memoryGameSet mg " +
+           "JOIN mg.playerSet pl " +
            "JOIN pl.user us " +
            "WHERE cr = :creator " +
            "AND us.username = :username")

@@ -25,7 +25,7 @@ public class UserTypeEntity implements GrantedAuthority {
     private UserTypeEnum type;
     
     @OneToMany(mappedBy = "userType")
-    private List<UserEntity> user;
+    private Set<UserEntity> user;
     
     @Override
     public String getAuthority() {

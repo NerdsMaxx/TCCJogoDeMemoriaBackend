@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface CardRepository extends JpaRepository<CardEntity, Long> {
@@ -18,5 +19,5 @@ public interface CardRepository extends JpaRepository<CardEntity, Long> {
            "JOIN mg.creator cr " +
            "WHERE cr = :creator " +
            "AND mg = :memoryGame ")
-    List<CardEntity> findAllByMemoryGameAndCreator(MemoryGameEntity memoryGame, CreatorEntity creator);
+    Set<CardEntity> findAllByMemoryGameAndCreator(MemoryGameEntity memoryGame, CreatorEntity creator);
 }

@@ -36,7 +36,7 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_type_id")
     private UserTypeEntity userType;
     

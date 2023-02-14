@@ -7,12 +7,9 @@ public final class ListUtilStatic {
     
     private ListUtilStatic() {}
     
-    public static <T> List<T> addIfNotExist(List<T> list, List<T> otherList) {
-        for (var element : otherList) {
-            if (! list.contains(element)) {
-                list.add(element);
-            }
-        }
+    public static <T> List<T> addAllIfNotExist(List<T> list, List<T> otherList) {
+        otherList = otherList.stream().filter(element -> !list.contains(element)).distinct().toList();
+        list.addAll(otherList);
         
         return list;
     }

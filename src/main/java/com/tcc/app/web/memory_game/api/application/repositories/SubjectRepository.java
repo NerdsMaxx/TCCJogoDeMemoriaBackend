@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface SubjectRepository extends JpaRepository<SubjectEntity,Long> {
@@ -16,24 +16,29 @@ public interface SubjectRepository extends JpaRepository<SubjectEntity,Long> {
     
     @Query("SELECT DISTINCT sub " +
            "FROM PlayerEntity pl " +
-           "JOIN pl.memoryGameList mg " +
-           "JOIN mg.subjectList sub " +
+           "JOIN pl.memoryGameSet mg " +
+           "JOIN mg.subjectSet sub " +
            "JOIN pl.user us " +
            "WHERE us.username = :username")
-    List<SubjectEntity> findAllByUsernamePlayer(String username);
+    Set<SubjectEntity> findAllByUsernamePlayer(String username);
     
     @Query("SELECT DISTINCT sub " +
            "FROM PlayerEntity pl " +
-           "JOIN pl.memoryGameList mg " +
-           "JOIN mg.subjectList sub " +
+           "JOIN pl.memoryGameSet mg " +
+           "JOIN mg.subjectSet sub " +
            "JOIN pl.user us " +
            "WHERE us.username = :username " +
            "AND mg.creator = :creator")
-    List<SubjectEntity> findAllByUsernamePlayerAndCreator(String username, CreatorEntity creator);
+    Set<SubjectEntity> findAllByUsernamePlayerAndCreator(String username, CreatorEntity creator);
     
     @Query("SELECT DISTINCT sub " +
            "FROM MemoryGameEntity mg " +
-           "JOIN mg.subjectList sub " +
+           "JOIN mg.subjectSet sub " +
            "WHERE mg = :memoryGame")
-    List<SubjectEntity> findByMemoryGame(MemoryGameEntity memoryGame);
+    Set<SubjectEntity> findByMemoryGame(MemoryGameEntity memoryGame);
+    
+    @Query("SELECT sub " +
+           "FROM SubjectEntity sub " +
+           "WHERE sub.subject in  :subjectSet")
+    Set<SubjectEntity> findBySubjectSet(Set<String> subjectSet);
 }

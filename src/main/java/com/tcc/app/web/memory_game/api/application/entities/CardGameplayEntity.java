@@ -5,13 +5,13 @@ import lombok.*;
 
 @Entity
 @Table(name = "card_gameplay",
-       uniqueConstraints = {@UniqueConstraint(name = "unique_player_gameplay",
-                                              columnNames = {"player_id", "gameplay_id"})})
+       uniqueConstraints = {@UniqueConstraint(name = "unique_player_gameplay_card",
+                                              columnNames = {"player_gameplay_id", "card_id"})})
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(exclude = {"id"})
 public class CardGameplayEntity {
     
     @Id

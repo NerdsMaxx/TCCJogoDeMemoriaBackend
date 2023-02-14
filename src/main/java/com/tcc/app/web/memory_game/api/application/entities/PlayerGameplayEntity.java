@@ -4,8 +4,8 @@ import com.tcc.app.web.memory_game.api.application.dtos.requests.PlayerScoreRequ
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "player_gameplay",
@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(exclude = {"id", "cardGameplaySet"})
 public class PlayerGameplayEntity {
     
     @Id
@@ -24,13 +24,13 @@ public class PlayerGameplayEntity {
     private Long id;
     
     @Column(nullable = false)
-    private Integer score;
+    private Integer score = 0;
     
     @Column(name = "correct", nullable = false)
-    private Integer numberCardCorrect;
+    private Integer numberCardCorrect = 0;
     
     @Column(name = "wrong", nullable = false)
-    private Integer numberCardWrong;
+    private Integer numberCardWrong = 0;
     
     @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,8 +42,8 @@ public class PlayerGameplayEntity {
     @JoinColumn(name = "gameplay_id", nullable = false)
     private GameplayEntity gameplay;
     
-    @OneToMany
-    private List<CardGameplayEntity> cardGameplay = new LinkedList<>();
+    @OneToMany(mappedBy = "playerGameplay")
+    private Set<CardGameplayEntity> cardGameplaySet = new HashSet<>();
     
     public void setScores(PlayerScoreRequestDto playerScoreRequestDto) {
         this.score = playerScoreRequestDto.score();

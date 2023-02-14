@@ -4,8 +4,8 @@ import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEnt
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "creator")
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(exclude = {"id"})
 public class CreatorEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +26,5 @@ public class CreatorEntity {
     private UserEntity user;
     
     @OneToMany(mappedBy = "creator")
-    private List<MemoryGameEntity> memoryGameList = new LinkedList<>();
+    private Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
 }

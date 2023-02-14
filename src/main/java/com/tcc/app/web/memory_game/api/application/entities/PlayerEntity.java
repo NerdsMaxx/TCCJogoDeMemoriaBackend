@@ -1,12 +1,11 @@
 package com.tcc.app.web.memory_game.api.application.entities;
 
-import com.tcc.app.web.memory_game.api.application.utils.ListUtilStatic;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "player")
@@ -15,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(exclude = {"id", "memoryGameSet", "playerGameplaySet"})
 public class PlayerEntity {
     
     @Id
@@ -27,17 +26,14 @@ public class PlayerEntity {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserEntity user;
     
-    @ManyToMany
-    @JoinTable(name = "player_memory_game",
-               joinColumns = @JoinColumn(name = "player_id"),
-               inverseJoinColumns = @JoinColumn(name = "memory_game_id"))
-    private List<MemoryGameEntity> memoryGameList = new LinkedList<>();
+    @ManyToMany(mappedBy = "playerSet")
+    private Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
     
     @OneToMany(mappedBy = "player")
-    private List<PlayerGameplayEntity> playerGameplayList = new LinkedList<>();
+    private Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
     
     public PlayerEntity addMemoryGame(MemoryGameEntity memoryGame) {
-        ListUtilStatic.addElementIfNotExist(memoryGame, memoryGameList);
+        memoryGameSet.add(memoryGame);
         return this;
     }
     

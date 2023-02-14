@@ -21,7 +21,7 @@ public class PlayerService {
         return playerRepository.save(player);
     }
     
-    public PlayerEntity savePlayerByUser(UserEntity user) {
+    public PlayerEntity saveByUser(UserEntity user) {
         return playerRepository.save(new PlayerEntity(user));
     }
     
@@ -37,19 +37,5 @@ public class PlayerService {
     
     boolean existsByUsernameAndCreator(String username, CreatorEntity creator) {
         return playerRepository.existsByUsernameAndCreator(username, creator);
-    }
-    
-    public void addMemoryGame(String username, MemoryGameEntity memoryGame) throws Exception {
-        PlayerEntity player = playerRepository.findByUsername(username)
-                                              .orElseThrow(() -> new EntityNotFoundException(
-                                                      "Jogador não encontrado!"));
-        
-        player.addMemoryGame(memoryGame);
-        playerRepository.save(player);
-    }
-    
-    public void addMemoryGame(PlayerEntity player, MemoryGameEntity memoryGame) throws Exception {
-        player.addMemoryGame(memoryGame);
-        playerRepository.save(player);
     }
 }

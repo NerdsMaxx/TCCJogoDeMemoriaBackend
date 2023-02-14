@@ -3,8 +3,8 @@ package com.tcc.app.web.memory_game.api.application.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "gameplay")
@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(exclude = {"id", "playerGameplaySet", "codeGameplay"})
 public class GameplayEntity {
     
     @Id
@@ -28,10 +28,22 @@ public class GameplayEntity {
     @JoinColumn(name = "memory_game_id")
     private MemoryGameEntity memoryGame;
     
-    @OneToMany(mappedBy = "gameplay")
-    private List<PlayerGameplayEntity> playerGameplayList = new LinkedList<>();
+    @OneToMany(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
+    
+    @OneToOne(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CodeGameplayEntity codeGameplay;
     
     public void sumOnePlayer() {
         ++this.numbersPlayer;
+    }
+    
+    public void addPlayerGameplay(PlayerGameplayEntity playerGameplay) {
+        playerGameplaySet.add(playerGameplay);
+    }
+    
+    public void alterPlayerGameplay(PlayerGameplayEntity playerGameplay) {
+        playerGameplaySet.remove(playerGameplay);
+        playerGameplaySet.add(playerGameplay);
     }
 }

@@ -67,8 +67,10 @@ public class GameplayService {
             return codeGameplay;
         }
         
+        gameplay.setCodeGameplay(codeGameplay);
+        
         gameplayRepository.save(gameplay);
-        codeGameplayRepository.save(codeGameplay);
+
         return codeGameplay;
     }
     
@@ -90,10 +92,12 @@ public class GameplayService {
         PlayerGameplayEntity playerGameplay = gameplayUtil.getPlayerGameplay(player, gameplay);
         
         codeGameplay.removeOnePlayer();
-        codeGameplayRepository.save(codeGameplay);
-        
         playerGameplay.setScores(playerScoreRequestDto);
-        playerGameplayRepository.save(playerGameplay);
+        
+        gameplay.setCodeGameplay(codeGameplay);
+        gameplay.alterPlayerGameplay(playerGameplay);
+        
+        gameplayRepository.save(gameplay);
         
         return new Object[]{playerGameplay, codeGameplay};
     }
@@ -110,14 +114,17 @@ public class GameplayService {
             throw new EntityExistsException("O jogador já foi adicionado no gameplay!");
         }
         
-        playerService.addMemoryGame(player, gameplay.getMemoryGame());
+        memoryGameService.addPlayer(gameplay.getMemoryGame(), player);
         
         gameplay.sumOnePlayer();
+        codeGameplay.sumOnePlayer();
+        PlayerGameplayEntity playerGameplay = new PlayerGameplayEntity(player, gameplay);
+        
+        gameplay.setCodeGameplay(codeGameplay);
+        gameplay.addPlayerGameplay(playerGameplay);
+        
         gameplayRepository.save(gameplay);
         
-        codeGameplay.sumOnePlayer();
-        codeGameplayRepository.save(codeGameplay);
-        
-        return playerGameplayRepository.save(new PlayerGameplayEntity(player, gameplay));
+        return playerGameplay;
     }
 }

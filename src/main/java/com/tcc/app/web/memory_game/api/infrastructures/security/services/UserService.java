@@ -5,6 +5,8 @@ import com.tcc.app.web.memory_game.api.application.services.CreatorService;
 import com.tcc.app.web.memory_game.api.application.services.PlayerService;
 import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserRequestDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserTypeEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEnum;
 import com.tcc.app.web.memory_game.api.infrastructures.security.mappers.UserMapper;
 import com.tcc.app.web.memory_game.api.infrastructures.security.repositories.UserRepository;
 import com.tcc.app.web.memory_game.api.infrastructures.security.repositories.UserTypeRepository;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class UserService {
     
     @Autowired
@@ -38,40 +41,40 @@ public class UserService {
     @Autowired
     private PlayerService playerService;
     
-    @Transactional
+
     public UserEntity save(UserEntity user) {
         return userRepository.save(user);
     }
     
-    @Transactional
+
     public UserEntity saveAndFlush(UserEntity user) {
         return userRepository.saveAndFlush(user);
     }
     
-    @Transactional
+
     public UserEntity saveUser(UserRequestDto userRequestDto) throws Exception {
-        var user = userMapper.toUserEntity(userRequestDto);
+        UserEntity user = userMapper.toUserEntity(userRequestDto);
         
         if(userRepository.findByUsernameOrEmail(userRequestDto.username()) != null) {
             throw  new EntityExistsException("Este usuário já está adicionado.");
         }
         
-        var type = UserTypeUtilStatic.getType(userRequestDto.type());
+        UserTypeEnum type = UserTypeUtilStatic.getType(userRequestDto.type());
         if(type == null){
             throw new InvalidValueException("O tipo de usuário inválido. Usuário deve ser Professor ou Aluno");
         }
         
-        var userType = userTypeRepository.findByType(type).orElseThrow();
+        UserTypeEntity userType = userTypeRepository.findByType(type).orElseThrow();
         
         user.setUserType(userType);
         user.setPassword(passwordEncoder.encode(userRequestDto.password()));
         userRepository.save(user);
         
         if (userType.isCreator()) {
-            creatorService.saveCreator(user);
+            creatorService.save(user);
         }
         
-        playerService.savePlayerByUser(user);
+        playerService.saveByUser(user);
         
         return user;
     }

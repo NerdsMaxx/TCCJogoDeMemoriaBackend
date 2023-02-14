@@ -25,4 +25,9 @@ public class CustomExceptionHandler {
     public ResponseEntity invalidValue(InvalidValueException invalidValueException) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(invalidValueException.getMessage());
     }
+    
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity exceptionCommon(Exception exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
+    }
 }

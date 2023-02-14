@@ -6,13 +6,13 @@ import lombok.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "gameplay")
+@Table(name = "code_gameplay")
 @Getter
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(exclude = {"id"})
 public class CodeGameplayEntity {
     
     @Id
@@ -23,7 +23,7 @@ public class CodeGameplayEntity {
     @Column(nullable = false, unique = true)
     private String code;
     
-    @Column
+    @Column(nullable = false)
     private Integer numbersPlayerMoment = 0;
     
     private Date startDate = new Date();

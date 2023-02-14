@@ -4,8 +4,8 @@ import com.tcc.app.web.memory_game.api.application.utils.ListUtilStatic;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "subject")
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(exclude = {"id", "memoryGameSet"})
 public class SubjectEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,20 +24,19 @@ public class SubjectEntity {
     @Column(nullable = false, unique = true)
     private String subject;
     
-    @ManyToMany
-    @JoinTable(name = "memory_game_subject", joinColumns = @JoinColumn(name = "subject_id"),
-               inverseJoinColumns = @JoinColumn(name = "memory_game_id"))
-    private List<MemoryGameEntity> memoryGameList = new LinkedList<>();
+    @ManyToMany(mappedBy = "subjectSet")
+    private Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
     
-    public SubjectEntity addMemoryGame(MemoryGameEntity memoryGame) {
-        ListUtilStatic.addElementIfNotExist(this, memoryGame.getSubjectList());
-        ListUtilStatic.addElementIfNotExist(memoryGame, memoryGameList);
-        return this;
+    public void addMemoryGame(MemoryGameEntity memoryGame) {
+        memoryGameSet.add(memoryGame);
     }
     
-    public SubjectEntity removeMemoryGame(MemoryGameEntity memoryGame) {
-        memoryGameList.remove(memoryGame);
-        return this;
+    public void removeMemoryGame(MemoryGameEntity memoryGame) {
+        memoryGameSet.remove(memoryGame);
+    }
+    
+    public boolean equalsSubject(String subjectName) {
+        return this.subject.equals(subjectName);
     }
     
 }

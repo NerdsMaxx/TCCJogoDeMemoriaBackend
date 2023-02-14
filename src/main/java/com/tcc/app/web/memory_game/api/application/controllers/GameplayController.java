@@ -34,7 +34,7 @@ public class GameplayController {
     }
     
     @PostMapping("/terminar/{code}")
-    @PreAuthorize("hasRole('ROLE_JOGADOR')")
+    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity finishGameplay(@NotBlank @PathVariable("code") String code,
                                          @RequestBody @Valid PlayerScoreRequestDto playerScoreRequestDto) throws Exception{
         Object[] resultList = gameplayService.finishGameplayByCode(code, playerScoreRequestDto);

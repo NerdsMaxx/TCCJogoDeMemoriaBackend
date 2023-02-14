@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -27,11 +28,11 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        var jwtToken = getToken(request);
+        String jwtToken = getToken(request);
         
         if (jwtToken != null) {
-            var subject = tokenService.getSubject(jwtToken);
-            var userDetails = userRepository.findByUsernameOrEmail(subject);
+            String subject = tokenService.getSubject(jwtToken);
+            UserDetails userDetails = userRepository.findByUsernameOrEmail(subject);
             var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
                                                                          userDetails.getAuthorities());
             
@@ -42,12 +43,8 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
     
     private String getToken(HttpServletRequest request) {
-        var authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        
-        if (authorizationHeader != null) {
-            return authorizationHeader.replace("Bearer ", "");
-        }
-        
-        return null;
+        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        return (authorizationHeader != null) ? authorizationHeader.replace("Bearer ", "")
+                                             : null;
     }
 }

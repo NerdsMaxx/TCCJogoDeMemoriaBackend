@@ -17,7 +17,7 @@ public class CreatorService {
     @Autowired
     private CreatorRepository creatorRepository;
     
-    public CreatorEntity saveCreator(UserEntity user) {
+    public CreatorEntity save(UserEntity user) {
         return creatorRepository.save(new CreatorEntity(user));
     }
     
