@@ -2,7 +2,6 @@ package com.tcc.app.web.memory_game.api.application.controllers;
 
 import com.tcc.app.web.memory_game.api.application.dtos.requests.GameplayRequestDto;
 import com.tcc.app.web.memory_game.api.application.dtos.requests.PlayerScoreRequestDto;
-import com.tcc.app.web.memory_game.api.application.dtos.responses.PlayerGameplayFinsishedResponseDto;
 import com.tcc.app.web.memory_game.api.application.entities.CodeGameplayEntity;
 import com.tcc.app.web.memory_game.api.application.entities.PlayerGameplayEntity;
 import com.tcc.app.web.memory_game.api.application.mappers.GameplayMapper;
@@ -33,13 +32,24 @@ public class GameplayController {
         return ResponseEntity.ok(gameplayMapper.toGameplayResponseDto(codeGameplay));
     }
     
+    @PostMapping("/jogar/{code}")
+    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
+    public ResponseEntity addPlayerInGameplay(@PathVariable("code") String code) throws Exception {
+        PlayerGameplayEntity playerGameplayEntity = gameplayService.addGameplayByCode(code);
+        
+        return ResponseEntity.ok(gameplayMapper.toPlayerAddedResponseDto(playerGameplayEntity));
+    }
+    
     @PostMapping("/terminar/{code}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity finishGameplay(@NotBlank @PathVariable("code") String code,
-                                         @RequestBody @Valid PlayerScoreRequestDto playerScoreRequestDto) throws Exception{
-        Object[] resultList = gameplayService.finishGameplayByCode(code, playerScoreRequestDto);
+                                         @RequestBody
+                                         @Valid PlayerScoreRequestDto playerScoreRequestDto) throws Exception {
+        var result = gameplayService.finishGameplayByCode(code, playerScoreRequestDto);
         
-        return ResponseEntity.ok(gameplayMapper.toPlayerGameplayFinsishedResponseDto((PlayerGameplayEntity) resultList[0],
-                                                                                     (CodeGameplayEntity) resultList[1]));
+        return ResponseEntity.ok(gameplayMapper.toGameplayFinishedDtoList(result.v1(),
+                                                                          result.v2(),
+                                                                          result.v3(),
+                                                                          result.v4()));
     }
 }

@@ -4,7 +4,7 @@ import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.responses.U
 
 import java.util.Set;
 
-public record MemoryGameResponseDto(UserResponseDto user,
+public record MemoryGameResponseDto(String creator,
                                     String name,
                                     Set<String> subjectSet,
                                     Set<CardResponseDto> cardSet) {

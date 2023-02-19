@@ -1,6 +1,5 @@
 package com.tcc.app.web.memory_game.api.application.entities;
 
-import com.tcc.app.web.memory_game.api.application.utils.ListUtilStatic;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,16 +26,8 @@ public class SubjectEntity {
     @ManyToMany(mappedBy = "subjectSet")
     private Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
     
-    public void addMemoryGame(MemoryGameEntity memoryGame) {
-        memoryGameSet.add(memoryGame);
-    }
-    
-    public void removeMemoryGame(MemoryGameEntity memoryGame) {
+    public SubjectEntity removeMemoryGame(MemoryGameEntity memoryGame) {
         memoryGameSet.remove(memoryGame);
+        return this;
     }
-    
-    public boolean equalsSubject(String subjectName) {
-        return this.subject.equals(subjectName);
-    }
-    
 }

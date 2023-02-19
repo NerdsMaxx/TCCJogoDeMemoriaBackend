@@ -1,7 +1,8 @@
 CREATE TABLE gameplay (
     id BIGSERIAL PRIMARY KEY,
     numbers_player INT NOT NULL,
-    memory_game_id BIGINT NOT NULL UNIQUE,
+    start_time TIMESTAMP NOT NULL,
+    memory_game_id BIGINT NOT NULL,
     CONSTRAINT fk_memory_game
             FOREIGN KEY (memory_game_id)
                 REFERENCES memory_game(id)

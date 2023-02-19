@@ -10,6 +10,7 @@ import lombok.*;
 @Getter
 @Setter
 @AllArgsConstructor
+@RequiredArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"id"})
 public class CardGameplayEntity {
@@ -18,14 +19,20 @@ public class CardGameplayEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false)
+    @Column
     private Boolean winner;
     
+    @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_gameplay_id", nullable = false)
     private PlayerGameplayEntity playerGameplay;
     
+    @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id", nullable = false)
-    private CardEntity cardEntity;
+    private CardEntity card;
+    
+    public boolean equalsCardId(Long id) {
+        return this.card.getId().equals(id);
+    }
 }

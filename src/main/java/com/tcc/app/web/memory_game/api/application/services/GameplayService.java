@@ -3,17 +3,20 @@ package com.tcc.app.web.memory_game.api.application.services;
 import com.tcc.app.web.memory_game.api.application.dtos.requests.GameplayRequestDto;
 import com.tcc.app.web.memory_game.api.application.dtos.requests.PlayerScoreRequestDto;
 import com.tcc.app.web.memory_game.api.application.entities.*;
+import com.tcc.app.web.memory_game.api.application.mappers.GameplayMapper;
 import com.tcc.app.web.memory_game.api.application.repositories.CodeGameplayRepository;
 import com.tcc.app.web.memory_game.api.application.repositories.GameplayRepository;
 import com.tcc.app.web.memory_game.api.application.repositories.PlayerGameplayRepository;
 import com.tcc.app.web.memory_game.api.application.utils.GameplayUtil;
 import com.tcc.app.web.memory_game.api.infrastructures.security.utils.AuthenticatedUserUtil;
+import com.tcc.app.web.memory_game.api.custom.Quartet;
 import jakarta.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -42,6 +45,9 @@ public class GameplayService {
     
     @Autowired
     private AuthenticatedUserUtil authenticatedUserUtil;
+    
+    @Autowired
+    private GameplayMapper gameplayMapper;
     
     public List<CodeGameplayEntity> findAllCodeGameplay() {
         return codeGameplayRepository.findAll();
@@ -84,22 +90,27 @@ public class GameplayService {
         return _addPlayerInGameplay(player, code);
     }
     
-    public Object[] finishGameplayByCode(String code, PlayerScoreRequestDto playerScoreRequestDto) throws Exception {
+    public Quartet<Set<PlayerGameplayEntity>, CodeGameplayEntity, String, String>
+    finishGameplayByCode(String code, PlayerScoreRequestDto playerScoreRequestDto) throws Exception {
         CodeGameplayEntity codeGameplay = gameplayUtil.getCodeGameplay(code);
         GameplayEntity gameplay = codeGameplay.getGameplay();
         
         PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
         PlayerGameplayEntity playerGameplay = gameplayUtil.getPlayerGameplay(player, gameplay);
-        
+        playerGameplay = gameplayMapper.updatePlayerGameplay(playerScoreRequestDto, playerGameplay);
+
         codeGameplay.removeOnePlayer();
-        playerGameplay.setScores(playerScoreRequestDto);
         
-        gameplay.setCodeGameplay(codeGameplay);
-        gameplay.alterPlayerGameplay(playerGameplay);
+        gameplay.setCodeGameplay(codeGameplay)
+                .updatePlayerGameplay(playerGameplay);
         
         gameplayRepository.save(gameplay);
         
-        return new Object[]{playerGameplay, codeGameplay};
+        
+        return new Quartet<>(gameplay.getPlayerGameplaySet(),
+                             codeGameplay,
+                             gameplay.getMemoryGame().getMemoryGame(),
+                             gameplay.getMemoryGame().getCreator().getUser().getUsername());
     }
     
     private PlayerGameplayEntity _addPlayerInGameplay(PlayerEntity player, String code) throws Exception {
@@ -116,12 +127,12 @@ public class GameplayService {
         
         memoryGameService.addPlayer(gameplay.getMemoryGame(), player);
         
-        gameplay.sumOnePlayer();
-        codeGameplay.sumOnePlayer();
         PlayerGameplayEntity playerGameplay = new PlayerGameplayEntity(player, gameplay);
+        codeGameplay.sumOnePlayer();
         
-        gameplay.setCodeGameplay(codeGameplay);
-        gameplay.addPlayerGameplay(playerGameplay);
+        gameplay.sumOnePlayer()
+                .setCodeGameplay(codeGameplay)
+                .addPlayerGameplay(playerGameplay);
         
         gameplayRepository.save(gameplay);
         

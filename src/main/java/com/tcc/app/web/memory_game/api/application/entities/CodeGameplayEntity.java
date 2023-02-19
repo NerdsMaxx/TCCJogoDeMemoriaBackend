@@ -3,7 +3,7 @@ package com.tcc.app.web.memory_game.api.application.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "code_gameplay")
@@ -26,22 +26,23 @@ public class CodeGameplayEntity {
     @Column(nullable = false)
     private Integer numbersPlayerMoment = 0;
     
-    private Date startDate = new Date();
-    
     @NonNull
     @OneToOne
-    @JoinColumn(name = "gameplay_id", nullable = false)
+    @JoinColumn(name = "gameplay_id", nullable = false, unique = true)
     GameplayEntity gameplay;
     
-    public void sumOnePlayer() {
-        ++numbersPlayerMoment;
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime = LocalDateTime.now().plusHours(2);
+    
+    public CodeGameplayEntity sumOnePlayer() {
+        ++ numbersPlayerMoment;
+        return this;
     }
     
-    public void removeOnePlayer() {
-        if(numbersPlayerMoment <= 0) {
-            return;
+    public CodeGameplayEntity removeOnePlayer() {
+        if (numbersPlayerMoment > 0) {
+            -- numbersPlayerMoment;
         }
-        
-        --numbersPlayerMoment;
+        return this;
     }
 }

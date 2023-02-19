@@ -6,7 +6,7 @@ import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEnt
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface UserMapper {
     
     @Mapping(source = "user.userType.type", target = "type")

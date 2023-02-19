@@ -53,31 +53,44 @@ public class MemoryGameEntity {
     @OneToMany(mappedBy = "memoryGame")
     private Set<GameplayEntity> gameplaySet = new HashSet<>();
     
-    public void addPlayer(PlayerEntity player) {
+    public MemoryGameEntity addPlayer(PlayerEntity player) {
         playerSet.add(player);
+        return this;
     }
     
-    public void addCardListFromResquestDto(Set<CardRequestDto> cardRequestDtoList, CardMapper cardMapper) {
+    public MemoryGameEntity addCardListFromResquestDto(Set<CardRequestDto> cardRequestDtoList, CardMapper cardMapper) {
         Set<CardEntity> newCardSet = cardRequestDtoList.stream()
                                                     .map(cardMapper::toCardEntity)
                                                     .collect(Collectors.toSet());
         newCardSet.forEach(card -> card.setMemoryGame(this));
-        this.cardSet = newCardSet;
+        cardSet.addAll(newCardSet);
+        return this;
     }
     
-    public void clearCardSet() {
-        cardSet.forEach(card -> card.setMemoryGame(null));
+    public MemoryGameEntity clearCardSet(Set<CardRequestDto> cardRequestDtoSet, CardMapper cardMapper) {
+        cardSet.removeIf(card -> !cardRequestDtoSet.contains(cardMapper.toCardRequestDto(card)));
+        return this;
+    }
+    
+    public MemoryGameEntity clearCardSet() {
         cardSet.clear();
+        return this;
     }
     
-    public void addSubjectListFromRequestDto(Set<String> subjectRequestDtoSet, Set<SubjectEntity> subjectFoundSet) {
+    public MemoryGameEntity addSubjectListFromRequestDto(Set<String> subjectRequestDtoSet, Set<SubjectEntity> subjectFoundSet) {
         Set<SubjectEntity> newSubjectSet = new HashSet<>(subjectFoundSet);
         newSubjectSet.addAll(subjectRequestDtoSet.stream().map(SubjectEntity::new).collect(Collectors.toSet()));
-        this.subjectSet = newSubjectSet;
+        subjectSet.addAll(newSubjectSet);
+        return this;
     }
     
-    public void clearSubjectSet() {
-        subjectSet.forEach(subject -> subject.removeMemoryGame(this));
+    public MemoryGameEntity clearSubjectSet(Set<String> subjectNameSet) {
+        subjectSet.removeIf(subject -> !subjectNameSet.contains(subject.getSubject()));
+        return this;
+    }
+    
+    public MemoryGameEntity clearSubjectSet() {
         subjectSet.clear();
+        return this;
     }
 }

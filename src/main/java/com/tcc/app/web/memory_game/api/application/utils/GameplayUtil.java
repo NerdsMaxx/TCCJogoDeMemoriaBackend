@@ -1,5 +1,6 @@
 package com.tcc.app.web.memory_game.api.application.utils;
 
+import com.tcc.app.web.memory_game.api.application.caches.CodeCache;
 import com.tcc.app.web.memory_game.api.application.entities.CodeGameplayEntity;
 import com.tcc.app.web.memory_game.api.application.entities.GameplayEntity;
 import com.tcc.app.web.memory_game.api.application.entities.PlayerEntity;
@@ -19,15 +20,18 @@ import java.util.Random;
 public class GameplayUtil {
     
     @Autowired
-    CodeGameplayRepository codeGameplayRepository;
+    private CodeGameplayRepository codeGameplayRepository;
     
     @Autowired
-    PlayerGameplayRepository playerGameplayRepository;
+    private PlayerGameplayRepository playerGameplayRepository;
+    
+    @Autowired
+    private CodeCache codeCache;
     
     public CodeGameplayEntity getCodeGameplay(String code) throws Exception {
         return codeGameplayRepository.findByCode(code)
                                      .orElseThrow(() -> new EntityNotFoundException(
-                                             "Não foi criado um gameplay!"));
+                                             "Não foi criado um gameplay ou código foi expirado!"));
     }
     
     public PlayerGameplayEntity getPlayerGameplay(PlayerEntity player, GameplayEntity gameplay) throws Exception {
@@ -53,8 +57,9 @@ public class GameplayUtil {
             }
             
             code = codeBuilder.toString();
-        } while (codeGameplayRepository.existsByCode(code));
+        } while (codeCache.contains(code));
         
+        codeCache.add(code);
         return code;
     }
 }

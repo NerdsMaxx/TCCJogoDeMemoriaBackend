@@ -1,7 +1,10 @@
 package com.tcc.app.web.memory_game.api.application.entities;
 
+import com.tcc.app.web.memory_game.api.application.dtos.requests.CardRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
 
 
 @Entity

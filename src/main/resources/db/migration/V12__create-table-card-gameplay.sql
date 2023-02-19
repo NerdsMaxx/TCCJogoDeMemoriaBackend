@@ -1,6 +1,6 @@
 CREATE TABLE card_gameplay (
     id BIGSERIAL PRIMARY KEY,
-    winner BOOLEAN NOT NULL,
+    winner BOOLEAN,
     player_gameplay_id BIGINT NOT NULL,
     card_id BIGINT NOT NULL,
     CONSTRAINT fk_player_gameplay_id

@@ -41,4 +41,8 @@ public interface SubjectRepository extends JpaRepository<SubjectEntity,Long> {
            "FROM SubjectEntity sub " +
            "WHERE sub.subject in  :subjectSet")
     Set<SubjectEntity> findBySubjectSet(Set<String> subjectSet);
+    
+    @Query("DELETE FROM SubjectEntity sub " +
+           "WHERE sub.subject in :subjectSet")
+    Set<SubjectEntity> deleteBySubjectSet(Set<String> subjectSet);
 }
