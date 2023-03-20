@@ -8,14 +8,14 @@ import java.util.Set;
 public record PlayerScoreRequestDto(@Min(0) Integer score,
                                     @NotEmpty Set<CardScoreRequestDto> cardSet) {
     
-    public Integer getNumberCardCorrect() {
+    public Integer getNumberPairCardCorrect() {
         long count = cardSet.stream().filter(cardScoreRequestDto -> cardScoreRequestDto.winner())
                             .count();
         
         return Integer.valueOf(count + "");
     }
     
-    public Integer getNumberCardWrong() {
+    public Integer getNumberPairCardWrong() {
         long count = cardSet.stream().filter(cardScoreRequestDto -> !cardScoreRequestDto.winner())
                             .count();
     

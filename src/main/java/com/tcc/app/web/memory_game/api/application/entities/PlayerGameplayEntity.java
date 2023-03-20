@@ -15,24 +15,30 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"id", "score", "numberCardCorrect", "numberCardWrong", "cardGameplaySet"})
+@EqualsAndHashCode(exclude = {"id", "score", "numberPairCardCorrect", "numberPairCardWrong", "cardGameplaySet"})
 public class PlayerGameplayEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     @Column(nullable = false)
     private Integer score = 0;
+    
     @Column(name = "correct", nullable = false)
-    private Integer numberCardCorrect = 0;
+    private Integer numberPairCardCorrect = 0;
+    
     @Column(name = "wrong", nullable = false)
-    private Integer numberCardWrong = 0;
+    private Integer numberPairCardWrong = 0;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerEntity player;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gameplay_id", nullable = false)
     private GameplayEntity gameplay;
+    
     @OneToMany(mappedBy = "playerGameplay", cascade = CascadeType.ALL)
     private Set<CardGameplayEntity> cardGameplaySet = new HashSet<>();
     
@@ -45,6 +51,7 @@ public class PlayerGameplayEntity {
     public CardGameplayEntity findCardGameplay(CardScoreRequestDto cardScoreRequestDto) throws Exception {
         return cardGameplaySet.stream().filter(cardGameplay -> cardGameplay.equalsCardId(cardScoreRequestDto.id()))
                               .findFirst()
-                              .orElseThrow(() -> new EntityNotFoundException("Carta não encontrado pela informações fornecidas!"));
+                              .orElseThrow(() -> new EntityNotFoundException(
+                                      "Carta não encontrado pela informações fornecidas!"));
     }
 }

@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class MemoryGameService {
     
+    
+    @Autowired
+    private CreatorService creatorService;
+    
     @Autowired
     private PlayerService playerService;
     
@@ -43,15 +47,49 @@ public class MemoryGameService {
     @Autowired
     private AuthenticatedUserUtil authenticatedUserUtil;
     
-    public Page<MemoryGameEntity> findAllByCreator(Pageable pageable) throws Exception {
-        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+    public Page<MemoryGameEntity> findAll(Pageable pageable) throws Exception {
         
-        return memoryGameRepository.findAllByCreator(pageable, creator);
+        if (authenticatedUserUtil.isCreator()) {
+            CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+            return memoryGameRepository.findAllByCreator(pageable, creator);
+        }
+        
+        if (authenticatedUserUtil.isPlayer()) {
+            PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
+            return memoryGameRepository.findAllByPlayer(pageable, player);
+        }
+        
+        return null;
+    }
+    
+    public Page<MemoryGameEntity> findByMemoryGameNameAndSubject(Pageable pageable, String search) throws Exception {
+        if(authenticatedUserUtil.isCreator()) {
+            CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+            return memoryGameRepository.findAllBySubjectOrMemoryGameName(pageable, creator, search, search);
+        }
+        
+        if(authenticatedUserUtil.isPlayer()) {
+            PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
+            return memoryGameRepository.findAllBySubjectOrMemoryGameName(pageable, player, search, search);
+        }
+        
+        return null;
     }
     
     public MemoryGameEntity findByCreatorAndMemoryGame(CreatorEntity creator, String memoryGameName) throws Exception {
         return memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
                                    .orElseThrow(() -> new EntityNotFoundException("Não tem este jogo de memória!"));
+    }
+    
+    public MemoryGameEntity findByCreatorAndMemoryGame(String memoryGameName) throws Exception {
+        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+        
+        return findByCreatorAndMemoryGame(creator, memoryGameName);
+    }
+    
+    public MemoryGameEntity findByCreatorAndMemoryGame(String memoryGameName, String creatorUsername) throws Exception {
+        return memoryGameRepository.findByCreatorUsernameAndMemoryGame(creatorUsername, memoryGameName)
+                                   .orElseThrow(() -> new EntityNotFoundException("Jogo de memória não encontrada!"));
     }
     
     public CardEntity findCardById(Long id) throws Exception {
@@ -145,12 +183,11 @@ public class MemoryGameService {
     public void _deleteAllSubjectNotUsed(MemoryGameEntity memoryGame, Set<String> subjectNameSet) {
         Set<SubjectEntity> subjectSet;
         
-        if(subjectNameSet != null && !subjectNameSet.isEmpty()) {
+        if (subjectNameSet != null && ! subjectNameSet.isEmpty()) {
             subjectSet = memoryGame.getSubjectSet().stream()
-                                   .filter(subject -> !subjectNameSet.contains(subject.getSubject()))
+                                   .filter(subject -> ! subjectNameSet.contains(subject.getSubject()))
                                    .collect(Collectors.toSet());
-        }
-        else {
+        } else {
             subjectSet = new HashSet<>(memoryGame.getSubjectSet());
         }
         

@@ -21,7 +21,7 @@ public interface PlayerGameplayRepository extends JpaRepository<PlayerGameplayEn
            "FROM PlayerGameplayEntity plgm " +
            "JOIN plgm.gameplay gm " +
            "WHERE gm = :gameplay " +
-           "AND (plgm.numberCardCorrect > 0 " +
-           "OR plgm.numberCardWrong > 0)")
+           "AND (plgm.numberPairCardCorrect > 0 " +
+           "OR plgm.numberPairCardWrong > 0)")
     Set<PlayerGameplayEntity> findAllWithScoresByGameplay(GameplayEntity gameplay);
 }

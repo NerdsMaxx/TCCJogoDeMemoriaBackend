@@ -14,8 +14,8 @@ public interface CreatorRepository extends JpaRepository<CreatorEntity,Long> {
     Optional<CreatorEntity> findByUser(UserEntity user);
     
     @Query("SELECT cr " +
-           "FROM CreatorEntity cr " +
-           "JOIN cr.user us " +
+           "FROM UserEntity us " +
+           "JOIN us.creator cr " +
            "WHERE us.username = :username")
     Optional<CreatorEntity> findByUsername(String username);
 }

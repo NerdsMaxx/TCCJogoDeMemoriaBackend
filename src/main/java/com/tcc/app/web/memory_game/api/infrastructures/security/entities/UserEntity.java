@@ -40,10 +40,10 @@ public class UserEntity implements UserDetails {
     @JoinColumn(name = "user_type_id")
     private UserTypeEntity userType;
     
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user")
     private PlayerEntity player;
     
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user")
     private CreatorEntity creator;
     
     public boolean isCreator() {

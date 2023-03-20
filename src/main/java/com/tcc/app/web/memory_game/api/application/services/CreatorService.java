@@ -3,6 +3,7 @@ package com.tcc.app.web.memory_game.api.application.services;
 import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
 import com.tcc.app.web.memory_game.api.application.repositories.CreatorRepository;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class CreatorService {
     
     @Autowired
     private CreatorRepository creatorRepository;
+    
     
     public CreatorEntity save(UserEntity user) {
         return creatorRepository.save(new CreatorEntity(user));
@@ -31,6 +33,7 @@ public class CreatorService {
     }
     
     public CreatorEntity findByUsername(String username) throws Exception {
+        
         return creatorRepository.findByUsername(username)
                                 .orElseThrow(() -> new EntityNotFoundException("Criador não encontrado!"));
     }

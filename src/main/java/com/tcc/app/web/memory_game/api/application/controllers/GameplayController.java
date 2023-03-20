@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping("/gameplay")
 @CrossOrigin("*")
@@ -47,9 +49,29 @@ public class GameplayController {
                                          @Valid PlayerScoreRequestDto playerScoreRequestDto) throws Exception {
         var result = gameplayService.finishGameplayByCode(code, playerScoreRequestDto);
         
-        return ResponseEntity.ok(gameplayMapper.toGameplayFinishedDtoList(result.v1(),
-                                                                          result.v2(),
-                                                                          result.v3(),
-                                                                          result.v4()));
+        return ResponseEntity.ok(gameplayMapper.toGameplayResultDto(result.v1(),
+                                                                    result.v2(),
+                                                                    result.v3(),
+                                                                    result.v4()));
+    }
+    
+    
+    @GetMapping("/pontuacoes/{code}")
+    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
+    public ResponseEntity getGameplayScores(@NotBlank @PathVariable("code") String code) throws Exception {
+        var result = gameplayService.getGameplayScoresByCode(code);
+    
+        return ResponseEntity.ok(gameplayMapper.toGameplayResultDto(result.v1(),
+                                                                    result.v2(),
+                                                                    result.v3(),
+                                                                    result.v4()));
+    }
+    
+    @GetMapping("/codigos")
+    @PreAuthorize("hasRole('ROLE_CRIADOR')")
+    public ResponseEntity getGameplayScores() throws Exception {
+        Set<CodeGameplayEntity> codeGameplaySet = gameplayService.getCodeSet();
+        
+        return ResponseEntity.ok(gameplayMapper.toCodesResponseDto(codeGameplaySet));
     }
 }

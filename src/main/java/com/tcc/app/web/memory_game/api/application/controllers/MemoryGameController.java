@@ -1,12 +1,13 @@
 package com.tcc.app.web.memory_game.api.application.controllers;
 
+import com.tcc.app.web.memory_game.api.application.dtos.requests.MemoryGameRequestDto;
+import com.tcc.app.web.memory_game.api.application.dtos.requests.PlayerMemoryGameRequestDto;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.mappers.MemoryGameMapper;
 import com.tcc.app.web.memory_game.api.application.services.MemoryGameService;
-import com.tcc.app.web.memory_game.api.application.dtos.requests.MemoryGameRequestDto;
-import com.tcc.app.web.memory_game.api.application.dtos.requests.PlayerMemoryGameRequestDto;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,17 +26,47 @@ public class MemoryGameController {
     private MemoryGameMapper memoryGameMapper;
     
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_CRIADOR')")
-    public ResponseEntity getAllMemoryGamesByCreator(Pageable pageable) throws Exception {
-        memoryGameService.findAllByCreator(pageable)
-                         .map(memoryGameMapper::toMemoryGameResponseDto);
+    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
+    public ResponseEntity getAllMemoryGame(Pageable pageable) throws Exception {
+        var result = memoryGameService.findAll(pageable)
+                                      .map(memoryGameMapper::toMemoryGameResponseDto);
         
-        return ResponseEntity.ok("Jogador foi adicionado com sucesso!");
+        return ResponseEntity.ok(result);
+    }
+    
+    @GetMapping("/{memoryGameName}")
+    @PreAuthorize("hasRole('ROLE_CRIADOR')")
+    public ResponseEntity getCardsByCreatorAndMemoryGame(
+            @PathVariable("memoryGameName") String memoryGameName) throws Exception {
+        MemoryGameEntity memoryGame = memoryGameService.findByCreatorAndMemoryGame(memoryGameName);
+        
+        return ResponseEntity.ok(memoryGameMapper.toMemoryGameCardsResponseDto(memoryGame));
+    }
+    
+    @GetMapping("/{memoryGameName}/{creatorUsername}")
+    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
+    public ResponseEntity getCardsByCreatorAndMemoryGame(
+            @PathVariable("memoryGameName") String memoryGameName,
+            @PathVariable("creatorUsername") String creatorUsername) throws Exception {
+        MemoryGameEntity memoryGame = memoryGameService.findByCreatorAndMemoryGame(memoryGameName, creatorUsername);
+        
+        return ResponseEntity.ok(memoryGameMapper.toMemoryGameCardsResponseDto(memoryGame));
+    }
+    
+    @GetMapping("/pesquisar/{search}")
+    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
+    public ResponseEntity getMemoryGamesByMemoryGameNameAndSubject(
+            @PathVariable("search") String search,
+            Pageable pageable) throws Exception {
+        Page<MemoryGameEntity> memoryGamePage = memoryGameService.findByMemoryGameNameAndSubject(pageable, search);
+        
+        return ResponseEntity.ok(memoryGamePage.map(memoryGameMapper::toMemoryGameResponseDto));
     }
     
     @PostMapping("/jogador")
     @PreAuthorize("hasRole('ROLE_CRIADOR')")
-    public ResponseEntity addPlayerInMemoryGame(@RequestBody @Valid PlayerMemoryGameRequestDto playerMemoryGameRequestDto) throws Exception {
+    public ResponseEntity addPlayerInMemoryGame(
+            @RequestBody @Valid PlayerMemoryGameRequestDto playerMemoryGameRequestDto) throws Exception {
         String result = memoryGameService.addPlayer(playerMemoryGameRequestDto);
         
         return ResponseEntity.ok(result);
@@ -56,9 +87,9 @@ public class MemoryGameController {
                              .body(memoryGameMapper.toMemoryGameResponseDto(memoryGame));
     }
     
-    @PutMapping("/{memoryGame}")
+    @PutMapping("/{memoryGameName}")
     @PreAuthorize("hasRole('ROLE_CRIADOR')")
-    public ResponseEntity updateMemoryGame(@PathVariable(value = "memoryGame") String memoryGameName,
+    public ResponseEntity updateMemoryGame(@PathVariable(value = "memoryGameName") String memoryGameName,
                                            @RequestBody MemoryGameRequestDto memoryGameRequestDto) throws Exception {
         MemoryGameEntity memoryGame = memoryGameService.update(memoryGameName, memoryGameRequestDto);
         

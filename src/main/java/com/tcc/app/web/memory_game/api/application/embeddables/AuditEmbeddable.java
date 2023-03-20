@@ -7,19 +7,20 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
 @Embeddable
 public class AuditEmbeddable {
     @Column(nullable = false)
-    private Date createdOn;
+    private LocalDateTime createdOn;
     
     @Column(nullable = false)
     private Long createdBy;
     
     @Column(nullable = false)
-    private Date updatedOn;
+    private LocalDateTime updatedOn;
     
     @Column(nullable = false)
     private Long updateBy;
@@ -34,11 +35,11 @@ public class AuditEmbeddable {
     
     @PrePersist
     public void prePersist() {
-        createdOn = new Date();
+        createdOn = LocalDateTime.now();
     }
     
     @PreUpdate
     public void preUpdate() {
-        updatedOn = new Date();
+        updatedOn = LocalDateTime.now();
     }
 }

@@ -1,6 +1,7 @@
 package com.tcc.app.web.memory_game.api.application.repositories;
 
 import com.tcc.app.web.memory_game.api.application.entities.CodeGameplayEntity;
+import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
 import com.tcc.app.web.memory_game.api.application.entities.GameplayEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,6 +23,15 @@ public interface CodeGameplayRepository extends JpaRepository<CodeGameplayEntity
     Optional<GameplayEntity> findGameplayByCode(String code);
     
     boolean existsByCode(String code);
+    
+    
+    @Query("SELECT code " +
+           "FROM CodeGameplayEntity code " +
+           "JOIN code.gameplay gply " +
+           "JOIN gply.memoryGame mg " +
+           "JOIN mg.creator cr " +
+           "WHERE cr = :creator ")
+    Set<CodeGameplayEntity> findCodeSetByCreator(CreatorEntity creator);
     
     @Modifying
     @Query("DELETE FROM " +

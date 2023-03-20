@@ -58,8 +58,8 @@ public class MemoryGameEntity {
         return this;
     }
     
-    public MemoryGameEntity addCardListFromResquestDto(Set<CardRequestDto> cardRequestDtoList, CardMapper cardMapper) {
-        Set<CardEntity> newCardSet = cardRequestDtoList.stream()
+    public MemoryGameEntity addCardListFromResquestDto(Set<CardRequestDto> cardRequestDtoSet, CardMapper cardMapper) {
+        Set<CardEntity> newCardSet = cardRequestDtoSet.stream()
                                                     .map(cardMapper::toCardEntity)
                                                     .collect(Collectors.toSet());
         newCardSet.forEach(card -> card.setMemoryGame(this));

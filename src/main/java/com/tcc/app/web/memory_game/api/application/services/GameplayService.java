@@ -106,11 +106,32 @@ public class GameplayService {
         
         gameplayRepository.save(gameplay);
         
+        String memoryGameName = gameplay.getMemoryGame().getMemoryGame();
+        String creatorName = gameplay.getMemoryGame().getCreator().getUser().getUsername();
         
         return new Quartet<>(gameplay.getPlayerGameplaySet(),
                              codeGameplay,
-                             gameplay.getMemoryGame().getMemoryGame(),
-                             gameplay.getMemoryGame().getCreator().getUser().getUsername());
+                             memoryGameName,
+                             creatorName);
+    }
+    
+    public Quartet<Set<PlayerGameplayEntity>, CodeGameplayEntity, String, String> getGameplayScoresByCode(String code) throws Exception {
+        CodeGameplayEntity codeGameplay = gameplayUtil.getCodeGameplay(code);
+        GameplayEntity gameplay = codeGameplay.getGameplay();
+    
+        String memoryGameName = gameplay.getMemoryGame().getMemoryGame();
+        String creatorUsername = gameplay.getMemoryGame().getCreator().getUser().getUsername();
+    
+        return new Quartet<>(gameplay.getPlayerGameplaySet(),
+                             codeGameplay,
+                             memoryGameName,
+                             creatorUsername);
+    }
+    
+    public Set<CodeGameplayEntity> getCodeSet() throws Exception {
+        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+        
+        return codeGameplayRepository.findCodeSetByCreator(creator);
     }
     
     private PlayerGameplayEntity _addPlayerInGameplay(PlayerEntity player, String code) throws Exception {

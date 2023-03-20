@@ -4,10 +4,10 @@ import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEn
 
 public final class UserTypeUtilStatic {
     
-    private UserTypeUtilStatic(){}
+    private UserTypeUtilStatic() {}
     
     public static UserTypeEnum getType(String type) {
-        return switch ( type.toLowerCase() ){
+        return switch (type.toLowerCase()) {
             case "prof", "professor", "criador" -> UserTypeEnum.CRIADOR;
             case "aluno", "estudante", "jogador" -> UserTypeEnum.JOGADOR;
             default -> null;

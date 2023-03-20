@@ -36,5 +36,4 @@ public class PlayerEntity {
         memoryGameSet.add(memoryGame);
         return this;
     }
-    
 }
