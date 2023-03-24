@@ -1,5 +1,6 @@
 CREATE TABLE gameplay (
     id BIGSERIAL PRIMARY KEY,
+    alone BOOLEAN NOT NULL,
     numbers_player INT NOT NULL,
     start_time TIMESTAMP NOT NULL,
     memory_game_id BIGINT NOT NULL,

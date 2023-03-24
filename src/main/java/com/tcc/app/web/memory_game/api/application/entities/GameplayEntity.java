@@ -25,6 +25,9 @@ public class GameplayEntity {
     @Column
     private Integer numbersPlayer = 0;
     
+    @Column(nullable = false)
+    private Boolean alone = false;
+    
     @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memory_game_id")

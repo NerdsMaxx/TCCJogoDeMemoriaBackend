@@ -3,6 +3,7 @@ package com.tcc.app.web.memory_game.api.infrastructures.security.services;
 import com.electronwill.nightconfig.core.conversion.InvalidValueException;
 import com.tcc.app.web.memory_game.api.application.services.CreatorService;
 import com.tcc.app.web.memory_game.api.application.services.PlayerService;
+import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.ResetPasswordRequestDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserRequestDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserTypeEntity;
@@ -77,6 +78,13 @@ public class UserService {
         playerService.saveByUser(user);
         
         return user;
+    }
+    
+    public UserEntity changePassword(ResetPasswordRequestDto resetPasswordRequestDto) {
+        UserEntity user = userRepository.findByUsernameOrEmail(resetPasswordRequestDto.username());
+        user.setPassword(passwordEncoder.encode(resetPasswordRequestDto.newPassword()));
+        
+        return userRepository.save(user);
     }
     
     public UserEntity getCurrentUser() throws Exception {

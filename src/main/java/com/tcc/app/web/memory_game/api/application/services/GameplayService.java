@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -68,9 +69,10 @@ public class GameplayService {
         GameplayEntity gameplay = new GameplayEntity(memoryGame);
         CodeGameplayEntity codeGameplay = new CodeGameplayEntity(gameplayUtil.generateCode(), gameplay);
         
-        if (authenticatedUserUtil.isPlayer()) {
-            _addPlayerInGameplay(authenticatedUserUtil.getCurrentPlayer(), gameplay, codeGameplay);
-            return codeGameplay;
+        if (gameplayRequestDto.alone()) {
+            gameplay.setAlone(true);
+//            _addPlayerInGameplay(authenticatedUserUtil.getCurrentPlayer(), gameplay, codeGameplay);
+//            return codeGameplay;
         }
         
         gameplay.setCodeGameplay(codeGameplay);

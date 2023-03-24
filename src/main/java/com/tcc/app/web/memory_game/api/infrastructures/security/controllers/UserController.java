@@ -1,12 +1,10 @@
 package com.tcc.app.web.memory_game.api.infrastructures.security.controllers;
 
+import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.ResetPasswordRequestDto;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserRequestDto;
@@ -34,5 +32,12 @@ public class UserController {
 				var uri = uriBuilder.path( "/usuario/{id}" ).buildAndExpand( user.getId() ).toUri();
 
 				return ResponseEntity.created( uri ).body( userMapper.toUserResponseDto( user ) );
+		}
+		
+		@PutMapping("/mudar-senha")
+		public ResponseEntity changePassword(@RequestBody @Valid ResetPasswordRequestDto changePasswordRequestDto) {
+			UserEntity user = userService.changePassword(changePasswordRequestDto);
+			
+			return ResponseEntity.ok(userMapper.toUserResponseDto(user));
 		}
 }

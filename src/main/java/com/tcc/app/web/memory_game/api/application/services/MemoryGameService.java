@@ -11,6 +11,7 @@ import com.tcc.app.web.memory_game.api.application.repositories.SubjectRepositor
 import com.tcc.app.web.memory_game.api.infrastructures.security.utils.AuthenticatedUserUtil;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,33 +48,33 @@ public class MemoryGameService {
     @Autowired
     private AuthenticatedUserUtil authenticatedUserUtil;
     
-    public Page<MemoryGameEntity> findAll(Pageable pageable) throws Exception {
+    public Set<MemoryGameEntity> findAll() throws Exception {
         
         if (authenticatedUserUtil.isCreator()) {
             CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
-            return memoryGameRepository.findAllByCreator(pageable, creator);
+            return memoryGameRepository.findAllByCreator(creator);
         }
         
         if (authenticatedUserUtil.isPlayer()) {
             PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
-            return memoryGameRepository.findAllByPlayer(pageable, player);
+            return memoryGameRepository.findAllByPlayer( player);
         }
         
-        return null;
+        return Collections.emptySet();
     }
     
-    public Page<MemoryGameEntity> findByMemoryGameNameAndSubject(Pageable pageable, String search) throws Exception {
+    public Set<MemoryGameEntity> findByMemoryGameNameAndSubject(String search) throws Exception {
         if(authenticatedUserUtil.isCreator()) {
             CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
-            return memoryGameRepository.findAllBySubjectOrMemoryGameName(pageable, creator, search, search);
+            return memoryGameRepository.findAllBySubjectOrMemoryGameName( creator, search, search);
         }
         
         if(authenticatedUserUtil.isPlayer()) {
             PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
-            return memoryGameRepository.findAllBySubjectOrMemoryGameName(pageable, player, search, search);
+            return memoryGameRepository.findAllBySubjectOrMemoryGameName(player, search, search);
         }
         
-        return null;
+        return Collections.emptySet();
     }
     
     public MemoryGameEntity findByCreatorAndMemoryGame(CreatorEntity creator, String memoryGameName) throws Exception {
@@ -130,8 +131,8 @@ public class MemoryGameService {
         
         Set<CardRequestDto> cardSet = memoryGameRequestDto.cardSet();
         if (cardSet != null) {
-            memoryGame.clearCardSet(cardSet, cardMapper);
-            memoryGame.addCardListFromResquestDto(cardSet, cardMapper);
+            memoryGame.clearCardSet(cardSet, cardMapper)
+                      .addCardListFromResquestDto(cardSet, cardMapper);
         }
         
         Set<String> subjectSet = memoryGameRequestDto.subjectSet();

@@ -27,10 +27,12 @@ public interface CodeGameplayRepository extends JpaRepository<CodeGameplayEntity
     
     @Query("SELECT code " +
            "FROM CodeGameplayEntity code " +
-           "JOIN code.gameplay gply " +
-           "JOIN gply.memoryGame mg " +
-           "JOIN mg.creator cr " +
-           "WHERE cr = :creator ")
+           "JOIN FETCH code.gameplay gply " +
+           "JOIN FETCH gply.memoryGame mg " +
+           "JOIN FETCH mg.creator cr " +
+           "JOIN FETCH cr.user us " +
+           "WHERE cr = :creator " +
+           "AND gply.alone = false")
     Set<CodeGameplayEntity> findCodeSetByCreator(CreatorEntity creator);
     
     @Modifying

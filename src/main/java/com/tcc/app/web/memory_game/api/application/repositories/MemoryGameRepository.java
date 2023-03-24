@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Long> {
@@ -25,7 +26,7 @@ public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Lon
     )
     Optional<MemoryGameEntity> findByCreatorUsernameAndMemoryGame(String creatorUsername, String memoryGame);
     
-    Page<MemoryGameEntity> findAllByCreator(Pageable pageable, CreatorEntity creator);
+    Set<MemoryGameEntity> findAllByCreator(CreatorEntity creator);
     
     boolean existsByCreatorAndMemoryGame(CreatorEntity creator, String memoryGame);
     
@@ -34,7 +35,7 @@ public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Lon
            "JOIN plg.gameplay gm " +
            "JOIN gm.memoryGame mg " +
            "WHERE plg.player = :player")
-    Page<MemoryGameEntity> findAllByPlayer(Pageable pageable, PlayerEntity player);
+    Set<MemoryGameEntity> findAllByPlayer(PlayerEntity player);
     
     @Query("SELECT DISTINCT mg " +
            "FROM MemoryGameEntity mg " +
@@ -43,7 +44,7 @@ public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Lon
            "WHERE cr = :creator " +
            "AND (sub.subject LIKE :subject% " +
            "OR mg.memoryGame LIKE :memoryGameName%) ")
-    Page<MemoryGameEntity> findAllBySubjectOrMemoryGameName(Pageable pageable, CreatorEntity creator, String subject, String memoryGameName);
+    Set<MemoryGameEntity> findAllBySubjectOrMemoryGameName(CreatorEntity creator, String subject, String memoryGameName);
     
     @Query("SELECT DISTINCT mg " +
            "FROM PlayerGameplayEntity plg " +
@@ -53,5 +54,5 @@ public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Lon
            "WHERE plg.player = :player " +
            "AND (sub.subject LIKE :subject% " +
            "OR mg.memoryGame LIKE :memoryGameName%) ")
-    Page<MemoryGameEntity> findAllBySubjectOrMemoryGameName(Pageable pageable, PlayerEntity player, String subject, String memoryGameName);
+    Set<MemoryGameEntity> findAllBySubjectOrMemoryGameName(PlayerEntity player, String subject, String memoryGameName);
 }

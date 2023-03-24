@@ -7,12 +7,14 @@ import com.tcc.app.web.memory_game.api.application.mappers.MemoryGameMapper;
 import com.tcc.app.web.memory_game.api.application.services.MemoryGameService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/jogo-de-memoria")
@@ -27,11 +29,13 @@ public class MemoryGameController {
     
     @GetMapping
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
-    public ResponseEntity getAllMemoryGame(Pageable pageable) throws Exception {
-        var result = memoryGameService.findAll(pageable)
-                                      .map(memoryGameMapper::toMemoryGameResponseDto);
+    public ResponseEntity getAllMemoryGame() throws Exception {
+        Set<MemoryGameEntity> memoryGameSet = memoryGameService.findAll();
         
-        return ResponseEntity.ok(result);
+        
+        return ResponseEntity.ok(memoryGameSet.stream()
+                                              .map(memoryGameMapper::toMemoryGameResponseDto)
+                                              .collect(Collectors.toSet()));
     }
     
     @GetMapping("/{memoryGameName}")
@@ -56,11 +60,12 @@ public class MemoryGameController {
     @GetMapping("/pesquisar/{search}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity getMemoryGamesByMemoryGameNameAndSubject(
-            @PathVariable("search") String search,
-            Pageable pageable) throws Exception {
-        Page<MemoryGameEntity> memoryGamePage = memoryGameService.findByMemoryGameNameAndSubject(pageable, search);
+            @PathVariable("search") String search) throws Exception {
+        Set<MemoryGameEntity> memoryGameSet = memoryGameService.findByMemoryGameNameAndSubject(search);
         
-        return ResponseEntity.ok(memoryGamePage.map(memoryGameMapper::toMemoryGameResponseDto));
+        return ResponseEntity.ok(memoryGameSet.stream()
+                                               .map(memoryGameMapper::toMemoryGameResponseDto)
+                                               .collect(Collectors.toSet()));
     }
     
     @PostMapping("/jogador")

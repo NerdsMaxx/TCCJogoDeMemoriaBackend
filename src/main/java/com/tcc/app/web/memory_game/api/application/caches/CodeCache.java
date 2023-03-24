@@ -11,9 +11,9 @@ import java.util.List;
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public final class CodeCache {
     
-    private List<String> codeCache = new LinkedList<>();
+    private final List<String> codeCache = new LinkedList<>();
     
-    private int limit = 50;
+    private final int limit = 50;
     
     public CodeCache add(String code) {
         if(codeCache.contains(code)) return this;

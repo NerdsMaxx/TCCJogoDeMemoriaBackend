@@ -36,8 +36,15 @@ public interface GameplayMapper {
                                                   String creator);
     
     default CodesResponseDto toCodesResponseDto(Set<CodeGameplayEntity> codeGameplaySet) {
-        Set<String> codes = codeGameplaySet.stream().map(CodeGameplayEntity::getCode)
-                                           .collect(Collectors.toSet());
+        Set<MemoryGameWithCodeResponseDto> codes = codeGameplaySet.stream()
+                                                                  .map(code -> new MemoryGameWithCodeResponseDto(
+                                                                          code.getGameplay().getMemoryGame()
+                                                                              .getCreator().getUser().getUsername(),
+                                                                          code.getGameplay().getMemoryGame().getMemoryGame(),
+                                                                          code.getCode())
+                                                                  )
+                                                                  .collect(Collectors.toSet());
+        
         
         return new CodesResponseDto(codes);
     }
