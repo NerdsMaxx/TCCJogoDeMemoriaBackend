@@ -15,7 +15,8 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"id", "score", "numberPairCardCorrect", "numberPairCardWrong", "cardGameplaySet"})
+//@EqualsAndHashCode(exclude = {"id", "score", "numberPairCardCorrect", "numberPairCardWrong", "cardGameplaySet"})
+@EqualsAndHashCode(exclude = {"id", "score"})
 public class PlayerGameplayEntity {
     
     @Id
@@ -25,11 +26,11 @@ public class PlayerGameplayEntity {
     @Column(nullable = false)
     private Integer score = 0;
     
-    @Column(name = "correct", nullable = false)
-    private Integer numberPairCardCorrect = 0;
-    
-    @Column(name = "wrong", nullable = false)
-    private Integer numberPairCardWrong = 0;
+//    @Column(name = "correct", nullable = false)
+//    private Integer numberPairCardCorrect = 0;
+//
+//    @Column(name = "wrong", nullable = false)
+//    private Integer numberPairCardWrong = 0;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false)
@@ -39,19 +40,19 @@ public class PlayerGameplayEntity {
     @JoinColumn(name = "gameplay_id", nullable = false)
     private GameplayEntity gameplay;
     
-    @OneToMany(mappedBy = "playerGameplay", cascade = CascadeType.ALL)
-    private Set<CardGameplayEntity> cardGameplaySet = new HashSet<>();
+//    @OneToMany(mappedBy = "playerGameplay", cascade = CascadeType.ALL)
+//    private Set<CardGameplayEntity> cardGameplaySet = new HashSet<>();
     
     public PlayerGameplayEntity(PlayerEntity player, GameplayEntity gameplay) {
         this.player = player;
         this.gameplay = gameplay;
-        this.cardGameplaySet.addAll(gameplay.generateCardGameplaySet(this));
+        //this.cardGameplaySet.addAll(gameplay.generateCardGameplaySet(this));
     }
     
-    public CardGameplayEntity findCardGameplay(CardScoreRequestDto cardScoreRequestDto) throws Exception {
-        return cardGameplaySet.stream().filter(cardGameplay -> cardGameplay.equalsCardId(cardScoreRequestDto.id()))
-                              .findFirst()
-                              .orElseThrow(() -> new EntityNotFoundException(
-                                      "Carta não encontrado pela informações fornecidas!"));
-    }
+//    public CardGameplayEntity findCardGameplay(CardScoreRequestDto cardScoreRequestDto) throws Exception {
+//        return cardGameplaySet.stream().filter(cardGameplay -> cardGameplay.equalsCardId(cardScoreRequestDto.id()))
+//                              .findFirst()
+//                              .orElseThrow(() -> new EntityNotFoundException(
+//                                      "Carta não encontrado pela informações fornecidas!"));
+//    }
 }

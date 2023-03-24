@@ -52,7 +52,11 @@ public interface GameplayMapper {
     PlayerGameplayEntity updatePlayerGameplay(PlayerScoreRequestDto playerScoreRequestDto,
                                               @MappingTarget PlayerGameplayEntity playerGameplay) throws Exception;
     
-    @Mapping(target = "id", ignore = true)
-    CardGameplayEntity updateCardGameplay(CardScoreRequestDto cardScoreRequestDto,
-                                          @MappingTarget CardGameplayEntity cardGameplay) throws Exception;
+    @Mapping(source = "gameplay.memoryGame.creator.user.username", target = "creator")
+    @Mapping(source = "gameplay.memoryGame.memoryGame", target = "memoryGame")
+    PreviousGameplaysResponseDto toPreviousGameplaysResponseDTO(PlayerGameplayEntity playerGameplay);
+    
+//    @Mapping(target = "id", ignore = true)
+//    CardGameplayEntity updateCardGameplay(CardScoreRequestDto cardScoreRequestDto,
+//                                          @MappingTarget CardGameplayEntity cardGameplay) throws Exception;
 }

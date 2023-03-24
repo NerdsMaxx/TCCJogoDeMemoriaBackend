@@ -59,9 +59,9 @@ public class GameplayEntity {
         return this;
     }
     
-    public Set<CardGameplayEntity> generateCardGameplaySet(PlayerGameplayEntity playerGameplay) {
-        return memoryGame.getCardSet().stream()
-                         .map(card -> new CardGameplayEntity(playerGameplay, card))
-                         .collect(Collectors.toSet());
-    }
+//    public Set<CardGameplayEntity> generateCardGameplaySet(PlayerGameplayEntity playerGameplay) {
+//        return memoryGame.getCardSet().stream()
+//                         .map(card -> new CardGameplayEntity(playerGameplay, card))
+//                         .collect(Collectors.toSet());
+//    }
 }

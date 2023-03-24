@@ -17,11 +17,23 @@ public interface PlayerGameplayRepository extends JpaRepository<PlayerGameplayEn
     
     boolean existsByPlayerAndGameplay(PlayerEntity player, GameplayEntity gameplay);
     
+//    @Query("SELECT plgm " +
+//           "FROM PlayerGameplayEntity plgm " +
+//           "JOIN plgm.gameplay gm " +
+//           "WHERE gm = :gameplay " +
+//           "AND (plgm.numberPairCardCorrect > 0 " +
+//           "OR plgm.numberPairCardWrong > 0)")
+//    Set<PlayerGameplayEntity> findAllWithScoresByGameplay(GameplayEntity gameplay);
+    
     @Query("SELECT plgm " +
            "FROM PlayerGameplayEntity plgm " +
            "JOIN plgm.gameplay gm " +
-           "WHERE gm = :gameplay " +
-           "AND (plgm.numberPairCardCorrect > 0 " +
-           "OR plgm.numberPairCardWrong > 0)")
+           "WHERE gm = :gameplay")
     Set<PlayerGameplayEntity> findAllWithScoresByGameplay(GameplayEntity gameplay);
+    
+    @Query("SELECT plgm " +
+           "FROM PlayerGameplayEntity plgm " +
+           "JOIN plgm.player pl " +
+           "WHERE pl = :player")
+    Set<PlayerGameplayEntity> findAllByPlayer(PlayerEntity player);
 }

@@ -6,6 +6,7 @@ import com.tcc.app.web.memory_game.api.application.entities.CodeGameplayEntity;
 import com.tcc.app.web.memory_game.api.application.entities.PlayerGameplayEntity;
 import com.tcc.app.web.memory_game.api.application.mappers.GameplayMapper;
 import com.tcc.app.web.memory_game.api.application.services.GameplayService;
+import com.tcc.app.web.memory_game.api.custom.Pair;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/gameplay")
@@ -73,5 +75,15 @@ public class GameplayController {
         Set<CodeGameplayEntity> codeGameplaySet = gameplayService.getCodeSet();
         
         return ResponseEntity.ok(gameplayMapper.toCodesResponseDto(codeGameplaySet));
+    }
+    
+    @GetMapping("/partidas-anteriores")
+    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
+    public ResponseEntity getPreviousGameplays() throws Exception {
+        Set<PlayerGameplayEntity> playerGameplaySet = gameplayService.getPreviousGameplays();
+        
+        return ResponseEntity.ok(playerGameplaySet.stream()
+                                                  .map(gameplayMapper::toPreviousGameplaysResponseDTO)
+                                                  .collect(Collectors.toSet()));
     }
 }

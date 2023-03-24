@@ -24,20 +24,20 @@ public abstract class GameplayMapperDecorator implements GameplayMapper {
                                                      PlayerGameplayEntity playerGameplay) throws Exception {
         playerGameplay = delegate.updatePlayerGameplay(playerScoreRequestDto, playerGameplay);
         
-        for (CardScoreRequestDto cardScoreRequestDto : playerScoreRequestDto.cardSet()) {
-            CardGameplayEntity cardGameplay = playerGameplay.findCardGameplay(cardScoreRequestDto);
-            updateCardGameplay(cardScoreRequestDto, cardGameplay);
-        }
+//        for (CardScoreRequestDto cardScoreRequestDto : playerScoreRequestDto.cardSet()) {
+//            CardGameplayEntity cardGameplay = playerGameplay.findCardGameplay(cardScoreRequestDto);
+//            updateCardGameplay(cardScoreRequestDto, cardGameplay);
+//        }
         
         return playerGameplay;
     }
     
-    @Override
-    public CardGameplayEntity updateCardGameplay(CardScoreRequestDto cardScoreRequestDto,
-                                                 @MappingTarget CardGameplayEntity cardGameplay) throws Exception {
-        cardGameplay = delegate.updateCardGameplay(cardScoreRequestDto, cardGameplay);
-        cardGameplay.setCard(memoryGameService.findCardById(cardScoreRequestDto.id()));
-        
-        return cardGameplay;
-    }
+//    @Override
+//    public CardGameplayEntity updateCardGameplay(CardScoreRequestDto cardScoreRequestDto,
+//                                                 @MappingTarget CardGameplayEntity cardGameplay) throws Exception {
+//        cardGameplay = delegate.updateCardGameplay(cardScoreRequestDto, cardGameplay);
+//        cardGameplay.setCard(memoryGameService.findCardById(cardScoreRequestDto.id()));
+//
+//        return cardGameplay;
+//    }
 }

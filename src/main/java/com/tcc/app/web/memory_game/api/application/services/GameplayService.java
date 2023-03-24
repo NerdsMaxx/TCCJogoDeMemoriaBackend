@@ -136,6 +136,12 @@ public class GameplayService {
         return codeGameplayRepository.findCodeSetByCreator(creator);
     }
     
+    public Set<PlayerGameplayEntity> getPreviousGameplays() throws Exception {
+        PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
+        
+        return playerGameplayRepository.findAllByPlayer(player);
+    }
+    
     private PlayerGameplayEntity _addPlayerInGameplay(PlayerEntity player, String code) throws Exception {
         CodeGameplayEntity codeGameplay = gameplayUtil.getCodeGameplay(code);
         GameplayEntity gameplay = codeGameplay.getGameplay();
@@ -161,4 +167,6 @@ public class GameplayService {
         
         return playerGameplay;
     }
+    
+    
 }

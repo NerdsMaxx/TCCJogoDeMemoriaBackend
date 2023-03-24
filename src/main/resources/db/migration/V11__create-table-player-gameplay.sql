@@ -1,8 +1,8 @@
 CREATE TABLE player_gameplay (
     id BIGSERIAL PRIMARY KEY,
     score INT NOT NULL,
-    correct INT NOT NULL,
-    wrong INT NOT NULL,
+--    correct INT NOT NULL,
+--    wrong INT NOT NULL,
     player_id BIGINT NOT NULL,
     gameplay_id BIGINT NOT NULL,
     CONSTRAINT fk_player_id
