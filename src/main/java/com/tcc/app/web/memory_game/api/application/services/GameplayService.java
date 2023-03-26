@@ -8,6 +8,9 @@ import com.tcc.app.web.memory_game.api.application.repositories.CodeGameplayRepo
 import com.tcc.app.web.memory_game.api.application.repositories.GameplayRepository;
 import com.tcc.app.web.memory_game.api.application.repositories.PlayerGameplayRepository;
 import com.tcc.app.web.memory_game.api.application.utils.GameplayUtil;
+import com.tcc.app.web.memory_game.api.custom.CustomException;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
 import com.tcc.app.web.memory_game.api.infrastructures.security.utils.AuthenticatedUserUtil;
 import com.tcc.app.web.memory_game.api.custom.Quartet;
 import jakarta.persistence.EntityExistsException;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -36,10 +40,7 @@ public class GameplayService {
     private MemoryGameService memoryGameService;
     
     @Autowired
-    private PlayerService playerService;
-    
-    @Autowired
-    private CreatorService creatorService;
+    private UserService userService;
     
     @Autowired
     private GameplayUtil gameplayUtil;
@@ -59,9 +60,10 @@ public class GameplayService {
     }
     
     public CodeGameplayEntity generateGameplay(GameplayRequestDto gameplayRequestDto) throws Exception {
-        CreatorEntity creator = (authenticatedUserUtil.isCreator()) ?
-                                authenticatedUserUtil.getCurrentCreator() :
-                                creatorService.findByUsername(gameplayRequestDto.creator());
+        UserEntity creator = (authenticatedUserUtil.isCreator()) ?
+                             authenticatedUserUtil.getCurrentCreator() :
+                             userService.findCreatorByUsernameOrEmail(gameplayRequestDto.creator())
+                                        .orElseThrow();
         
         MemoryGameEntity memoryGame = memoryGameService.findByCreatorAndMemoryGame(creator,
                                                                                    gameplayRequestDto.memoryGame());
@@ -69,7 +71,7 @@ public class GameplayService {
         GameplayEntity gameplay = new GameplayEntity(memoryGame);
         CodeGameplayEntity codeGameplay = new CodeGameplayEntity(gameplayUtil.generateCode(), gameplay);
         
-        if (gameplayRequestDto.alone()) {
+        if (Objects.requireNonNullElse(gameplayRequestDto.alone(), false)) {
             gameplay.setAlone(true);
 //            _addPlayerInGameplay(authenticatedUserUtil.getCurrentPlayer(), gameplay, codeGameplay);
 //            return codeGameplay;
@@ -83,12 +85,12 @@ public class GameplayService {
     }
     
     public PlayerGameplayEntity addPlayerAndGameplayByCode(String username, String code) throws Exception {
-        PlayerEntity player = playerService.findByUsername(username);
-        return _addPlayerInGameplay(player, code);
+        Optional<UserEntity> player = userService.findPlayerByUsernameOrEmail(username);
+        return _addPlayerInGameplay(player.orElseThrow(() -> new CustomException("Não foi encontrado usuário jogador.")), code);
     }
     
     public PlayerGameplayEntity addGameplayByCode(String code) throws Exception {
-        PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
+        UserEntity player = authenticatedUserUtil.getCurrentPlayer();
         return _addPlayerInGameplay(player, code);
     }
     
@@ -97,7 +99,7 @@ public class GameplayService {
         CodeGameplayEntity codeGameplay = gameplayUtil.getCodeGameplay(code);
         GameplayEntity gameplay = codeGameplay.getGameplay();
         
-        PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
+        UserEntity player = authenticatedUserUtil.getCurrentPlayer();
         PlayerGameplayEntity playerGameplay = gameplayUtil.getPlayerGameplay(player, gameplay);
         playerGameplay = gameplayMapper.updatePlayerGameplay(playerScoreRequestDto, playerGameplay);
 
@@ -109,7 +111,7 @@ public class GameplayService {
         gameplayRepository.save(gameplay);
         
         String memoryGameName = gameplay.getMemoryGame().getMemoryGame();
-        String creatorName = gameplay.getMemoryGame().getCreator().getUser().getUsername();
+        String creatorName = gameplay.getMemoryGame().getCreator().getUsername();
         
         return new Quartet<>(gameplay.getPlayerGameplaySet(),
                              codeGameplay,
@@ -122,7 +124,7 @@ public class GameplayService {
         GameplayEntity gameplay = codeGameplay.getGameplay();
     
         String memoryGameName = gameplay.getMemoryGame().getMemoryGame();
-        String creatorUsername = gameplay.getMemoryGame().getCreator().getUser().getUsername();
+        String creatorUsername = gameplay.getMemoryGame().getCreator().getUsername();
     
         return new Quartet<>(gameplay.getPlayerGameplaySet(),
                              codeGameplay,
@@ -131,25 +133,25 @@ public class GameplayService {
     }
     
     public Set<CodeGameplayEntity> getCodeSet() throws Exception {
-        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+        UserEntity creator = authenticatedUserUtil.getCurrentCreator();
         
         return codeGameplayRepository.findCodeSetByCreator(creator);
     }
     
     public Set<PlayerGameplayEntity> getPreviousGameplays() throws Exception {
-        PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
+        UserEntity player = authenticatedUserUtil.getCurrentPlayer();
         
         return playerGameplayRepository.findAllByPlayer(player);
     }
     
-    private PlayerGameplayEntity _addPlayerInGameplay(PlayerEntity player, String code) throws Exception {
+    private PlayerGameplayEntity _addPlayerInGameplay(UserEntity player, String code) throws Exception {
         CodeGameplayEntity codeGameplay = gameplayUtil.getCodeGameplay(code);
         GameplayEntity gameplay = codeGameplay.getGameplay();
         
         return _addPlayerInGameplay(player, gameplay, codeGameplay);
     }
     
-    private PlayerGameplayEntity _addPlayerInGameplay(PlayerEntity player, GameplayEntity gameplay, CodeGameplayEntity codeGameplay) throws Exception {
+    private PlayerGameplayEntity _addPlayerInGameplay(UserEntity player, GameplayEntity gameplay, CodeGameplayEntity codeGameplay) throws Exception {
         if (playerGameplayRepository.existsByPlayerAndGameplay(player, gameplay)) {
             throw new EntityExistsException("O jogador já foi adicionado no gameplay!");
         }

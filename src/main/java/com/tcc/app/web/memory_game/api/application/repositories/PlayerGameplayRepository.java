@@ -1,8 +1,8 @@
 package com.tcc.app.web.memory_game.api.application.repositories;
 
 import com.tcc.app.web.memory_game.api.application.entities.GameplayEntity;
-import com.tcc.app.web.memory_game.api.application.entities.PlayerEntity;
 import com.tcc.app.web.memory_game.api.application.entities.PlayerGameplayEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -11,12 +11,12 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface PlayerGameplayRepository extends JpaRepository<PlayerGameplayEntity, Long> {
+public interface PlayerGameplayRepository extends JpaRepository<PlayerGameplayEntity,Long> {
     
-    Optional<PlayerGameplayEntity> findByPlayerAndGameplay(PlayerEntity player, GameplayEntity gameplay);
+    Optional<PlayerGameplayEntity> findByPlayerAndGameplay(UserEntity player, GameplayEntity gameplay);
     
-    boolean existsByPlayerAndGameplay(PlayerEntity player, GameplayEntity gameplay);
-    
+    boolean existsByPlayerAndGameplay(UserEntity player, GameplayEntity gameplay);
+
 //    @Query("SELECT plgm " +
 //           "FROM PlayerGameplayEntity plgm " +
 //           "JOIN plgm.gameplay gm " +
@@ -35,5 +35,5 @@ public interface PlayerGameplayRepository extends JpaRepository<PlayerGameplayEn
            "FROM PlayerGameplayEntity plgm " +
            "JOIN plgm.player pl " +
            "WHERE pl = :player")
-    Set<PlayerGameplayEntity> findAllByPlayer(PlayerEntity player);
+    Set<PlayerGameplayEntity> findAllByPlayer(UserEntity player);
 }

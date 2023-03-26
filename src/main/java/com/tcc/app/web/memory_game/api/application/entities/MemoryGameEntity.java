@@ -2,6 +2,8 @@ package com.tcc.app.web.memory_game.api.application.entities;
 
 import com.tcc.app.web.memory_game.api.application.dtos.requests.CardRequestDto;
 import com.tcc.app.web.memory_game.api.application.mappers.CardMapper;
+import com.tcc.app.web.memory_game.api.custom.CustomException;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -34,13 +36,13 @@ public class MemoryGameEntity {
     @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
-    private CreatorEntity creator;
+    private UserEntity creator;
     
     @ManyToMany
     @JoinTable(name = "player_memory_game",
                joinColumns = @JoinColumn(name = "memory_game_id"),
                inverseJoinColumns = @JoinColumn(name = "player_id"))
-    private Set<PlayerEntity> playerSet = new HashSet<>();
+    private Set<UserEntity> playerSet = new HashSet<>();
     
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "memory_game_subject", joinColumns = @JoinColumn(name = "memory_game_id"),
@@ -53,7 +55,11 @@ public class MemoryGameEntity {
     @OneToMany(mappedBy = "memoryGame")
     private Set<GameplayEntity> gameplaySet = new HashSet<>();
     
-    public MemoryGameEntity addPlayer(PlayerEntity player) {
+    public MemoryGameEntity addPlayer(UserEntity player) throws CustomException {
+        if(! player.isPlayer()) {
+            throw new CustomException("Este usuário não é jogador");
+        }
+        
         playerSet.add(player);
         return this;
     }

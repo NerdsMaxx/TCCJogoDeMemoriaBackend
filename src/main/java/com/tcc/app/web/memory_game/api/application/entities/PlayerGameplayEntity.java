@@ -1,6 +1,7 @@
 package com.tcc.app.web.memory_game.api.application.entities;
 
 import com.tcc.app.web.memory_game.api.application.dtos.requests.CardScoreRequestDto;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,7 +35,7 @@ public class PlayerGameplayEntity {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false)
-    private PlayerEntity player;
+    private UserEntity player;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gameplay_id", nullable = false)
@@ -43,7 +44,7 @@ public class PlayerGameplayEntity {
 //    @OneToMany(mappedBy = "playerGameplay", cascade = CascadeType.ALL)
 //    private Set<CardGameplayEntity> cardGameplaySet = new HashSet<>();
     
-    public PlayerGameplayEntity(PlayerEntity player, GameplayEntity gameplay) {
+    public PlayerGameplayEntity(UserEntity player, GameplayEntity gameplay) {
         this.player = player;
         this.gameplay = gameplay;
         //this.cardGameplaySet.addAll(gameplay.generateCardGameplaySet(this));

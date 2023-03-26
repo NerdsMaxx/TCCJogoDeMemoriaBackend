@@ -3,21 +3,26 @@ package com.tcc.app.web.memory_game.api.application.services;
 import com.tcc.app.web.memory_game.api.application.dtos.requests.CardRequestDto;
 import com.tcc.app.web.memory_game.api.application.dtos.requests.MemoryGameRequestDto;
 import com.tcc.app.web.memory_game.api.application.dtos.requests.PlayerMemoryGameRequestDto;
-import com.tcc.app.web.memory_game.api.application.entities.*;
+import com.tcc.app.web.memory_game.api.application.entities.CardEntity;
+import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
+import com.tcc.app.web.memory_game.api.application.entities.SubjectEntity;
 import com.tcc.app.web.memory_game.api.application.mappers.CardMapper;
 import com.tcc.app.web.memory_game.api.application.repositories.CardRepository;
 import com.tcc.app.web.memory_game.api.application.repositories.MemoryGameRepository;
 import com.tcc.app.web.memory_game.api.application.repositories.SubjectRepository;
+import com.tcc.app.web.memory_game.api.custom.CustomException;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEnum;
+import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
 import com.tcc.app.web.memory_game.api.infrastructures.security.utils.AuthenticatedUserUtil;
+import com.tcc.app.web.memory_game.api.infrastructures.security.utils.UserTypeUtilStatic;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,12 +31,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class MemoryGameService {
     
+    private static final String MEMORY_GAME_NOT_FOUND = "Não foi encontrado o jogo de memória.";
     
     @Autowired
-    private CreatorService creatorService;
-    
-    @Autowired
-    private PlayerService playerService;
+    private UserService userService;
     
     @Autowired
     private SubjectRepository subjectRepository;
@@ -48,49 +51,50 @@ public class MemoryGameService {
     @Autowired
     private AuthenticatedUserUtil authenticatedUserUtil;
     
-    public Set<MemoryGameEntity> findAll() throws Exception {
+    public Set<MemoryGameEntity> findAll(Set<UserTypeEnum> userTypeEnumSet) throws Exception {
+        UserEntity user = authenticatedUserUtil.getCurrentUser();
+        Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
         
-        if (authenticatedUserUtil.isCreator()) {
-            CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
-            return memoryGameRepository.findAllByCreator(creator);
+        if (userTypeEnumSet.contains(UserTypeEnum.CRIADOR) && user.isCreator()) {
+            memoryGameSet.addAll(memoryGameRepository.findAllByCreator(user));
         }
         
-        if (authenticatedUserUtil.isPlayer()) {
-            PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
-            return memoryGameRepository.findAllByPlayer( player);
+        if (userTypeEnumSet.contains(UserTypeEnum.JOGADOR) && user.isPlayer()) {
+            memoryGameSet.addAll(memoryGameRepository.findAllByPlayer(user));
         }
         
-        return Collections.emptySet();
+        return memoryGameSet;
     }
     
-    public Set<MemoryGameEntity> findByMemoryGameNameAndSubject(String search) throws Exception {
-        if(authenticatedUserUtil.isCreator()) {
-            CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
-            return memoryGameRepository.findAllBySubjectOrMemoryGameName( creator, search, search);
+    public Set<MemoryGameEntity> findByMemoryGameNameAndSubject(String search, Set<UserTypeEnum> userTypeEnumSet) throws Exception {
+        UserEntity user = authenticatedUserUtil.getCurrentUser();
+        Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
+        
+        if (userTypeEnumSet.contains(UserTypeEnum.CRIADOR) && user.isCreator()) {
+            memoryGameSet.addAll(memoryGameRepository.findAllBySubjectOrMemoryGameNameForCreator(user, search, search));
         }
         
-        if(authenticatedUserUtil.isPlayer()) {
-            PlayerEntity player = authenticatedUserUtil.getCurrentPlayer();
-            return memoryGameRepository.findAllBySubjectOrMemoryGameName(player, search, search);
+        if (userTypeEnumSet.contains(UserTypeEnum.JOGADOR) && user.isPlayer()) {
+            memoryGameSet.addAll(memoryGameRepository.findAllBySubjectOrMemoryGameNameForPlayer(user, search, search));
         }
         
-        return Collections.emptySet();
+        return memoryGameSet;
     }
     
-    public MemoryGameEntity findByCreatorAndMemoryGame(CreatorEntity creator, String memoryGameName) throws Exception {
+    public MemoryGameEntity findByCreatorAndMemoryGame(UserEntity creator, String memoryGameName) throws Exception {
+        UserTypeUtilStatic.throwIfUserIsNotCreator(creator);
         return memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
-                                   .orElseThrow(() -> new EntityNotFoundException("Não tem este jogo de memória!"));
+                                   .orElseThrow(() -> new EntityNotFoundException(MEMORY_GAME_NOT_FOUND));
     }
     
     public MemoryGameEntity findByCreatorAndMemoryGame(String memoryGameName) throws Exception {
-        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
-        
+        UserEntity creator = authenticatedUserUtil.getCurrentCreator();
         return findByCreatorAndMemoryGame(creator, memoryGameName);
     }
     
     public MemoryGameEntity findByCreatorAndMemoryGame(String memoryGameName, String creatorUsername) throws Exception {
         return memoryGameRepository.findByCreatorUsernameAndMemoryGame(creatorUsername, memoryGameName)
-                                   .orElseThrow(() -> new EntityNotFoundException("Jogo de memória não encontrada!"));
+                                   .orElseThrow(() -> new EntityNotFoundException(MEMORY_GAME_NOT_FOUND));
     }
     
     public CardEntity findCardById(Long id) throws Exception {
@@ -99,7 +103,7 @@ public class MemoryGameService {
     }
     
     public MemoryGameEntity save(MemoryGameRequestDto memoryGameRequestDto) throws Exception {
-        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+        UserEntity creator = authenticatedUserUtil.getCurrentCreator();
         
         if (memoryGameRepository.existsByCreatorAndMemoryGame(creator, memoryGameRequestDto.name())) {
             throw new EntityExistsException("Já existe o jogo de memória com este nome.");
@@ -117,11 +121,11 @@ public class MemoryGameService {
     }
     
     public MemoryGameEntity update(String memoryGameName, MemoryGameRequestDto memoryGameRequestDto) throws Exception {
-        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+        UserEntity creator = authenticatedUserUtil.getCurrentCreator();
         
         MemoryGameEntity memoryGame = memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
                                                           .orElseThrow(() -> new EntityNotFoundException(
-                                                                  "Não foi encontrado jogo de memória."));
+                                                                  MEMORY_GAME_NOT_FOUND));
         
         String name = memoryGameRequestDto.name();
         if (name != null) {
@@ -148,11 +152,11 @@ public class MemoryGameService {
     }
     
     public void delete(String memoryGameName) throws Exception {
-        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+        UserEntity creator = authenticatedUserUtil.getCurrentCreator();
         
         MemoryGameEntity memoryGame = memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
                                                           .orElseThrow(() -> new EntityNotFoundException(
-                                                                  "Não foi encontrado jogo de memória."));
+                                                                  MEMORY_GAME_NOT_FOUND));
         
         _deleteAllSubjectNotUsed(memoryGame);
         
@@ -162,21 +166,23 @@ public class MemoryGameService {
     }
     
     public String addPlayer(PlayerMemoryGameRequestDto playerMemoryGameRequestDto) throws Exception {
-        CreatorEntity creator = authenticatedUserUtil.getCurrentCreator();
+        UserEntity creator = authenticatedUserUtil.getCurrentCreator();
         
         String memoryGameName = playerMemoryGameRequestDto.memoryGameName();
         MemoryGameEntity memoryGame = memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
                                                           .orElseThrow(() -> new EntityNotFoundException(
-                                                                  "Não foi encontrado jogo de memória."));
+                                                                  MEMORY_GAME_NOT_FOUND));
         
-        PlayerEntity player = playerService.findByUsername(playerMemoryGameRequestDto.username());
+        UserEntity player = userService.findPlayerByUsernameOrEmail(playerMemoryGameRequestDto.username())
+                                       .orElseThrow(() -> new CustomException("Não foi encontrado o jogador."));
+        
         memoryGame.addPlayer(player);
         memoryGameRepository.save(memoryGame);
         
         return "Jogador adicionado com sucesso!";
     }
     
-    public void addPlayer(MemoryGameEntity memoryGame, PlayerEntity player) {
+    public void addPlayer(MemoryGameEntity memoryGame, UserEntity player) throws CustomException {
         memoryGame.addPlayer(player);
         memoryGameRepository.save(memoryGame);
     }

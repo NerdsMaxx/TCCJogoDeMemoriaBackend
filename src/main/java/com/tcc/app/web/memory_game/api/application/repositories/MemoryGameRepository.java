@@ -1,10 +1,7 @@
 package com.tcc.app.web.memory_game.api.application.repositories;
 
-import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
-import com.tcc.app.web.memory_game.api.application.entities.PlayerEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,28 +11,27 @@ import java.util.Set;
 
 @Repository
 public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Long> {
-    Optional<MemoryGameEntity> findByCreatorAndMemoryGame(CreatorEntity creator, String memoryGame);
+    Optional<MemoryGameEntity> findByCreatorAndMemoryGame(UserEntity creator, String memoryGame);
     
     @Query(
             "SELECT mg " +
             "FROM MemoryGameEntity mg " +
             "JOIN mg.creator cr " +
-            "JOIN cr.user us " +
-            "WHERE us.username = :creatorUsername " +
+            "WHERE cr.username = :creatorUsername " +
             "AND mg.memoryGame = :memoryGame "
     )
     Optional<MemoryGameEntity> findByCreatorUsernameAndMemoryGame(String creatorUsername, String memoryGame);
     
-    Set<MemoryGameEntity> findAllByCreator(CreatorEntity creator);
+    Set<MemoryGameEntity> findAllByCreator(UserEntity creator);
     
-    boolean existsByCreatorAndMemoryGame(CreatorEntity creator, String memoryGame);
+    boolean existsByCreatorAndMemoryGame(UserEntity creator, String memoryGame);
     
     @Query("SELECT DISTINCT mg " +
            "FROM PlayerGameplayEntity plg " +
            "JOIN plg.gameplay gm " +
            "JOIN gm.memoryGame mg " +
            "WHERE plg.player = :player")
-    Set<MemoryGameEntity> findAllByPlayer(PlayerEntity player);
+    Set<MemoryGameEntity> findAllByPlayer(UserEntity player);
     
     @Query("SELECT DISTINCT mg " +
            "FROM MemoryGameEntity mg " +
@@ -44,7 +40,7 @@ public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Lon
            "WHERE cr = :creator " +
            "AND (sub.subject LIKE :subject% " +
            "OR mg.memoryGame LIKE :memoryGameName%) ")
-    Set<MemoryGameEntity> findAllBySubjectOrMemoryGameName(CreatorEntity creator, String subject, String memoryGameName);
+    Set<MemoryGameEntity> findAllBySubjectOrMemoryGameNameForCreator(UserEntity creator, String subject, String memoryGameName);
     
     @Query("SELECT DISTINCT mg " +
            "FROM PlayerGameplayEntity plg " +
@@ -54,5 +50,5 @@ public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Lon
            "WHERE plg.player = :player " +
            "AND (sub.subject LIKE :subject% " +
            "OR mg.memoryGame LIKE :memoryGameName%) ")
-    Set<MemoryGameEntity> findAllBySubjectOrMemoryGameName(PlayerEntity player, String subject, String memoryGameName);
+    Set<MemoryGameEntity> findAllBySubjectOrMemoryGameNameForPlayer(UserEntity player, String subject, String memoryGameName);
 }

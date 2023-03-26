@@ -1,0 +1,7 @@
+CREATE TABLE type_user (
+     id BIGSERIAL PRIMARY KEY,
+     type VARCHAR NOT NULL UNIQUE
+);
+
+INSERT INTO type_user(type) VALUES('CRIADOR');
+INSERT INTO type_user(type) VALUES('JOGADOR');

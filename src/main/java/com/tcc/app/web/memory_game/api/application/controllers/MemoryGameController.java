@@ -5,9 +5,9 @@ import com.tcc.app.web.memory_game.api.application.dtos.requests.PlayerMemoryGam
 import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.application.mappers.MemoryGameMapper;
 import com.tcc.app.web.memory_game.api.application.services.MemoryGameService;
+import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEnum;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +27,21 @@ public class MemoryGameController {
     @Autowired
     private MemoryGameMapper memoryGameMapper;
     
-    @GetMapping
-    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
-    public ResponseEntity getAllMemoryGame() throws Exception {
-        Set<MemoryGameEntity> memoryGameSet = memoryGameService.findAll();
+    @GetMapping("/criador")
+    @PreAuthorize("hasRole('ROLE_CRIADOR')")
+    public ResponseEntity getAllMemoryGameForCreator() throws Exception {
+        Set<MemoryGameEntity> memoryGameSet = memoryGameService.findAll(Set.of(UserTypeEnum.CRIADOR));
+        
+        
+        return ResponseEntity.ok(memoryGameSet.stream()
+                                              .map(memoryGameMapper::toMemoryGameResponseDto)
+                                              .collect(Collectors.toSet()));
+    }
+    
+    @GetMapping("/jogador")
+    @PreAuthorize("hasRole('ROLE_JOGADOR')")
+    public ResponseEntity getAllMemoryGameForPlayer() throws Exception {
+        Set<MemoryGameEntity> memoryGameSet = memoryGameService.findAll(Set.of(UserTypeEnum.JOGADOR));
         
         
         return ResponseEntity.ok(memoryGameSet.stream()
@@ -57,15 +68,28 @@ public class MemoryGameController {
         return ResponseEntity.ok(memoryGameMapper.toMemoryGameCardsResponseDto(memoryGame));
     }
     
-    @GetMapping("/pesquisar/{search}")
+    @GetMapping("/pesquisar/criador/{search}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
-    public ResponseEntity getMemoryGamesByMemoryGameNameAndSubject(
+    public ResponseEntity getMemoryGamesByMemoryGameNameAndSubjectForCreator(
             @PathVariable("search") String search) throws Exception {
-        Set<MemoryGameEntity> memoryGameSet = memoryGameService.findByMemoryGameNameAndSubject(search);
+        Set<MemoryGameEntity> memoryGameSet;
+        memoryGameSet = memoryGameService.findByMemoryGameNameAndSubject(search, Set.of(UserTypeEnum.CRIADOR));
         
         return ResponseEntity.ok(memoryGameSet.stream()
-                                               .map(memoryGameMapper::toMemoryGameResponseDto)
-                                               .collect(Collectors.toSet()));
+                                              .map(memoryGameMapper::toMemoryGameResponseDto)
+                                              .collect(Collectors.toSet()));
+    }
+    
+    @GetMapping("/pesquisar/jogador/{search}")
+    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
+    public ResponseEntity getMemoryGamesByMemoryGameNameAndSubjectForPlayer(
+            @PathVariable("search") String search) throws Exception {
+        Set<MemoryGameEntity> memoryGameSet;
+        memoryGameSet = memoryGameService.findByMemoryGameNameAndSubject(search, Set.of(UserTypeEnum.JOGADOR));
+        
+        return ResponseEntity.ok(memoryGameSet.stream()
+                                              .map(memoryGameMapper::toMemoryGameResponseDto)
+                                              .collect(Collectors.toSet()));
     }
     
     @PostMapping("/jogador")

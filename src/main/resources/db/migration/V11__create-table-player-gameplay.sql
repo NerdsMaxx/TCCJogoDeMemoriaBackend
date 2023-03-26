@@ -7,7 +7,7 @@ CREATE TABLE player_gameplay (
     gameplay_id BIGINT NOT NULL,
     CONSTRAINT fk_player_id
         FOREIGN KEY (player_id)
-            REFERENCES player(id),
+            REFERENCES user_mg(id),
     CONSTRAINT fk_gameplay_id
             FOREIGN KEY (gameplay_id)
                 REFERENCES gameplay(id),

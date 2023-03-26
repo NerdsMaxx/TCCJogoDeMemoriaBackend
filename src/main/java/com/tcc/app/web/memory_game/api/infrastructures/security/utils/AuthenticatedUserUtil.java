@@ -1,9 +1,5 @@
 package com.tcc.app.web.memory_game.api.infrastructures.security.utils;
 
-import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
-import com.tcc.app.web.memory_game.api.application.entities.PlayerEntity;
-import com.tcc.app.web.memory_game.api.application.services.CreatorService;
-import com.tcc.app.web.memory_game.api.application.services.PlayerService;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import com.tcc.app.web.memory_game.api.infrastructures.security.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,25 +15,31 @@ public final class AuthenticatedUserUtil {
     @Autowired
     private UserService userService;
     
-    @Autowired
-    private CreatorService creatorService;
-    
-    @Autowired
-    private PlayerService playerService;
-    
-    public CreatorEntity getCurrentCreator() throws Exception {
-        UserEntity user = userService.getCurrentUser();
-        return creatorService.findByUser(user);
+    //    @Autowired
+//    private CreatorService creatorService;
+//
+//    @Autowired
+//    private PlayerService playerService;
+//
+    public UserEntity getCurrentUser() throws Exception {
+        return userService.getCurrentUser();
     }
     
-    public Optional<CreatorEntity> getCurrentOptionalCreator() throws Exception {
+    public UserEntity getCurrentCreator() throws Exception {
         UserEntity user = userService.getCurrentUser();
-        return creatorService.findOptionalByUser(user);
+        UserTypeUtilStatic.throwIfUserIsNotCreator(user);
+        return user;
     }
     
-    public PlayerEntity getCurrentPlayer() throws Exception {
+    public Optional<UserEntity> getCurrentOptionalCreator() throws Exception {
         UserEntity user = userService.getCurrentUser();
-        return playerService.findByUser(user);
+        return (user.isCreator()) ? Optional.of(user) : Optional.empty();
+    }
+    
+    public UserEntity getCurrentPlayer() throws Exception {
+        UserEntity user = userService.getCurrentUser();
+        UserTypeUtilStatic.throwIfUserIsNotPlayer(user);
+        return user;
     }
     
     public boolean isPlayer() throws Exception {

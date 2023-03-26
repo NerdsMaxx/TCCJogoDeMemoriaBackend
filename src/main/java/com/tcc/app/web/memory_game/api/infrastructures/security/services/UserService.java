@@ -1,8 +1,6 @@
 package com.tcc.app.web.memory_game.api.infrastructures.security.services;
 
 import com.electronwill.nightconfig.core.conversion.InvalidValueException;
-import com.tcc.app.web.memory_game.api.application.services.CreatorService;
-import com.tcc.app.web.memory_game.api.application.services.PlayerService;
 import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.ResetPasswordRequestDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.dtos.requests.UserRequestDto;
 import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
@@ -20,6 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 @Transactional
 public class UserService {
@@ -36,11 +38,11 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     
-    @Autowired
-    private CreatorService creatorService;
-    
-    @Autowired
-    private PlayerService playerService;
+//    @Autowired
+//    private CreatorService creatorService;
+//
+//    @Autowired
+//    private PlayerService playerService;
     
 
     public UserEntity save(UserEntity user) {
@@ -60,22 +62,21 @@ public class UserService {
             throw  new EntityExistsException("Este usuário já está adicionado.");
         }
         
-        UserTypeEnum type = UserTypeUtilStatic.getType(userRequestDto.type());
-        if(type == null){
-            throw new InvalidValueException("O tipo de usuário inválido. Usuário deve ser Professor ou Aluno");
+        Set<UserTypeEnum> type = userRequestDto.type().stream()
+                                               .map(UserTypeUtilStatic::getType)
+                                               .collect(Collectors.toSet());
+        
+        if(type.isEmpty() || type.contains(null)){
+            throw new InvalidValueException("O tipo de usuário não foi dado. Usuário deve ser Criador ou Jogador ou ambos.");
         }
         
-        UserTypeEntity userType = userTypeRepository.findByType(type).orElseThrow();
+        Set<UserTypeEntity> userType = type.stream()
+                                           .map(type1 -> userTypeRepository.findByType(type1).orElseThrow())
+                                           .collect(Collectors.toSet());
         
         user.setUserType(userType);
         user.setPassword(passwordEncoder.encode(userRequestDto.password()));
         userRepository.save(user);
-        
-        if (userType.isCreator()) {
-            creatorService.save(user);
-        }
-        
-        playerService.saveByUser(user);
         
         return user;
     }
@@ -97,5 +98,13 @@ public class UserService {
     
     public UserEntity findByUsername(String username) throws Exception {
         return userRepository.findByUsernameOrEmail(username);
+    }
+    
+    public Optional<UserEntity> findCreatorByUsernameOrEmail(String usernameOrEmail) {
+        return userRepository.findCreatorByUsernameOrEmail(usernameOrEmail);
+    }
+    
+    public Optional<UserEntity> findPlayerByUsernameOrEmail(String usernameOrEmail) {
+        return userRepository.findPlayerByUsernameOrEmail(usernameOrEmail);
     }
 }

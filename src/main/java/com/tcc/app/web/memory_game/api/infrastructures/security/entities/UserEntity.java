@@ -1,16 +1,16 @@
 package com.tcc.app.web.memory_game.api.infrastructures.security.entities;
 
-import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
-import com.tcc.app.web.memory_game.api.application.entities.PlayerEntity;
+import com.tcc.app.web.memory_game.api.application.entities.MemoryGameEntity;
+import com.tcc.app.web.memory_game.api.application.entities.PlayerGameplayEntity;
 import com.tcc.app.web.memory_game.api.infrastructures.security.enums.UserTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "user_mg")
@@ -36,27 +36,32 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
     
-    @ManyToOne
-    @JoinColumn(name = "user_type_id")
-    private UserTypeEntity userType;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_type",
+               joinColumns = @JoinColumn(name = "user_id"),
+               inverseJoinColumns = @JoinColumn(name = "type_user_id"))
+    private Set<UserTypeEntity> userType;
     
-    @OneToOne(mappedBy = "user")
-    private PlayerEntity player;
+    @OneToMany(mappedBy = "creator")
+    private Set<MemoryGameEntity> memoryGameCreatorSet = new HashSet<>();
     
-    @OneToOne(mappedBy = "user")
-    private CreatorEntity creator;
+    @ManyToMany(mappedBy = "playerSet")
+    private Set<MemoryGameEntity> memoryGamePlayerSet = new HashSet<>();
+    
+    @OneToMany(mappedBy = "player")
+    private Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
     
     public boolean isCreator() {
-        return UserTypeEnum.CRIADOR.equals(userType.getType());
+        return userType.stream().anyMatch(userType -> UserTypeEnum.CRIADOR.equals(userType.getType()));
     }
     
     public boolean isPlayer() {
-        return UserTypeEnum.JOGADOR.equals(userType.getType());
+        return userType.stream().anyMatch(userType -> UserTypeEnum.JOGADOR.equals(userType.getType()));
     }
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(this.userType);
+        return userType;
     }
     
     @Override

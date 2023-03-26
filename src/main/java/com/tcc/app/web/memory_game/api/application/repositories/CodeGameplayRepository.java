@@ -1,8 +1,8 @@
 package com.tcc.app.web.memory_game.api.application.repositories;
 
 import com.tcc.app.web.memory_game.api.application.entities.CodeGameplayEntity;
-import com.tcc.app.web.memory_game.api.application.entities.CreatorEntity;
 import com.tcc.app.web.memory_game.api.application.entities.GameplayEntity;
+import com.tcc.app.web.memory_game.api.infrastructures.security.entities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface CodeGameplayRepository extends JpaRepository<CodeGameplayEntity, Long> {
+public interface CodeGameplayRepository extends JpaRepository<CodeGameplayEntity,Long> {
     
     Optional<CodeGameplayEntity> findByCode(String code);
     
@@ -27,13 +27,12 @@ public interface CodeGameplayRepository extends JpaRepository<CodeGameplayEntity
     
     @Query("SELECT code " +
            "FROM CodeGameplayEntity code " +
-           "JOIN FETCH code.gameplay gply " +
-           "JOIN FETCH gply.memoryGame mg " +
-           "JOIN FETCH mg.creator cr " +
-           "JOIN FETCH cr.user us " +
+           "JOIN code.gameplay gply " +
+           "JOIN gply.memoryGame mg " +
+           "JOIN mg.creator cr " +
            "WHERE cr = :creator " +
            "AND gply.alone = false")
-    Set<CodeGameplayEntity> findCodeSetByCreator(CreatorEntity creator);
+    Set<CodeGameplayEntity> findCodeSetByCreator(UserEntity creator);
     
     @Modifying
     @Query("DELETE FROM " +

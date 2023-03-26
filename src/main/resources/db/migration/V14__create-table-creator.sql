@@ -1,4 +1,4 @@
---CREATE TABLE player (
+--CREATE TABLE creator (
 --    id BIGSERIAL PRIMARY KEY,
 --    user_id INT NOT NULL,
 --    CONSTRAINT fk_user

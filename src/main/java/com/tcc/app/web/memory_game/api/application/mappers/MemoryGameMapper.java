@@ -10,11 +10,11 @@ import org.mapstruct.Mapping;
 public interface MemoryGameMapper {
     
     @Mapping(source = "memoryGame", target = "name")
-    @Mapping(source = "creator.user.username", target = "creator")
+    @Mapping(source = "creator.username", target = "creator")
     MemoryGameResponseDto toMemoryGameResponseDto(MemoryGameEntity memoryGame);
     
     @Mapping(source = "memoryGame", target = "name")
-    @Mapping(source = "creator.user.username", target = "creator")
+    @Mapping(source = "creator.username", target = "creator")
     MemoryGameCardsResponseDto toMemoryGameCardsResponseDto(MemoryGameEntity memoryGame);
 }
 

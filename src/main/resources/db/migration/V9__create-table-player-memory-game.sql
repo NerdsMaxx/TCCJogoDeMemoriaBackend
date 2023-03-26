@@ -5,7 +5,7 @@ CREATE TABLE player_memory_game (
         PRIMARY KEY (player_id, memory_game_id),
       CONSTRAINT fk_player
         FOREIGN KEY (player_id)
-            REFERENCES player(id),
+            REFERENCES user_mg(id),
       CONSTRAINT fk_memory_game
         FOREIGN KEY (memory_game_id)
             REFERENCES memory_game(id)

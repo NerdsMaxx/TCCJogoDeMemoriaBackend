@@ -15,17 +15,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(uses = {MemoryGameMapper.class})
-@DecoratedWith(GameplayMapperDecorator.class)
+//@DecoratedWith(GameplayMapperDecorator.class)
 public interface GameplayMapper {
     
     GameplayResponseDto toGameplayResponseDto(CodeGameplayEntity codeGameplay);
     
     
-    @Mapping(source = "player.user.username", target = "player")
+    @Mapping(source = "player.username", target = "player")
     @Mapping(source = "gameplay.memoryGame", target = "memoryGame")
     PlayerAddedResponseDto toPlayerAddedResponseDto(PlayerGameplayEntity playerGameplay);
     
-    @Mapping(source = "player.user.username", target = "player")
+    @Mapping(source = "player.username", target = "player")
     PlayerResultResponseDto toResultPlayerResponseDto(PlayerGameplayEntity playerGameplay);
     
     @Mapping(source = "playerGameplaySet", target = "playerSet")
@@ -39,10 +39,9 @@ public interface GameplayMapper {
         Set<MemoryGameWithCodeResponseDto> codes = codeGameplaySet.stream()
                                                                   .map(code -> new MemoryGameWithCodeResponseDto(
                                                                           code.getGameplay().getMemoryGame()
-                                                                              .getCreator().getUser().getUsername(),
+                                                                              .getCreator().getUsername(),
                                                                           code.getGameplay().getMemoryGame().getMemoryGame(),
-                                                                          code.getCode())
-                                                                  )
+                                                                          code.getCode()))
                                                                   .collect(Collectors.toSet());
         
         
@@ -52,7 +51,7 @@ public interface GameplayMapper {
     PlayerGameplayEntity updatePlayerGameplay(PlayerScoreRequestDto playerScoreRequestDto,
                                               @MappingTarget PlayerGameplayEntity playerGameplay) throws Exception;
     
-    @Mapping(source = "gameplay.memoryGame.creator.user.username", target = "creator")
+    @Mapping(source = "gameplay.memoryGame.creator.username", target = "creator")
     @Mapping(source = "gameplay.memoryGame.memoryGame", target = "memoryGame")
     PreviousGameplaysResponseDto toPreviousGameplaysResponseDTO(PlayerGameplayEntity playerGameplay);
     
