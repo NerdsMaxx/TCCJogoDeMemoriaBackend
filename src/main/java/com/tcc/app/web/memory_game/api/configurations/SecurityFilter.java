@@ -33,8 +33,8 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (jwtToken != null) {
             String subject = tokenService.getSubject(jwtToken);
             UserDetails userDetails = userRepository.findByUsernameOrEmail(subject);
-            var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
-                                                                         userDetails.getAuthorities());
+            final var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+                                                                               userDetails.getAuthorities());
             
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
@@ -43,7 +43,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
     
     private String getToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         return (authorizationHeader != null) ?
                authorizationHeader.replace("Bearer ", "") :
                null;

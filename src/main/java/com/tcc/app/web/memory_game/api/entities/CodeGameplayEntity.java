@@ -7,11 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "code_gameplay")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor(force = true)
-@RequiredArgsConstructor
+@Data
 @EqualsAndHashCode(exclude = {"id"})
 public class CodeGameplayEntity {
     
@@ -21,7 +17,7 @@ public class CodeGameplayEntity {
     
     @NonNull
     @Column(nullable = false, unique = true)
-    private String code;
+    private final String code;
     
     @Column(nullable = false)
     private Integer numbersPlayerMoment = 0;
@@ -29,10 +25,10 @@ public class CodeGameplayEntity {
     @NonNull
     @OneToOne
     @JoinColumn(name = "gameplay_id", nullable = false, unique = true)
-    GameplayEntity gameplay;
+    private final GameplayEntity gameplay;
     
     @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime = LocalDateTime.now().plusHours(2);
+    private final LocalDateTime endTime = LocalDateTime.now().plusHours(2);
     
     public CodeGameplayEntity sumOnePlayer() {
         ++ numbersPlayerMoment;

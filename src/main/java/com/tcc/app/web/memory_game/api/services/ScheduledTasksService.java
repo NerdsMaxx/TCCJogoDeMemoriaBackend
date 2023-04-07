@@ -11,10 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScheduledTasksService {
     
     @Autowired
-    private CodeGameplayRepository codeGameplayRepository;
+    private GameplayService gameplayService;
     
     @Scheduled(fixedRate = 7200000L) //7200000 millisegundos = 2 horas
     public void deleteCodeGameplayNotUsed() {
-        codeGameplayRepository.deleteAllInvalidated();
+        gameplayService.deleteAllCodeInvalidated();
     }
 }

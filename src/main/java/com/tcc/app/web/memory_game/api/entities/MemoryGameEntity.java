@@ -1,6 +1,5 @@
 package com.tcc.app.web.memory_game.api.entities;
 
-import com.tcc.app.web.memory_game.api.custom.CustomException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -13,19 +12,14 @@ import java.util.Set;
        uniqueConstraints = {@UniqueConstraint(name = "unique_memory_game_creator",
                                               columnNames = {"memory_game", "creator_id"})}
 )
-@Getter
-@Setter
-@AllArgsConstructor
-@RequiredArgsConstructor
-@NoArgsConstructor(force = true)
-@EqualsAndHashCode(exclude = {"id", "playerSet", "subjectSet", "cardSet", "gameplaySet"})
+@Data
+@EqualsAndHashCode(exclude = {"id", "subjectSet", "cardSet", "gameplaySet"})
 public class MemoryGameEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @NonNull
-    @NotBlank
     @Column(name = "memory_game", nullable = false)
     private String memoryGame;
     
@@ -50,7 +44,7 @@ public class MemoryGameEntity {
     
     @OneToMany(mappedBy = "memoryGame")
     private final Set<GameplayEntity> gameplaySet = new HashSet<>();
-    
+
 //    public MemoryGameEntity addPlayer(UserEntity player) throws CustomException {
 //        if(! player.isPlayer()) {
 //            throw new CustomException("Este usuário não é jogador");
@@ -61,7 +55,7 @@ public class MemoryGameEntity {
 //    }
     
     public MemoryGameEntity addCardSet(@NonNull Set<CardEntity> newCardSet) {
-        newCardSet.forEach(card -> card.setMemoryGame(this));
+        //newCardSet.forEach(card -> card.setMemoryGame(this));
         cardSet.addAll(newCardSet);
         return this;
     }

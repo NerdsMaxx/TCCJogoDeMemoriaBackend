@@ -3,20 +3,23 @@ package com.tcc.app.web.memory_game.api.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-
-@Entity
-@Table(name = "gameplay")
 //@Getter
 //@Setter
 //@AllArgsConstructor
 //@NoArgsConstructor(force = true)
 //@RequiredArgsConstructor
 //@EqualsAndHashCode(exclude = {"id", "playerGameplaySet", "codeGameplay"})
+
+@Entity
+@Table(name = "gameplay")
 @Data
+@EqualsAndHashCode(exclude = {"id", "playerGameplaySet", "codeGameplay"})
 public class GameplayEntity {
     
     @Id
@@ -26,19 +29,20 @@ public class GameplayEntity {
     @Column
     private Integer numbersPlayer = 0;
     
+    @NonNull
     @Column(nullable = false)
-    private Boolean alone = false;
+    private final Boolean alone;
     
     @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memory_game_id")
-    private MemoryGameEntity memoryGame;
+    private final MemoryGameEntity memoryGame;
     
     @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime = LocalDateTime.now();
+    private final LocalDateTime startTime = LocalDateTime.now();
     
     @OneToMany(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
+    private final Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
     
     @OneToOne(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
     private CodeGameplayEntity codeGameplay;
@@ -48,13 +52,13 @@ public class GameplayEntity {
         return this;
     }
     
-    public GameplayEntity addPlayerGameplay(PlayerGameplayEntity playerGameplay) {
-        playerGameplay.setGameplay(this);
+    public GameplayEntity addPlayerGameplay(@NonNull PlayerGameplayEntity playerGameplay) {
+        //playerGameplay.setGameplay(this);
         playerGameplaySet.add(playerGameplay);
         return this;
     }
     
-    public GameplayEntity updatePlayerGameplay(PlayerGameplayEntity playerGameplay) {
+    public GameplayEntity updatePlayerGameplay(@NonNull PlayerGameplayEntity playerGameplay) {
         playerGameplaySet.removeIf(playerGameplay1 -> playerGameplay1.equals(playerGameplay));
         playerGameplaySet.add(playerGameplay);
         return this;

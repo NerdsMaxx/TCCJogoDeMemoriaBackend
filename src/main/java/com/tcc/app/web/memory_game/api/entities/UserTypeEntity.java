@@ -9,10 +9,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "type_user")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @EqualsAndHashCode(of = "id")
 public class UserTypeEntity implements GrantedAuthority {
     @Id

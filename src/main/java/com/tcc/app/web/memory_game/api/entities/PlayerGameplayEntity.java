@@ -7,11 +7,9 @@ import lombok.*;
 @Table(name = "player_gameplay",
        uniqueConstraints = {@UniqueConstraint(name = "unique_player_gameplay",
                                               columnNames = {"player_id", "gameplay_id"})})
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 //@EqualsAndHashCode(exclude = {"id", "score", "numberPairCardCorrect", "numberPairCardWrong", "cardGameplaySet"})
+@Data
 @EqualsAndHashCode(exclude = {"id", "score"})
 public class PlayerGameplayEntity {
     
@@ -28,13 +26,15 @@ public class PlayerGameplayEntity {
 //    @Column(name = "wrong", nullable = false)
 //    private Integer numberPairCardWrong = 0;
     
+    @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false)
-    private UserEntity player;
+    private final UserEntity player;
     
+    @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gameplay_id", nullable = false)
-    private GameplayEntity gameplay;
+    private final GameplayEntity gameplay;
     
 //    @OneToMany(mappedBy = "playerGameplay", cascade = CascadeType.ALL)
 //    private Set<CardGameplayEntity> cardGameplaySet = new HashSet<>();

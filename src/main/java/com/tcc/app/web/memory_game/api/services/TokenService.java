@@ -27,7 +27,7 @@ public class TokenService {
 
 	public String generateToken(UserEntity user) {
 		try {
-			var algorithm = Algorithm.HMAC256(secret);
+			final Algorithm algorithm = Algorithm.HMAC256(secret);
 
 			return JWT.create().withIssuer(issuer).withSubject(user.getUsername())
 					  .withExpiresAt(_getExpirationDate()).sign(algorithm);
@@ -39,7 +39,7 @@ public class TokenService {
 
 	public String getSubject(String jwtToken) {
 		try {
-			var algorithm = Algorithm.HMAC256(secret);
+			final Algorithm algorithm = Algorithm.HMAC256(secret);
 
 			return JWT.require(algorithm).withIssuer(issuer).build().verify(jwtToken).getSubject();
 

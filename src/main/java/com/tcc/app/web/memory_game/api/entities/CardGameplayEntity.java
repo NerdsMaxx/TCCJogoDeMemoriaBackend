@@ -1,24 +1,22 @@
 package com.tcc.app.web.memory_game.api.entities;
-
-import jakarta.persistence.*;
-import lombok.*;
+//
+//import jakarta.persistence.*;
+//import lombok.*;
 
 //@Entity
 //@Table(name = "card_gameplay",
 //       uniqueConstraints = {@UniqueConstraint(name = "unique_player_gameplay_card",
 //                                              columnNames = {"player_gameplay_id", "card_id"})})
-@Getter
-@Setter
-@AllArgsConstructor
-@EqualsAndHashCode(exclude = {"id"})
-public class CardGameplayEntity {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column
-    private Boolean winner;
+//@Data
+//@EqualsAndHashCode(exclude = {"id"})
+//public class CardGameplayEntity {
+//
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
+//
+//    @Column
+//    private Boolean winner;
     
 //    @NonNull
 //    @ManyToOne(fetch = FetchType.LAZY)
@@ -33,4 +31,4 @@ public class CardGameplayEntity {
 //    public boolean equalsCardId(Long id) {
 //        return this.card.getId().equals(id);
 //    }
-}
+//}

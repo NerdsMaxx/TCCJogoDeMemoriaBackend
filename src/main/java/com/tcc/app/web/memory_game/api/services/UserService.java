@@ -64,7 +64,7 @@ public class UserService {
         }
         
         Set<UserTypeEnum> type = userRequestDto.type().stream()
-                                               .map(UserTypeUtilStatic::getType)
+                                               .map(UserTypeEnum::getType)
                                                .collect(Collectors.toSet());
         
         if(type.isEmpty() || type.contains(null)){
@@ -112,18 +112,18 @@ public class UserService {
     }
     
     public UserEntity getCurrentCreator() throws Exception {
-        UserEntity user = getCurrentUser();
+        final UserEntity user = getCurrentUser();
         _throwIfUserIsNotCreator(user);
         return user;
     }
     
-    public Optional<UserEntity> getCurrentOptionalCreator() throws Exception {
-        UserEntity user = getCurrentUser();
-        return (user.isCreator()) ? Optional.of(user) : Optional.empty();
-    }
+//    public Optional<UserEntity> getCurrentOptionalCreator() throws Exception {
+//        UserEntity user = getCurrentUser();
+//        return (user.isCreator()) ? Optional.of(user) : Optional.empty();
+//    }
     
     public UserEntity getCurrentPlayer() throws Exception {
-        UserEntity user = getCurrentUser();
+        final UserEntity user = getCurrentUser();
         _throwIfUserIsNotPlayer(user);
         return user;
     }

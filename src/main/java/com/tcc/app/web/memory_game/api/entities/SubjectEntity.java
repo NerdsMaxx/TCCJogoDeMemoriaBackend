@@ -8,11 +8,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "subject")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@RequiredArgsConstructor
+@Data
 @EqualsAndHashCode(exclude = {"id", "memoryGameSet"})
 public class SubjectEntity {
     @Id
@@ -21,10 +17,10 @@ public class SubjectEntity {
     
     @NonNull
     @Column(nullable = false, unique = true)
-    private String subject;
+    private final String subject;
     
     @ManyToMany(mappedBy = "subjectSet")
-    private Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
+    private final Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
     
     public SubjectEntity removeMemoryGame(MemoryGameEntity memoryGame) {
         memoryGameSet.remove(memoryGame);
