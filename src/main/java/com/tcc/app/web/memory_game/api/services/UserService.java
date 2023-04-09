@@ -1,7 +1,6 @@
 package com.tcc.app.web.memory_game.api.services;
 
 import com.electronwill.nightconfig.core.conversion.InvalidValueException;
-import com.tcc.app.web.memory_game.api.custom.CustomException;
 import com.tcc.app.web.memory_game.api.dtos.requests.ResetPasswordRequestDto;
 import com.tcc.app.web.memory_game.api.dtos.requests.UserRequestDto;
 import com.tcc.app.web.memory_game.api.entities.UserEntity;
@@ -10,65 +9,51 @@ import com.tcc.app.web.memory_game.api.enums.UserTypeEnum;
 import com.tcc.app.web.memory_game.api.mappers.UserMapper;
 import com.tcc.app.web.memory_game.api.repositories.UserRepository;
 import com.tcc.app.web.memory_game.api.repositories.UserTypeRepository;
-import com.tcc.app.web.memory_game.api.utils.UserTypeUtilStatic;
 import jakarta.persistence.EntityExistsException;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import javax.naming.NoPermissionException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class UserService {
     
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private UserTypeRepository userTypeRepository;
-    
-    @Autowired
-    private UserMapper userMapper;
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    
+    private final UserRepository userRepository;
+    private final UserTypeRepository userTypeRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+
 //    @Autowired
 //    private CreatorService creatorService;
 //
 //    @Autowired
 //    private PlayerService playerService;
     
-
-    public UserEntity save(UserEntity user) {
-        return userRepository.save(user);
-    }
     
-
-    public UserEntity saveAndFlush(UserEntity user) {
-        return userRepository.saveAndFlush(user);
-    }
-    
-
-    public UserEntity saveUser(UserRequestDto userRequestDto) throws Exception {
+    public UserEntity save(UserRequestDto userRequestDto) throws Exception {
         UserEntity user = userMapper.toUserEntity(userRequestDto);
         
-        if(userRepository.findByUsernameOrEmail(userRequestDto.username()) != null) {
-            throw  new EntityExistsException("Este usuário já está adicionado.");
+        if (userRepository.findByUsernameOrEmail(userRequestDto.username()) != null) {
+            throw new EntityExistsException("Este usuário já está adicionado.");
         }
         
         Set<UserTypeEnum> type = userRequestDto.type().stream()
                                                .map(UserTypeEnum::getType)
                                                .collect(Collectors.toSet());
         
-        if(type.isEmpty() || type.contains(null)){
-            throw new InvalidValueException("O tipo de usuário não foi dado. Usuário deve ser Criador ou Jogador ou ambos.");
+        if (type.isEmpty() || type.contains(null)) {
+            throw new InvalidValueException(
+                    "O tipo de usuário não foi dado. Usuário deve ser Criador ou Jogador ou ambos.");
         }
         
         Set<UserTypeEntity> userType = type.stream()
@@ -89,54 +74,50 @@ public class UserService {
         return userRepository.save(user);
     }
     
-    public UserEntity getCurrentUser() throws Exception {
+    public UserEntity getCurrentUser() {
         UserEntity user = (UserEntity) SecurityContextHolder.getContext()
-                                                     .getAuthentication()
-                                                     .getPrincipal();
+                                                            .getAuthentication()
+                                                            .getPrincipal();
         return userRepository.findById(user.getId())
                              .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado!"));
     }
     
-    public UserEntity findByUsername(String username) throws Exception {
-        return userRepository.findByUsernameOrEmail(username);
-    }
-    
-    public UserEntity findCreatorByUsernameOrEmail(String usernameOrEmail) throws CustomException {
+    public UserEntity findCreatorByUsernameOrEmail(@NonNull String usernameOrEmail) {
         return userRepository.findCreatorByUsernameOrEmail(usernameOrEmail)
-                             .orElseThrow(() -> new CustomException("Criador não foi encontrado!"));
+                             .orElseThrow(() -> new EntityNotFoundException("Criador não foi encontrado!"));
     }
     
-    public UserEntity findPlayerByUsernameOrEmail(String usernameOrEmail) throws CustomException {
+    public UserEntity findPlayerByUsernameOrEmail(@NonNull String usernameOrEmail) {
         return userRepository.findPlayerByUsernameOrEmail(usernameOrEmail)
-                             .orElseThrow(() -> new CustomException("Jogador não foi encontrado!"));
+                             .orElseThrow(() -> new EntityNotFoundException("Jogador não foi encontrado!"));
     }
     
-    public UserEntity getCurrentCreator() throws Exception {
+    public UserEntity getCurrentCreator() throws NoPermissionException {
         final UserEntity user = getCurrentUser();
         _throwIfUserIsNotCreator(user);
         return user;
     }
-    
+
 //    public Optional<UserEntity> getCurrentOptionalCreator() throws Exception {
 //        UserEntity user = getCurrentUser();
 //        return (user.isCreator()) ? Optional.of(user) : Optional.empty();
 //    }
     
-    public UserEntity getCurrentPlayer() throws Exception {
+    public UserEntity getCurrentPlayer() throws NoPermissionException {
         final UserEntity user = getCurrentUser();
         _throwIfUserIsNotPlayer(user);
         return user;
     }
     
-    private void _throwIfUserIsNotPlayer(UserEntity user) throws CustomException {
-        if(! user.isPlayer()) {
-            throw new CustomException("Este usuário não é jogador.");
+    private void _throwIfUserIsNotPlayer(@NonNull UserEntity user) throws NoPermissionException {
+        if (! user.isPlayer()) {
+            throw new NoPermissionException("Este usuário não é jogador.");
         }
     }
     
-    private void _throwIfUserIsNotCreator(UserEntity user) throws CustomException {
-        if(! user.isCreator()) {
-            throw new CustomException("Este usuário não é criador.");
+    private void _throwIfUserIsNotCreator(@NonNull UserEntity user) throws NoPermissionException {
+        if (! user.isCreator()) {
+            throw new NoPermissionException("Este usuário não é criador.");
         }
     }
 }

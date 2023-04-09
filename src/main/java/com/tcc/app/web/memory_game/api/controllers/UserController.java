@@ -6,6 +6,7 @@ import com.tcc.app.web.memory_game.api.entities.UserEntity;
 import com.tcc.app.web.memory_game.api.mappers.UserMapper;
 import com.tcc.app.web.memory_game.api.services.UserService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,18 +15,16 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RestController
 @RequestMapping("/usuario")
 @CrossOrigin("*")
+@AllArgsConstructor
 public class UserController {
     
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private UserMapper userMapper;
+    private final UserService userService;
+    private final UserMapper userMapper;
     
     @PostMapping
     public ResponseEntity insertNewUser(@RequestBody @Valid UserRequestDto userRequestDto,
                                         UriComponentsBuilder uriBuilder) throws Exception {
-        var user = userService.saveUser(userRequestDto);
+        var user = userService.save(userRequestDto);
         
         var uri = uriBuilder.path("/usuario/{id}").buildAndExpand(user.getId()).toUri();
         

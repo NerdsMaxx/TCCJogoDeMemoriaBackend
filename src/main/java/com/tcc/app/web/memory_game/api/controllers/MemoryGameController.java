@@ -7,6 +7,7 @@ import com.tcc.app.web.memory_game.api.mappers.MemoryGameMapper;
 import com.tcc.app.web.memory_game.api.services.MemoryGameService;
 import com.tcc.app.web.memory_game.api.enums.UserTypeEnum;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,13 +20,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/jogo-de-memoria")
 @CrossOrigin("*")
+@AllArgsConstructor
 public class MemoryGameController {
     
-    @Autowired
-    private MemoryGameService memoryGameService;
-    
-    @Autowired
-    private MemoryGameMapper memoryGameMapper;
+    private final MemoryGameService memoryGameService;
+    private final MemoryGameMapper memoryGameMapper;
     
     @GetMapping("/criador")
     @PreAuthorize("hasRole('ROLE_CRIADOR')")

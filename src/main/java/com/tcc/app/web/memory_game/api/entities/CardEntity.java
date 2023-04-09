@@ -16,12 +16,15 @@ public class CardEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NonNull
     @Column(nullable = false, name = "first_content")
     private final String firstContent;
     
+    @NonNull
     @Column(nullable = false, name = "second_content")
     private final String secondContent;
     
+    @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memory_game_id", nullable = false)
     private final MemoryGameEntity memoryGame;

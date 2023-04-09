@@ -11,9 +11,9 @@ import com.tcc.app.web.memory_game.api.mappers.CardMapper;
 import com.tcc.app.web.memory_game.api.repositories.CardRepository;
 import com.tcc.app.web.memory_game.api.repositories.MemoryGameRepository;
 import com.tcc.app.web.memory_game.api.repositories.SubjectRepository;
-import com.tcc.app.web.memory_game.api.utils.UserTypeUtilStatic;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,24 +25,16 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class MemoryGameService {
     
     private static final String MEMORY_GAME_NOT_FOUND = "Não foi encontrado o jogo de memória.";
     
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private SubjectRepository subjectRepository;
-    
-    @Autowired
-    private CardRepository cardRepository;
-    
-    @Autowired
-    private MemoryGameRepository memoryGameRepository;
-    
-    @Autowired
-    private CardMapper cardMapper;
+    private final UserService userService;
+    private final SubjectRepository subjectRepository;
+    private final CardRepository cardRepository;
+    private final MemoryGameRepository memoryGameRepository;
+    private final CardMapper cardMapper;
     
     public Set<MemoryGameEntity> findAll(@NonNull Set<UserTypeEnum> userTypeEnumSet) throws Exception {
         final UserEntity user = userService.getCurrentUser();
@@ -150,10 +142,10 @@ public class MemoryGameService {
         
         final Set<CardRequestDto> cardRequestDtoSet = memoryGameRequestDto.cardSet();
         if (cardRequestDtoSet != null) {
-            Set<CardEntity> cardSet = cardRequestDtoSet.stream()
-                                                       .map(cardRequestDto -> cardMapper.toCardEntity(cardRequestDto,
-                                                                                                      memoryGame))
-                                                       .collect(Collectors.toSet());
+            final Set<CardEntity> cardSet;
+            cardSet = cardRequestDtoSet.stream()
+                                       .map(cardRequestDto -> cardMapper.toCardEntity(cardRequestDto, memoryGame))
+                                       .collect(Collectors.toSet());
             
             memoryGame.clearCardSet(cardSet)
                       .addCardSet(cardSet);

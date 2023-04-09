@@ -1,13 +1,9 @@
 package com.tcc.app.web.memory_game.api.utils;
 
-import com.tcc.app.web.memory_game.api.custom.CustomException;
-import com.tcc.app.web.memory_game.api.entities.UserEntity;
-import com.tcc.app.web.memory_game.api.enums.UserTypeEnum;
-
 public final class UserTypeUtilStatic {
     
     private UserTypeUtilStatic() {}
-    
+
 //    public static UserTypeEnum getType(String type) {
 //        return switch (type.toLowerCase()) {
 //            case "prof", "professor", "criador" -> UserTypeEnum.CRIADOR;
@@ -15,7 +11,7 @@ public final class UserTypeUtilStatic {
 //            default -> null;
 //        };
 //    }
-    
+
 //    public static void throwIfUserIsNotPlayer(UserEntity user) throws CustomException {
 //        if(! user.isPlayer()) {
 //            throw new CustomException("Este usuário não é jogador.");

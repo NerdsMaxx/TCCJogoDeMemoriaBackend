@@ -10,8 +10,8 @@ import com.tcc.app.web.memory_game.api.repositories.GameplayRepository;
 import com.tcc.app.web.memory_game.api.repositories.PlayerGameplayRepository;
 import com.tcc.app.web.memory_game.api.utils.GameplayUtilStatic;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,25 +20,14 @@ import java.util.Set;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class GameplayService {
-    
-    @Autowired
-    private GameplayRepository gameplayRepository;
-    
-    @Autowired
-    private CodeGameplayRepository codeGameplayRepository;
-    
-    @Autowired
-    private PlayerGameplayRepository playerGameplayRepository;
-    
-    @Autowired
-    private MemoryGameService memoryGameService;
-    
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private GameplayMapper gameplayMapper;
+    private final GameplayRepository gameplayRepository;
+    private final CodeGameplayRepository codeGameplayRepository;
+    private final PlayerGameplayRepository playerGameplayRepository;
+    private final MemoryGameService memoryGameService;
+    private final UserService userService;
+    private final GameplayMapper gameplayMapper;
     
     public List<CodeGameplayEntity> findAllCodeGameplay() {
         return codeGameplayRepository.findAll();
@@ -145,9 +134,17 @@ public class GameplayService {
 //            throw new EntityExistsException("O jogador já foi adicionado no gameplay!");
 //        }
         
-        final PlayerGameplayEntity playerGameplay = playerGameplayRepository.findByPlayerAndGameplay(player, gameplay)
-                                                                            .orElse(new PlayerGameplayEntity(player, gameplay));
-        if (playerGameplay.getId() != null) {
+        final var isFirst = new Object() {
+            boolean value = false;
+        };
+        final PlayerGameplayEntity playerGameplay;
+        playerGameplay = playerGameplayRepository.findByPlayerAndGameplay(player, gameplay)
+                                                 .orElseGet(() -> {
+                                                     isFirst.value = true;
+                                                     return new PlayerGameplayEntity(player, gameplay);
+                                                 });
+        
+        if (isFirst.value) {
             return playerGameplay;
         }
         

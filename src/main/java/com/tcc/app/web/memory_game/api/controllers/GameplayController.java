@@ -8,6 +8,7 @@ import com.tcc.app.web.memory_game.api.mappers.GameplayMapper;
 import com.tcc.app.web.memory_game.api.services.GameplayService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,13 +21,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/gameplay")
 @CrossOrigin("*")
+@AllArgsConstructor
 public class GameplayController {
     
-    @Autowired
-    private GameplayService gameplayService;
-    
-    @Autowired
-    private GameplayMapper gameplayMapper;
+    private final GameplayService gameplayService;
+    private final GameplayMapper gameplayMapper;
     
     @PostMapping("/comecar")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")

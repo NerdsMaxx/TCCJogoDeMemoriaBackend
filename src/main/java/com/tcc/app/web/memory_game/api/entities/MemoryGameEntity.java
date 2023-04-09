@@ -54,8 +54,12 @@ public class MemoryGameEntity {
 //        return this;
 //    }
     
-    public MemoryGameEntity addCardSet(@NonNull Set<CardEntity> newCardSet) {
-        //newCardSet.forEach(card -> card.setMemoryGame(this));
+    public MemoryGameEntity addCardSet(@NonNull Set<CardEntity> newCardSet) throws Exception {
+        if(newCardSet.stream().anyMatch(card -> card.getMemoryGame().getId() == null)) {
+            throw new RuntimeException("O id do jogo de memória está nulo no método addCardSet(@NonNull Set<CardEntity> newCardSet)" +
+                                       " da classe MemoryGameEntity.");
+        }
+        
         cardSet.addAll(newCardSet);
         return this;
     }
