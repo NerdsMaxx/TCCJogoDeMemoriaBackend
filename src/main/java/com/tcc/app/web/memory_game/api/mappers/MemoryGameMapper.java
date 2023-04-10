@@ -17,28 +17,3 @@ public interface MemoryGameMapper {
     @Mapping(source = "creator.username", target = "creator")
     MemoryGameCardsResponseDto toMemoryGameCardsResponseDto(MemoryGameEntity memoryGame);
 }
-
-//public abstract class MemoryGameMapper {
-//    public static MemoryGameResponseDto toResponseDto(MemoryGameEntity memoryGame) {
-//        if (memoryGame == null) {return null;}
-//
-//        CreatorEntity creator = memoryGame.getCreator();
-//        if (creator == null) {return null;}
-//
-//        UserEntity user = creator.getUser();
-//        if (user == null) {return null;}
-//
-//        String creatorUsername = user.getUsername();
-//
-//        String memoryGameName = memoryGame.getMemoryGame();
-//
-//        Set<SubjectEntity> subjectEntitiySet = memoryGame.getSubjectSet();
-//        if (subjectEntitiySet == null) {return null;}
-//
-//        Set<String> subjectSet = subjectEntitiySet.stream()
-//                                                  .map(SubjectEntity::getSubject)
-//                                                  .collect(Collectors.toSet());
-//
-//        return new MemoryGameResponseDto(creatorUsername, memoryGameName, subjectSet);
-//    }
-//}

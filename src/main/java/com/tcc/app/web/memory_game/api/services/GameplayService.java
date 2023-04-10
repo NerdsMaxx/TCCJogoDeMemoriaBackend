@@ -1,6 +1,7 @@
 package com.tcc.app.web.memory_game.api.services;
 
 import com.tcc.app.web.memory_game.api.custom.Quartet;
+import com.tcc.app.web.memory_game.api.custom.SimpleValue;
 import com.tcc.app.web.memory_game.api.dtos.requests.GameplayRequestDto;
 import com.tcc.app.web.memory_game.api.dtos.requests.PlayerScoreRequestDto;
 import com.tcc.app.web.memory_game.api.entities.*;
@@ -15,6 +16,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.naming.NoPermissionException;
 import java.util.List;
 import java.util.Set;
 
@@ -37,9 +39,8 @@ public class GameplayService {
         codeGameplayRepository.deleteAllInvalidated();
     }
     
-    public CodeGameplayEntity generateGameplay(@NonNull GameplayRequestDto gameplayRequestDto) throws Exception {
+    public CodeGameplayEntity generateGameplay(@NonNull GameplayRequestDto gameplayRequestDto) {
         UserEntity creator = userService.getCurrentUser();
-        
         if (! creator.isCreator()) {
             creator = userService.findCreatorByUsernameOrEmail(gameplayRequestDto.creator());
         }
@@ -61,24 +62,26 @@ public class GameplayService {
         return codeGameplay;
     }
     
-    public PlayerGameplayEntity addPlayerAndGameplayByCode(@NonNull String username, @NonNull String code) throws Exception {
+    public PlayerGameplayEntity addPlayerAndGameplayByCode(@NonNull String username, @NonNull String code) {
         final UserEntity player = userService.findPlayerByUsernameOrEmail(username);
         return _addPlayerInGameplay(player, code);
     }
     
-    public PlayerGameplayEntity addGameplayByCode(@NonNull String code) throws Exception {
+    public PlayerGameplayEntity addGameplayByCode(@NonNull String code) throws NoPermissionException {
         final UserEntity player = userService.getCurrentPlayer();
         return _addPlayerInGameplay(player, code);
     }
     
     public Quartet<Set<PlayerGameplayEntity>,CodeGameplayEntity,String,String>
-    finishGameplayByCode(@NonNull String code, @NonNull PlayerScoreRequestDto playerScoreRequestDto) throws Exception {
+    finishGameplayByCode(@NonNull String code, @NonNull PlayerScoreRequestDto playerScoreRequestDto) throws NoPermissionException {
         final CodeGameplayEntity codeGameplay = _getCodeGameplay(code);
         final GameplayEntity gameplay = codeGameplay.getGameplay();
         
         final UserEntity player = userService.getCurrentPlayer();
-        PlayerGameplayEntity playerGameplay = _getPlayerGameplay(player, gameplay);
-        playerGameplay = gameplayMapper.updatePlayerGameplay(playerScoreRequestDto, playerGameplay);
+        
+        final PlayerGameplayEntity playerGameplay = _getPlayerGameplay(player, gameplay);
+        gameplayMapper.updatePlayerGameplay(playerScoreRequestDto, playerGameplay);
+        playerGameplay.finishGameplay();
         
         codeGameplay.removeOnePlayer();
         
@@ -87,70 +90,61 @@ public class GameplayService {
         
         gameplayRepository.save(gameplay);
         
-        final String memoryGameName = gameplay.getMemoryGame().getMemoryGame();
-        final String creatorName = gameplay.getMemoryGame().getCreator().getUsername();
+        final MemoryGameEntity memoryGame = gameplay.getMemoryGame();
         
         return new Quartet<>(gameplay.getPlayerGameplaySet(),
                              codeGameplay,
-                             memoryGameName,
-                             creatorName);
+                             memoryGame.getMemoryGame(),
+                             memoryGame.getCreator().getUsername());
     }
     
     public Quartet<Set<PlayerGameplayEntity>,CodeGameplayEntity,String,String>
-    getGameplayScoresByCode(@NonNull String code) throws Exception {
+    getGameplayScoresByCode(@NonNull String code) {
         final CodeGameplayEntity codeGameplay = _getCodeGameplay(code);
         final GameplayEntity gameplay = codeGameplay.getGameplay();
-        
-        final String memoryGameName = gameplay.getMemoryGame().getMemoryGame();
-        final String creatorUsername = gameplay.getMemoryGame().getCreator().getUsername();
+        final MemoryGameEntity memoryGame = gameplay.getMemoryGame();
         
         return new Quartet<>(gameplay.getPlayerGameplaySet(),
                              codeGameplay,
-                             memoryGameName,
-                             creatorUsername);
+                             memoryGame.getMemoryGame(),
+                             memoryGame.getCreator().getUsername());
     }
     
-    public Set<CodeGameplayEntity> getCodeSet() throws Exception {
+    public Set<CodeGameplayEntity> getCodeSet() throws NoPermissionException {
         final UserEntity creator = userService.getCurrentCreator();
         
         return codeGameplayRepository.findCodeSetByCreator(creator);
     }
     
-    public List<PlayerGameplayEntity> getPreviousGameplays() throws Exception {
+    public Set<PlayerGameplayEntity> getPreviousGameplays() throws NoPermissionException {
         final UserEntity player = userService.getCurrentPlayer();
         
         return playerGameplayRepository.findAllByPlayer(player);
     }
     
-    private PlayerGameplayEntity _addPlayerInGameplay(@NonNull UserEntity player, @NonNull String code) throws Exception {
+    private PlayerGameplayEntity _addPlayerInGameplay(@NonNull UserEntity player, @NonNull String code) {
         final CodeGameplayEntity codeGameplay = _getCodeGameplay(code);
         final GameplayEntity gameplay = codeGameplay.getGameplay();
         
         return _addPlayerInGameplay(player, gameplay, codeGameplay);
     }
     
-    private PlayerGameplayEntity _addPlayerInGameplay(@NonNull UserEntity player, @NonNull GameplayEntity gameplay, @NonNull CodeGameplayEntity codeGameplay) throws Exception {
-//        if (playerGameplayRepository.existsByPlayerAndGameplay(player, gameplay)) {
-//            throw new EntityExistsException("O jogador já foi adicionado no gameplay!");
-//        }
+    private PlayerGameplayEntity _addPlayerInGameplay(@NonNull UserEntity player,
+                                                      @NonNull GameplayEntity gameplay,
+                                                      @NonNull CodeGameplayEntity codeGameplay) {
         
-        final var isFirst = new Object() {
-            boolean value = false;
-        };
+        final SimpleValue<Boolean> isNotFirst = new SimpleValue<>(true);
         final PlayerGameplayEntity playerGameplay;
         playerGameplay = playerGameplayRepository.findByPlayerAndGameplay(player, gameplay)
                                                  .orElseGet(() -> {
-                                                     isFirst.value = true;
+                                                     isNotFirst.setValue(false);
                                                      return new PlayerGameplayEntity(player, gameplay);
                                                  });
         
-        if (isFirst.value) {
+        if (isNotFirst.getValue()) {
             return playerGameplay;
         }
         
-        //memoryGameService.addPlayer(gameplay.getMemoryGame(), player);
-        
-        //PlayerGameplayEntity playerGameplay = new PlayerGameplayEntity(player, gameplay);
         codeGameplay.sumOnePlayer();
         
         gameplay.sumOnePlayer()
@@ -162,13 +156,13 @@ public class GameplayService {
         return playerGameplay;
     }
     
-    private CodeGameplayEntity _getCodeGameplay(@NonNull String code) throws Exception {
+    private CodeGameplayEntity _getCodeGameplay(@NonNull String code) {
         return codeGameplayRepository.findByCode(code)
                                      .orElseThrow(() -> new EntityNotFoundException(
                                              "Não foi criado um gameplay ou código foi expirado!"));
     }
     
-    private PlayerGameplayEntity _getPlayerGameplay(@NonNull UserEntity player, @NonNull GameplayEntity gameplay) throws Exception {
+    private PlayerGameplayEntity _getPlayerGameplay(@NonNull UserEntity player, @NonNull GameplayEntity gameplay) {
         return playerGameplayRepository.findByPlayerAndGameplay(player, gameplay)
                                        .orElseThrow(() -> new EntityNotFoundException(
                                                "O jogador não foi encontrado para este gameplay!"));

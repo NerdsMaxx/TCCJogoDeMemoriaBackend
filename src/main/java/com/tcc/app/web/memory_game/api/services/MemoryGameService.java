@@ -15,10 +15,10 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.naming.NoPermissionException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,7 +36,7 @@ public class MemoryGameService {
     private final MemoryGameRepository memoryGameRepository;
     private final CardMapper cardMapper;
     
-    public Set<MemoryGameEntity> findAll(@NonNull Set<UserTypeEnum> userTypeEnumSet) throws Exception {
+    public Set<MemoryGameEntity> findAll(@NonNull Set<UserTypeEnum> userTypeEnumSet) {
         final UserEntity user = userService.getCurrentUser();
         final Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
         
@@ -52,7 +52,7 @@ public class MemoryGameService {
     }
     
     public Set<MemoryGameEntity> findByMemoryGameNameAndSubject(@NonNull String search,
-                                                                @NonNull Set<UserTypeEnum> userTypeEnumSet) throws Exception {
+                                                                @NonNull Set<UserTypeEnum> userTypeEnumSet) {
         final UserEntity user = userService.getCurrentUser();
         final Set<MemoryGameEntity> memoryGameSet = new HashSet<>();
         
@@ -68,28 +68,28 @@ public class MemoryGameService {
     }
     
     public MemoryGameEntity findByCreatorAndMemoryGame(@NonNull UserEntity creator,
-                                                       @NonNull String memoryGameName) throws Exception {
+                                                       @NonNull String memoryGameName) {
         return memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
                                    .orElseThrow(() -> new EntityNotFoundException(MEMORY_GAME_NOT_FOUND));
     }
     
-    public MemoryGameEntity findByCreatorAndMemoryGame(@NonNull String memoryGameName) throws Exception {
+    public MemoryGameEntity findByCreatorAndMemoryGame(@NonNull String memoryGameName) throws NoPermissionException {
         final UserEntity creator = userService.getCurrentCreator();
         return findByCreatorAndMemoryGame(creator, memoryGameName);
     }
     
     public MemoryGameEntity findByCreatorAndMemoryGame(@NonNull String memoryGameName,
-                                                       @NonNull String creatorUsername) throws Exception {
+                                                       @NonNull String creatorUsername) {
         return memoryGameRepository.findByCreatorUsernameAndMemoryGame(creatorUsername, memoryGameName)
                                    .orElseThrow(() -> new EntityNotFoundException(MEMORY_GAME_NOT_FOUND));
     }
     
-    public CardEntity findCardById(@NonNull Long id) throws Exception {
+    public CardEntity findCardById(@NonNull Long id) {
         return cardRepository.findById(id)
                              .orElseThrow(() -> new EntityNotFoundException("Não tem esta carta!"));
     }
     
-    public MemoryGameEntity save(@NonNull MemoryGameRequestDto memoryGameRequestDto) throws Exception {
+    public MemoryGameEntity save(@NonNull MemoryGameRequestDto memoryGameRequestDto) throws NoPermissionException {
         final UserEntity creator = userService.getCurrentCreator();
         
         if (memoryGameRepository.existsByCreatorAndMemoryGame(creator, memoryGameRequestDto.name())) {
@@ -97,14 +97,14 @@ public class MemoryGameService {
         }
         
         final MemoryGameEntity memoryGame = new MemoryGameEntity(memoryGameRequestDto.name(), creator);
+        memoryGameRepository.save(memoryGame);
         
-        final Set<CardEntity> newCardSet = memoryGameRequestDto.cardSet().stream()
-                                                               .map(cardRequestDto -> cardMapper.toCardEntity(
-                                                                       cardRequestDto, memoryGame))
-                                                               .collect(Collectors.toSet());
+        final Set<CardEntity> newCardSet;
+        newCardSet = memoryGameRequestDto.cardSet().stream()
+                                         .map(cardRequestDto -> cardMapper.toCardEntity(cardRequestDto, memoryGame))
+                                         .collect(Collectors.toSet());
         
-        final Set<SubjectEntity> subjectFoundSet = subjectRepository.findBySubjectSet(
-                memoryGameRequestDto.subjectSet());
+        final Set<SubjectEntity> subjectFoundSet = subjectRepository.findBySubjectSet(memoryGameRequestDto.subjectSet());
         final Set<SubjectEntity> subjectSet = memoryGameRequestDto.subjectSet().stream()
                                                                   .map(SubjectEntity::new)
                                                                   .collect(Collectors.toSet());
@@ -115,7 +115,7 @@ public class MemoryGameService {
         return memoryGameRepository.save(memoryGame);
     }
     
-    public MemoryGameEntity update(@NonNull String memoryGameName, @NonNull MemoryGameRequestDto memoryGameRequestDto) throws Exception {
+    public MemoryGameEntity update(@NonNull String memoryGameName, @NonNull MemoryGameRequestDto memoryGameRequestDto) throws NoPermissionException {
         final UserEntity creator = userService.getCurrentCreator();
         
         final MemoryGameEntity memoryGame = memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
@@ -127,18 +127,6 @@ public class MemoryGameService {
             memoryGame.setMemoryGame(name);
             memoryGameRepository.save(memoryGame);
         }
-
-//        Set<CardEntity> cardSet = Optional.ofNullable(memoryGameRequestDto.cardSet())
-//                                          .map(cardRequestDtoSet -> cardRequestDtoSet.stream()
-//                                                                                     .map(cardMapper::toCardEntity)
-//                                                                                     .collect(Collectors.toSet()))
-//                                          .orElse(null);
-
-
-//        Set<CardEntity> cardSet = Optional.ofNullable(memoryGameRequestDto.cardSet())
-//                                          .orElse(new HashSet<>(0))
-//                                          .stream().map(cardMapper::toCardEntity)
-//                                          .collect(Collectors.toSet());
         
         final Set<CardRequestDto> cardRequestDtoSet = memoryGameRequestDto.cardSet();
         if (cardRequestDtoSet != null) {
@@ -168,7 +156,7 @@ public class MemoryGameService {
         return memoryGameRepository.save(memoryGame);
     }
     
-    public void delete(@NonNull String memoryGameName) throws Exception {
+    public void delete(@NonNull String memoryGameName) throws NoPermissionException {
         final UserEntity creator = userService.getCurrentCreator();
         
         final MemoryGameEntity memoryGame = memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
@@ -181,27 +169,6 @@ public class MemoryGameService {
         memoryGame.clearSubjectSet();
         memoryGameRepository.delete(memoryGame);
     }
-
-//    public String addPlayer(PlayerMemoryGameRequestDto playerMemoryGameRequestDto) throws Exception {
-//        UserEntity creator = userService.getCurrentCreator();
-//
-//        String memoryGameName = playerMemoryGameRequestDto.memoryGameName();
-//        MemoryGameEntity memoryGame = memoryGameRepository.findByCreatorAndMemoryGame(creator, memoryGameName)
-//                                                          .orElseThrow(() -> new EntityNotFoundException(
-//                                                                  MEMORY_GAME_NOT_FOUND));
-//
-//        UserEntity player = userService.findPlayerByUsernameOrEmail(playerMemoryGameRequestDto.username());
-//
-//        memoryGame.addPlayer(player);
-//        memoryGameRepository.save(memoryGame);
-//
-//        return "Jogador adicionado com sucesso!";
-//    }
-
-//    public void addPlayer(MemoryGameEntity memoryGame, UserEntity player) throws CustomException {
-//        memoryGame.addPlayer(player);
-//        memoryGameRepository.save(memoryGame);
-//    }
     
     public void _deleteAllSubjectNotUsed(@NonNull MemoryGameEntity memoryGame, Set<String> subjectNameSet) {
         Set<SubjectEntity> subjectSet;
@@ -216,8 +183,9 @@ public class MemoryGameService {
         
         subjectSet.forEach(subject -> subject.removeMemoryGame(memoryGame));
         subjectSet = subjectSet.stream()
-                               .filter(subject -> subject.getMemoryGameSet().isEmpty())
+                               .filter(SubjectEntity::noMemoryGame)
                                .collect(Collectors.toSet());
+        
         subjectRepository.deleteAll(subjectSet);
     }
     

@@ -8,10 +8,11 @@ import lombok.*;
 @Table(name = "card",
        uniqueConstraints = {@UniqueConstraint(name = "unique_first_content_second_content_memory_game",
                                               columnNames = {"first_content", "second_content", "memory_game_id"})})
-@Data
-@EqualsAndHashCode(exclude = {"id"})
+@Getter
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"firstContent", "secondContent", "memoryGame"})
 public class CardEntity {
-    
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

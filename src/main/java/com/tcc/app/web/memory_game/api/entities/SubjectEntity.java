@@ -8,9 +8,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "subject")
-@Data
-@EqualsAndHashCode(exclude = {"id", "memoryGameSet"})
+@Getter
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"subject"})
 public class SubjectEntity {
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,5 +27,9 @@ public class SubjectEntity {
     public SubjectEntity removeMemoryGame(MemoryGameEntity memoryGame) {
         memoryGameSet.remove(memoryGame);
         return this;
+    }
+    
+    public boolean noMemoryGame() {
+        return memoryGameSet.isEmpty();
     }
 }

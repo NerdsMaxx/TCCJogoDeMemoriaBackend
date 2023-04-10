@@ -9,11 +9,11 @@ import com.tcc.app.web.memory_game.api.services.GameplayService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.NoPermissionException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,7 +37,7 @@ public class GameplayController {
     
     @PostMapping("/jogar/{code}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
-    public ResponseEntity addPlayerInGameplay(@PathVariable("code") String code) throws Exception {
+    public ResponseEntity addPlayerInGameplay(@PathVariable("code") String code) throws NoPermissionException {
         PlayerGameplayEntity playerGameplayEntity = gameplayService.addGameplayByCode(code);
         
         return ResponseEntity.ok(gameplayMapper.toPlayerAddedResponseDto(playerGameplayEntity));
@@ -59,9 +59,9 @@ public class GameplayController {
     
     @GetMapping("/pontuacoes/{code}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
-    public ResponseEntity getGameplayScores(@NotBlank @PathVariable("code") String code) throws Exception {
+    public ResponseEntity getGameplayScores(@NotBlank @PathVariable("code") String code) {
         var result = gameplayService.getGameplayScoresByCode(code);
-    
+        
         return ResponseEntity.ok(gameplayMapper.toGameplayResultDto(result.v1(),
                                                                     result.v2(),
                                                                     result.v3(),
@@ -70,7 +70,7 @@ public class GameplayController {
     
     @GetMapping("/codigos")
     @PreAuthorize("hasRole('ROLE_CRIADOR')")
-    public ResponseEntity getGameplayScores() throws Exception {
+    public ResponseEntity getGameplayScores() throws NoPermissionException {
         Set<CodeGameplayEntity> codeGameplaySet = gameplayService.getCodeSet();
         
         return ResponseEntity.ok(gameplayMapper.toCodesResponseDto(codeGameplaySet));
@@ -79,10 +79,10 @@ public class GameplayController {
     @GetMapping("/partidas-anteriores")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity getPreviousGameplays() throws Exception {
-        List<PlayerGameplayEntity> playerGameplaySet = gameplayService.getPreviousGameplays();
+        Set<PlayerGameplayEntity> playerGameplaySet = gameplayService.getPreviousGameplays();
         
         return ResponseEntity.ok(playerGameplaySet.stream()
                                                   .map(gameplayMapper::toPreviousGameplaysResponseDTO)
-                                                  .toList());
+                                                  .collect(Collectors.toSet()));
     }
 }

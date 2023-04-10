@@ -7,10 +7,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "code_gameplay")
-@Data
-@EqualsAndHashCode(exclude = {"id"})
+@Getter
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"code"})
 public class CodeGameplayEntity {
     
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

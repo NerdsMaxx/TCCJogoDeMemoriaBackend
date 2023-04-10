@@ -32,15 +32,9 @@ public class UserService {
     private final UserTypeRepository userTypeRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-
-//    @Autowired
-//    private CreatorService creatorService;
-//
-//    @Autowired
-//    private PlayerService playerService;
     
     
-    public UserEntity save(UserRequestDto userRequestDto) throws Exception {
+    public UserEntity save(UserRequestDto userRequestDto) {
         UserEntity user = userMapper.toUserEntity(userRequestDto);
         
         if (userRepository.findByUsernameOrEmail(userRequestDto.username()) != null) {
@@ -60,7 +54,7 @@ public class UserService {
                                            .map(type1 -> userTypeRepository.findByType(type1).orElseThrow())
                                            .collect(Collectors.toSet());
         
-        user.setUserType(userType);
+        user.addTypes(userType);
         user.setPassword(passwordEncoder.encode(userRequestDto.password()));
         userRepository.save(user);
         
@@ -97,11 +91,6 @@ public class UserService {
         _throwIfUserIsNotCreator(user);
         return user;
     }
-
-//    public Optional<UserEntity> getCurrentOptionalCreator() throws Exception {
-//        UserEntity user = getCurrentUser();
-//        return (user.isCreator()) ? Optional.of(user) : Optional.empty();
-//    }
     
     public UserEntity getCurrentPlayer() throws NoPermissionException {
         final UserEntity user = getCurrentUser();

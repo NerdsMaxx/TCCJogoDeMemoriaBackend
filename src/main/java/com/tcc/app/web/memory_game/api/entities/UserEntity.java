@@ -12,22 +12,28 @@ import java.util.Set;
 
 @Entity
 @Table(name = "user_mg")
-@Data
+@Getter
+@RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class UserEntity implements UserDetails {
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NonNull
     @Column(nullable = false)
-    private String name;
+    private final String name;
     
+    @NonNull
     @Column(nullable = false, unique = true)
-    private String email;
+    private final String email;
     
+    @NonNull
     @Column(nullable = false, unique = true)
-    private String username;
+    private final String username;
     
+    @Setter
     @Column(nullable = false)
     private String password;
     
@@ -35,23 +41,26 @@ public class UserEntity implements UserDetails {
     @JoinTable(name = "user_type",
                joinColumns = @JoinColumn(name = "user_id"),
                inverseJoinColumns = @JoinColumn(name = "type_user_id"))
-    private Set<UserTypeEntity> userType;
+    private final Set<UserTypeEntity> userType = new HashSet<>();
     
     @OneToMany(mappedBy = "creator")
-    private Set<MemoryGameEntity> memoryGameCreatorSet = new HashSet<>();
+    private final Set<MemoryGameEntity> memoryGameCreatorSet = new HashSet<>();
     
-//    @ManyToMany(mappedBy = "playerSet")
-//    private Set<MemoryGameEntity> memoryGamePlayerSet = new HashSet<>();
     
     @OneToMany(mappedBy = "player")
-    private Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
+    private final Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
     
     public boolean isCreator() {
-        return userType.stream().anyMatch(userType -> UserTypeEnum.CRIADOR.equals(userType.getType()));
+        return userType.stream().anyMatch(userType1 -> UserTypeEnum.CRIADOR.equals(userType1.getType()));
     }
     
     public boolean isPlayer() {
-        return userType.stream().anyMatch(userType -> UserTypeEnum.JOGADOR.equals(userType.getType()));
+        return userType.stream().anyMatch(userType1 -> UserTypeEnum.JOGADOR.equals(userType1.getType()));
+    }
+    
+    public UserEntity addTypes(Set<UserTypeEntity> types) {
+        userType.addAll(types);
+        return this;
     }
     
     @Override
@@ -60,7 +69,7 @@ public class UserEntity implements UserDetails {
     }
     
     @Override
-    public String getUsername() {
+    public @NonNull String getUsername() {
         return username;
     }
     

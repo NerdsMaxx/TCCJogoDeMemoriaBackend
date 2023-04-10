@@ -12,13 +12,16 @@ import java.util.Set;
        uniqueConstraints = {@UniqueConstraint(name = "unique_memory_game_creator",
                                               columnNames = {"memory_game", "creator_id"})}
 )
-@Data
-@EqualsAndHashCode(exclude = {"id", "subjectSet", "cardSet", "gameplaySet"})
+@Getter
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"memoryGame", "creator"})
 public class MemoryGameEntity {
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @Setter
     @NonNull
     @Column(name = "memory_game", nullable = false)
     private String memoryGame;
@@ -27,12 +30,6 @@ public class MemoryGameEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private final UserEntity creator;
-    
-//    @ManyToMany
-//    @JoinTable(name = "player_memory_game",
-//               joinColumns = @JoinColumn(name = "memory_game_id"),
-//               inverseJoinColumns = @JoinColumn(name = "player_id"))
-//    private final Set<UserEntity> playerSet = new HashSet<>();
     
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "memory_game_subject", joinColumns = @JoinColumn(name = "memory_game_id"),
@@ -44,22 +41,8 @@ public class MemoryGameEntity {
     
     @OneToMany(mappedBy = "memoryGame")
     private final Set<GameplayEntity> gameplaySet = new HashSet<>();
-
-//    public MemoryGameEntity addPlayer(UserEntity player) throws CustomException {
-//        if(! player.isPlayer()) {
-//            throw new CustomException("Este usuário não é jogador");
-//        }
-//
-//        playerSet.add(player);
-//        return this;
-//    }
     
-    public MemoryGameEntity addCardSet(@NonNull Set<CardEntity> newCardSet) throws Exception {
-        if(newCardSet.stream().anyMatch(card -> card.getMemoryGame().getId() == null)) {
-            throw new RuntimeException("O id do jogo de memória está nulo no método addCardSet(@NonNull Set<CardEntity> newCardSet)" +
-                                       " da classe MemoryGameEntity.");
-        }
-        
+    public MemoryGameEntity addCardSet(@NonNull Set<CardEntity> newCardSet) {
         cardSet.addAll(newCardSet);
         return this;
     }

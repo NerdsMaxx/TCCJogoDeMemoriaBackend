@@ -9,19 +9,23 @@ import java.util.Set;
 
 @Entity
 @Table(name = "type_user")
-@Data
+@Getter
+@RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class UserTypeEntity implements GrantedAuthority {
+    @NonNull
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private final Long id;
     
+    @NonNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
-    private UserTypeEnum type;
+    private final UserTypeEnum type;
     
+    @NonNull
     @ManyToMany(mappedBy = "userType")
-    private Set<UserEntity> user;
+    private final Set<UserEntity> user;
     
     @Override
     public String getAuthority() {

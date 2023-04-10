@@ -2,32 +2,22 @@ package com.tcc.app.web.memory_game.api.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.Accessors;
-import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-//@Getter
-//@Setter
-//@AllArgsConstructor
-//@NoArgsConstructor(force = true)
-//@RequiredArgsConstructor
-//@EqualsAndHashCode(exclude = {"id", "playerGameplaySet", "codeGameplay"})
 
 @Entity
 @Table(name = "gameplay")
-@Data
-@EqualsAndHashCode(exclude = {"id", "playerGameplaySet", "codeGameplay"})
+@Getter
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"alone", "memoryGame", "startTime", "numbersPlayer"})
 public class GameplayEntity {
     
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column
-    private Integer numbersPlayer = 0;
     
     @NonNull
     @Column(nullable = false)
@@ -44,16 +34,19 @@ public class GameplayEntity {
     @OneToMany(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
     
+    @Column
+    private Integer numbersPlayer = 0;
+    
+    @Setter
     @OneToOne(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
     private CodeGameplayEntity codeGameplay;
     
     public GameplayEntity sumOnePlayer() {
-        ++this.numbersPlayer;
+        ++ this.numbersPlayer;
         return this;
     }
     
     public GameplayEntity addPlayerGameplay(@NonNull PlayerGameplayEntity playerGameplay) {
-        //playerGameplay.setGameplay(this);
         playerGameplaySet.add(playerGameplay);
         return this;
     }
@@ -63,10 +56,4 @@ public class GameplayEntity {
         playerGameplaySet.add(playerGameplay);
         return this;
     }
-    
-//    public Set<CardGameplayEntity> generateCardGameplaySet(PlayerGameplayEntity playerGameplay) {
-//        return memoryGame.getCardSet().stream()
-//                         .map(card -> new CardGameplayEntity(playerGameplay, card))
-//                         .collect(Collectors.toSet());
-//    }
 }
