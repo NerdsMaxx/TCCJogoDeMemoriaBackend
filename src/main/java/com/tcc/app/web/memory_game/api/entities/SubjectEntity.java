@@ -8,9 +8,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "subject")
+
 @Getter
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"subject"})
+
 public class SubjectEntity {
     @Setter
     @Id

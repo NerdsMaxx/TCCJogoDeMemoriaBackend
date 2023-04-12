@@ -7,9 +7,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "code_gameplay")
+
 @Getter
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"code"})
+
 public class CodeGameplayEntity {
     
     @Setter

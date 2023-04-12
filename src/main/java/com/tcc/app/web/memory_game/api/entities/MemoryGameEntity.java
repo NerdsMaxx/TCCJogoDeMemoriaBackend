@@ -12,9 +12,12 @@ import java.util.Set;
        uniqueConstraints = {@UniqueConstraint(name = "unique_memory_game_creator",
                                               columnNames = {"memory_game", "creator_id"})}
 )
+
 @Getter
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"memoryGame", "creator"})
+
 public class MemoryGameEntity {
     @Setter
     @Id

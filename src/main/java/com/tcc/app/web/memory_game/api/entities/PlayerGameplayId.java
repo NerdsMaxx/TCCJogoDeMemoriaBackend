@@ -2,17 +2,17 @@ package com.tcc.app.web.memory_game.api.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 
 @Embeddable
+
 @Getter
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode
+
 public class PlayerGameplayId implements Serializable {
     
     @NonNull

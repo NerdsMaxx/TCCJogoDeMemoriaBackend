@@ -39,7 +39,7 @@ public class GameplayService {
         codeGameplayRepository.deleteAllInvalidated();
     }
     
-    public CodeGameplayEntity generateGameplay(@NonNull GameplayRequestDto gameplayRequestDto) {
+    public CodeGameplayEntity generateGameplay(@NonNull final GameplayRequestDto gameplayRequestDto) {
         UserEntity creator = userService.getCurrentUser();
         if (! creator.isCreator()) {
             creator = userService.findCreatorByUsernameOrEmail(gameplayRequestDto.creator());

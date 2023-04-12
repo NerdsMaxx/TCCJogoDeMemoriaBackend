@@ -9,9 +9,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "gameplay")
+
 @Getter
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"alone", "memoryGame", "startTime", "numbersPlayer"})
+
 public class GameplayEntity {
     
     @Setter

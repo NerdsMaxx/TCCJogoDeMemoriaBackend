@@ -12,9 +12,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "user_mg")
+
 @Getter
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
+
 public class UserEntity implements UserDetails {
     @Setter
     @Id

@@ -125,7 +125,6 @@ public class MemoryGameService {
         final String name = memoryGameRequestDto.name();
         if (name != null) {
             memoryGame.setMemoryGame(name);
-            memoryGameRepository.save(memoryGame);
         }
         
         final Set<CardRequestDto> cardRequestDtoSet = memoryGameRequestDto.cardSet();

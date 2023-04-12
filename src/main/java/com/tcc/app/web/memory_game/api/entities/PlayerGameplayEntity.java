@@ -7,14 +7,17 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "player_gameplay")
+
 @Getter
+@NoArgsConstructor(force = true)
 @EqualsAndHashCode(of = {"id", "score", "startTime", "endTime"})
+
 public class PlayerGameplayEntity {
     
-    public PlayerGameplayEntity(UserEntity player, GameplayEntity gameplay) {
+    public PlayerGameplayEntity(@NonNull UserEntity player, @NonNull GameplayEntity gameplay) {
+        this.id = new PlayerGameplayId(player.getId(), gameplay.getId());
         this.player = player;
         this.gameplay = gameplay;
-        this.id = new PlayerGameplayId(player.getId(), gameplay.getId());
     }
     
     @NonNull

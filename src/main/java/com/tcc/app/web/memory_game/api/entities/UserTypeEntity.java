@@ -9,9 +9,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "type_user")
+
 @Getter
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
+
 public class UserTypeEntity implements GrantedAuthority {
     @NonNull
     @Id

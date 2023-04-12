@@ -46,8 +46,7 @@ public class GameplayController {
     @PostMapping("/terminar/{code}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity finishGameplay(@NotBlank @PathVariable("code") String code,
-                                         @RequestBody
-                                         @Valid PlayerScoreRequestDto playerScoreRequestDto) throws Exception {
+                                         @RequestBody PlayerScoreRequestDto playerScoreRequestDto) throws NoPermissionException {
         var result = gameplayService.finishGameplayByCode(code, playerScoreRequestDto);
         
         return ResponseEntity.ok(gameplayMapper.toGameplayResultDto(result.v1(),
