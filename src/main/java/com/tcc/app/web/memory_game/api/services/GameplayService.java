@@ -9,6 +9,7 @@ import com.tcc.app.web.memory_game.api.mappers.GameplayMapper;
 import com.tcc.app.web.memory_game.api.repositories.CodeGameplayRepository;
 import com.tcc.app.web.memory_game.api.repositories.GameplayRepository;
 import com.tcc.app.web.memory_game.api.repositories.PlayerGameplayRepository;
+import com.tcc.app.web.memory_game.api.utils.CollectionUtil;
 import com.tcc.app.web.memory_game.api.utils.GameplayUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -17,8 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.NoPermissionException;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional
@@ -41,8 +41,10 @@ public class GameplayService {
     
     public CodeGameplayEntity generateGameplay(@NonNull final GameplayRequestDto gameplayRequestDto) {
         UserEntity creator = userService.getCurrentUser();
-        if (! creator.isCreator()) {
-            creator = userService.findCreatorByUsernameOrEmail(gameplayRequestDto.creator());
+        final String usernameOrEmailCreator = gameplayRequestDto.creator();
+        
+        if (creator.isNotCreator() || creator.notEqualsUsernameOrEmail(usernameOrEmailCreator)) {
+            creator = userService.findCreatorByUsernameOrEmail(usernameOrEmailCreator);
         }
         
         final MemoryGameEntity memoryGame = memoryGameService.findByCreatorAndMemoryGame(creator,

@@ -30,7 +30,8 @@ public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Lon
            "FROM PlayerGameplayEntity plg " +
            "JOIN plg.gameplay gm " +
            "JOIN gm.memoryGame mg " +
-           "WHERE plg.player = :player")
+           "WHERE plg.player = :player " +
+           "AND plg.player != mg.creator")
     Set<MemoryGameEntity> findAllByPlayer(UserEntity player);
     
     @Query("SELECT DISTINCT mg " +

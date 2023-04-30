@@ -43,7 +43,7 @@ public class GameplayController {
     }
     
     @PostMapping("/terminar/{code}")
-    @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
+    @PreAuthorize("hasRole('ROLE_JOGADOR')")
     public ResponseEntity finishGameplay(@NotBlank @PathVariable("code") String code,
                                          @Valid @RequestBody
                                          PlayerScoreRequestDto playerScoreRequestDto) throws NoPermissionException {

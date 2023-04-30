@@ -36,4 +36,8 @@ public class UserTypeEntity implements GrantedAuthority {
     public String getAuthority() {
         return "ROLE_" + this.type;
     }
+    
+    public boolean equalsType(UserTypeEnum typeEnum) {
+        return type.equals(typeEnum);
+    }
 }

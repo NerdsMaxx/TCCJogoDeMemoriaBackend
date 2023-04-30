@@ -2,6 +2,7 @@ package com.tcc.app.web.memory_game.api.entities;
 
 import com.tcc.app.web.memory_game.api.custom.Default;
 import com.tcc.app.web.memory_game.api.enums.UserTypeEnum;
+import com.tcc.app.web.memory_game.api.utils.CollectionUtil;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -56,11 +57,21 @@ public class UserEntity implements UserDetails {
     private final Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
     
     public boolean isCreator() {
-        return userType.stream().anyMatch(userType1 -> UserTypeEnum.CRIADOR.equals(userType1.getType()));
+        return userType.stream()
+                       .anyMatch(userType1 -> userType1.equalsType(UserTypeEnum.CRIADOR));
+    }
+    
+    public boolean isNotCreator() {
+        return ! isCreator();
     }
     
     public boolean isPlayer() {
-        return userType.stream().anyMatch(userType1 -> UserTypeEnum.JOGADOR.equals(userType1.getType()));
+        return userType.stream()
+                       .anyMatch(userType1 -> userType1.equalsType(UserTypeEnum.JOGADOR));
+    }
+    
+    public boolean isNotPlayer() {
+        return ! isPlayer();
     }
     
     public UserEntity addTypes(Set<UserTypeEntity> types) {
@@ -81,6 +92,14 @@ public class UserEntity implements UserDetails {
     @Override
     public String getPassword() {
         return password;
+    }
+    
+    public boolean equalsUsernameOrEmail(String usernameOrEmail) {
+        return this.username.equals(usernameOrEmail) || this.email.equals(usernameOrEmail);
+    }
+    
+    public boolean notEqualsUsernameOrEmail(String usernameOrEmail) {
+        return ! equalsUsernameOrEmail(usernameOrEmail);
     }
     
     @Override
