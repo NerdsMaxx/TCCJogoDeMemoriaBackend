@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public final class GameplayUtilStatic {
+public final class GameplayUtil {
     
     private static final Random random = new Random();
     private static final List<Pair<String,LocalDateTime>> codeList = new ArrayList<>();
@@ -17,7 +17,7 @@ public final class GameplayUtilStatic {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
     };
     
-    private GameplayUtilStatic() {}
+    private GameplayUtil() {}
     
     public static String generateCode() {
         final StringBuilder codeBuilder = new StringBuilder();

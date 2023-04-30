@@ -9,7 +9,7 @@ import com.tcc.app.web.memory_game.api.mappers.GameplayMapper;
 import com.tcc.app.web.memory_game.api.repositories.CodeGameplayRepository;
 import com.tcc.app.web.memory_game.api.repositories.GameplayRepository;
 import com.tcc.app.web.memory_game.api.repositories.PlayerGameplayRepository;
-import com.tcc.app.web.memory_game.api.utils.GameplayUtilStatic;
+import com.tcc.app.web.memory_game.api.utils.GameplayUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -53,7 +53,7 @@ public class GameplayService {
                                         new GameplayEntity(true, memoryGame) :
                                         new GameplayEntity(false, memoryGame);
         
-        final CodeGameplayEntity codeGameplay = new CodeGameplayEntity(GameplayUtilStatic.generateCode(), gameplay);
+        final CodeGameplayEntity codeGameplay = new CodeGameplayEntity(GameplayUtil.generateCode(), gameplay);
         
         gameplay.setCodeGameplay(codeGameplay);
         
@@ -132,7 +132,6 @@ public class GameplayService {
     private PlayerGameplayEntity _addPlayerInGameplay(@NonNull UserEntity player,
                                                       @NonNull GameplayEntity gameplay,
                                                       @NonNull CodeGameplayEntity codeGameplay) {
-        
         final SimpleValue<Boolean> isNotFirst = new SimpleValue<>(true);
         final PlayerGameplayEntity playerGameplay;
         playerGameplay = playerGameplayRepository.findByPlayerAndGameplay(player, gameplay)

@@ -1,5 +1,6 @@
 package com.tcc.app.web.memory_game.api.entities;
 
+import com.tcc.app.web.memory_game.api.custom.Default;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,27 +11,25 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Default))
 @EqualsAndHashCode(of = {"code"})
 
 public class CodeGameplayEntity {
     
-    @Setter
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private @Setter Long id;
     
-    @NonNull
     @Column(nullable = false, unique = true)
-    private final String code;
+    private final @NonNull String code;
     
     @Column(nullable = false)
     private Integer numbersPlayerMoment = 0;
     
-    @NonNull
     @OneToOne
     @JoinColumn(name = "gameplay_id", nullable = false, unique = true)
-    private final GameplayEntity gameplay;
+    private final @NonNull GameplayEntity gameplay;
     
     @Column(name = "end_time", nullable = false)
     private final LocalDateTime endTime = LocalDateTime.now().plusHours(2);

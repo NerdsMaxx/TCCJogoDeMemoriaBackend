@@ -1,5 +1,6 @@
 package com.tcc.app.web.memory_game.api.entities;
 
+import com.tcc.app.web.memory_game.api.custom.Default;
 import com.tcc.app.web.memory_game.api.enums.UserTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,30 +16,31 @@ import java.util.Set;
 
 @Getter
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Default))
 @EqualsAndHashCode(of = "id")
 
 public class UserEntity implements UserDetails {
+    
     @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @NonNull
+    
     @Column(nullable = false)
-    private final String name;
+    private final @NonNull String name;
     
-    @NonNull
+    
     @Column(nullable = false, unique = true)
-    private final String email;
+    private final @NonNull String email;
     
-    @NonNull
+    
     @Column(nullable = false, unique = true)
-    private final String username;
+    private final @NonNull String username;
     
-    @Setter
+    
     @Column(nullable = false)
-    private String password;
+    private @Setter String password;
     
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_type",

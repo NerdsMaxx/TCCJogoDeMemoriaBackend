@@ -14,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.NoPermissionException;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public class GameplayController {
     @PostMapping("/comecar")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity generateGameplay(@RequestBody @Valid GameplayRequestDto gameplayRequestDto) throws Exception {
-        CodeGameplayEntity codeGameplay = gameplayService.generateGameplay(gameplayRequestDto);
+        final CodeGameplayEntity codeGameplay = gameplayService.generateGameplay(gameplayRequestDto);
         
         return ResponseEntity.ok(gameplayMapper.toGameplayResponseDto(codeGameplay));
     }
@@ -38,7 +37,7 @@ public class GameplayController {
     @PostMapping("/jogar/{code}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity addPlayerInGameplay(@PathVariable("code") String code) throws NoPermissionException {
-        PlayerGameplayEntity playerGameplayEntity = gameplayService.addGameplayByCode(code);
+        final PlayerGameplayEntity playerGameplayEntity = gameplayService.addGameplayByCode(code);
         
         return ResponseEntity.ok(gameplayMapper.toPlayerAddedResponseDto(playerGameplayEntity));
     }
@@ -46,8 +45,9 @@ public class GameplayController {
     @PostMapping("/terminar/{code}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity finishGameplay(@NotBlank @PathVariable("code") String code,
-                                         @RequestBody PlayerScoreRequestDto playerScoreRequestDto) throws NoPermissionException {
-        var result = gameplayService.finishGameplayByCode(code, playerScoreRequestDto);
+                                         @Valid @RequestBody
+                                         PlayerScoreRequestDto playerScoreRequestDto) throws NoPermissionException {
+        final var result = gameplayService.finishGameplayByCode(code, playerScoreRequestDto);
         
         return ResponseEntity.ok(gameplayMapper.toGameplayResultDto(result.v1(),
                                                                     result.v2(),
@@ -59,7 +59,7 @@ public class GameplayController {
     @GetMapping("/pontuacoes/{code}")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity getGameplayScores(@NotBlank @PathVariable("code") String code) {
-        var result = gameplayService.getGameplayScoresByCode(code);
+        final var result = gameplayService.getGameplayScoresByCode(code);
         
         return ResponseEntity.ok(gameplayMapper.toGameplayResultDto(result.v1(),
                                                                     result.v2(),
@@ -70,7 +70,7 @@ public class GameplayController {
     @GetMapping("/codigos")
     @PreAuthorize("hasRole('ROLE_CRIADOR')")
     public ResponseEntity getGameplayScores() throws NoPermissionException {
-        Set<CodeGameplayEntity> codeGameplaySet = gameplayService.getCodeSet();
+        final Set<CodeGameplayEntity> codeGameplaySet = gameplayService.getCodeSet();
         
         return ResponseEntity.ok(gameplayMapper.toCodesResponseDto(codeGameplaySet));
     }
@@ -78,7 +78,7 @@ public class GameplayController {
     @GetMapping("/partidas-anteriores")
     @PreAuthorize("hasRole('ROLE_CRIADOR') or hasRole('ROLE_JOGADOR')")
     public ResponseEntity getPreviousGameplays() throws Exception {
-        Set<PlayerGameplayEntity> playerGameplaySet = gameplayService.getPreviousGameplays();
+        final Set<PlayerGameplayEntity> playerGameplaySet = gameplayService.getPreviousGameplays();
         
         return ResponseEntity.ok(playerGameplaySet.stream()
                                                   .map(gameplayMapper::toPreviousGameplaysResponseDTO)

@@ -1,5 +1,6 @@
 package com.tcc.app.web.memory_game.api.entities;
 
+import com.tcc.app.web.memory_game.api.custom.Default;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,19 +15,18 @@ import java.time.LocalDateTime;
 
 public class PlayerGameplayEntity {
     
+    @Default
     public PlayerGameplayEntity(@NonNull UserEntity player, @NonNull GameplayEntity gameplay) {
         this.id = new PlayerGameplayId(player.getId(), gameplay.getId());
         this.player = player;
         this.gameplay = gameplay;
     }
     
-    @NonNull
     @EmbeddedId
-    private final PlayerGameplayId id;
+    private final @NonNull PlayerGameplayId id;
     
-    @Setter
     @Column(nullable = false)
-    private Integer score = 0;
+    private @Setter @NonNull Integer score = 0;
     
     @Column(name = "start_time", nullable = false)
     private final LocalDateTime startTime = LocalDateTime.now();
@@ -34,17 +34,25 @@ public class PlayerGameplayEntity {
     @Column(name = "end_time")
     private LocalDateTime endTime;
     
-    @NonNull
+    @Column(name = "number_right_options")
+    private @Setter @NonNull Integer numberRightOptions = 0;
+    
+    @Column(name = "number_wrong_options")
+    private @Setter @NonNull Integer numberWrongOptions = 0;
+    
+    @Column(name = "number_attempts")
+    private @Setter @NonNull Integer numberAttempts = 0;
+   
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("playerId")
     @JoinColumn(name = "player_id", nullable = false)
-    private final UserEntity player;
+    private final @NonNull UserEntity player;
     
-    @NonNull
+   
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("gameplayId")
     @JoinColumn(name = "gameplay_id", nullable = false)
-    private final GameplayEntity gameplay;
+    private final @NonNull GameplayEntity gameplay;
     
     public PlayerGameplayEntity finishGameplay() {
         endTime = LocalDateTime.now();

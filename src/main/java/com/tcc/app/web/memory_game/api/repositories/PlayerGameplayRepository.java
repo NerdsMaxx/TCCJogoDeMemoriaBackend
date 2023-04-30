@@ -27,6 +27,7 @@ public interface PlayerGameplayRepository extends JpaRepository<PlayerGameplayEn
     @Query("SELECT plgm " +
            "FROM PlayerGameplayEntity plgm " +
            "JOIN plgm.player pl " +
-           "WHERE pl = :player")
+           "WHERE pl = :player " +
+           "AND plgm.endTime IS NOT NULL")
     Set<PlayerGameplayEntity> findAllByPlayer(UserEntity player);
 }

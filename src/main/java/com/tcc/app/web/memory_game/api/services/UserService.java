@@ -88,25 +88,21 @@ public class UserService {
     
     public UserEntity getCurrentCreator() throws NoPermissionException {
         final UserEntity user = getCurrentUser();
-        _throwIfUserIsNotCreator(user);
+        
+        if (! user.isCreator()) {
+            throw new NoPermissionException("Este usuário não é criador.");
+        }
+        
         return user;
     }
     
     public UserEntity getCurrentPlayer() throws NoPermissionException {
         final UserEntity user = getCurrentUser();
-        _throwIfUserIsNotPlayer(user);
-        return user;
-    }
-    
-    private void _throwIfUserIsNotPlayer(@NonNull UserEntity user) throws NoPermissionException {
+        
         if (! user.isPlayer()) {
             throw new NoPermissionException("Este usuário não é jogador.");
         }
-    }
-    
-    private void _throwIfUserIsNotCreator(@NonNull UserEntity user) throws NoPermissionException {
-        if (! user.isCreator()) {
-            throw new NoPermissionException("Este usuário não é criador.");
-        }
+        
+        return user;
     }
 }

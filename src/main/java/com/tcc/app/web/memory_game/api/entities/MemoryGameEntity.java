@@ -1,11 +1,12 @@
 package com.tcc.app.web.memory_game.api.entities;
 
+import com.tcc.app.web.memory_game.api.custom.Default;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "memory_game",
@@ -15,24 +16,21 @@ import java.util.Set;
 
 @Getter
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Default))
 @EqualsAndHashCode(of = {"memoryGame", "creator"})
 
 public class MemoryGameEntity {
-    @Setter
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private @Setter Long id;
     
-    @Setter
-    @NonNull
     @Column(name = "memory_game", nullable = false)
-    private String memoryGame;
+    private @Setter @NonNull String memoryGame;
     
-    @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
-    private final UserEntity creator;
+    private final @NonNull UserEntity creator;
     
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "memory_game_subject", joinColumns = @JoinColumn(name = "memory_game_id"),
@@ -60,8 +58,8 @@ public class MemoryGameEntity {
         return this;
     }
     
-    public MemoryGameEntity addSubjectList(@NonNull Set<SubjectEntity> subjectSet,
-                                           @NonNull Set<SubjectEntity> subjectFoundSet) {
+    public MemoryGameEntity addSubjectSet(@NonNull Set<SubjectEntity> subjectSet,
+                                          @NonNull Set<SubjectEntity> subjectFoundSet) {
         Set<SubjectEntity> newSubjectSet = new HashSet<>(subjectFoundSet);
         newSubjectSet.addAll(subjectSet);
         
@@ -70,12 +68,17 @@ public class MemoryGameEntity {
     }
     
     public MemoryGameEntity clearSubjectSet(@NonNull Set<String> subjectNameSet) {
-        subjectSet.removeIf(subject -> !subjectNameSet.contains(subject.getSubject()));
+        subjectSet.removeIf(subject -> ! subjectNameSet.contains(subject.getSubject()));
         return this;
     }
     
     public MemoryGameEntity clearSubjectSet() {
         subjectSet.clear();
         return this;
+    }
+    
+    public Set<SubjectEntity> getSubjectSetNotUsed(@NonNull Set<String> subjectNameSet) {
+        return subjectSet.stream().filter(subject -> ! subjectNameSet.contains(subject.getSubject()))
+                         .collect(Collectors.toSet());
     }
 }

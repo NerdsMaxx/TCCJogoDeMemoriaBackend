@@ -22,8 +22,6 @@ public interface CodeGameplayRepository extends JpaRepository<CodeGameplayEntity
            "WHERE cg.code = :code")
     Optional<GameplayEntity> findGameplayByCode(String code);
     
-    boolean existsByCode(String code);
-    
     
     @Query("SELECT code " +
            "FROM CodeGameplayEntity code " +

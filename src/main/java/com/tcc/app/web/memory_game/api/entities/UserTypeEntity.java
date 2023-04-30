@@ -1,5 +1,6 @@
 package com.tcc.app.web.memory_game.api.entities;
 
+import com.tcc.app.web.memory_game.api.custom.Default;
 import com.tcc.app.web.memory_game.api.enums.UserTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,23 +13,24 @@ import java.util.Set;
 
 @Getter
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Default))
 @EqualsAndHashCode(of = "id")
 
 public class UserTypeEntity implements GrantedAuthority {
-    @NonNull
+    
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private final Long id;
+    private final @NonNull Long id;
     
-    @NonNull
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
-    private final UserTypeEnum type;
+    private final @NonNull UserTypeEnum type;
     
-    @NonNull
+    
     @ManyToMany(mappedBy = "userType")
-    private final Set<UserEntity> user;
+    private final @NonNull Set<UserEntity> user;
     
     @Override
     public String getAuthority() {

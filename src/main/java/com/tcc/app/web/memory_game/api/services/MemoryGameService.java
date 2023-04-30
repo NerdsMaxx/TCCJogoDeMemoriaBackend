@@ -11,6 +11,7 @@ import com.tcc.app.web.memory_game.api.mappers.CardMapper;
 import com.tcc.app.web.memory_game.api.repositories.CardRepository;
 import com.tcc.app.web.memory_game.api.repositories.MemoryGameRepository;
 import com.tcc.app.web.memory_game.api.repositories.SubjectRepository;
+import com.tcc.app.web.memory_game.api.utils.CollectionUtil;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -104,13 +105,17 @@ public class MemoryGameService {
                                          .map(cardRequestDto -> cardMapper.toCardEntity(cardRequestDto, memoryGame))
                                          .collect(Collectors.toSet());
         
-        final Set<SubjectEntity> subjectFoundSet = subjectRepository.findBySubjectSet(memoryGameRequestDto.subjectSet());
-        final Set<SubjectEntity> subjectSet = memoryGameRequestDto.subjectSet().stream()
-                                                                  .map(SubjectEntity::new)
-                                                                  .collect(Collectors.toSet());
+        memoryGame.addCardSet(newCardSet);
         
-        memoryGame.addCardSet(newCardSet)
-                  .addSubjectList(subjectSet, subjectFoundSet);
+        final Set<String> subjectNameSet = memoryGameRequestDto.subjectSet();
+        if (subjectNameSet != null) {
+            final Set<SubjectEntity> subjectFoundSet = subjectRepository.findBySubjectSet(subjectNameSet);
+            final Set<SubjectEntity> subjectSet = memoryGameRequestDto.subjectSet().stream()
+                                                                      .map(SubjectEntity::new)
+                                                                      .collect(Collectors.toSet());
+            
+            memoryGame.addSubjectSet(subjectSet, subjectFoundSet);
+        }
         
         return memoryGameRepository.save(memoryGame);
     }
@@ -143,13 +148,12 @@ public class MemoryGameService {
             _deleteAllSubjectNotUsed(memoryGame, subjectNameSet);
             memoryGame.clearSubjectSet(subjectNameSet);
             
-            final Set<SubjectEntity> subjectSet = subjectNameSet.stream()
-                                                                .map(SubjectEntity::new)
+            final Set<SubjectEntity> subjectSet = subjectNameSet.stream().map(SubjectEntity::new)
                                                                 .collect(Collectors.toSet());
             
             final Set<SubjectEntity> subjectFoundSet = subjectRepository.findBySubjectSet(subjectNameSet);
             
-            memoryGame.addSubjectList(subjectSet, subjectFoundSet);
+            memoryGame.addSubjectSet(subjectSet, subjectFoundSet);
         }
         
         return memoryGameRepository.save(memoryGame);
@@ -169,26 +173,28 @@ public class MemoryGameService {
         memoryGameRepository.delete(memoryGame);
     }
     
-    public void _deleteAllSubjectNotUsed(@NonNull MemoryGameEntity memoryGame, Set<String> subjectNameSet) {
-        Set<SubjectEntity> subjectSet;
+    private void _deleteAllSubjectNotUsed(@NonNull MemoryGameEntity memoryGame, Set<String> subjectNameSet) {
+        final Set<SubjectEntity> subjectSet = (CollectionUtil.isNotEmpty(subjectNameSet)) ?
+                                              memoryGame.getSubjectSetNotUsed(subjectNameSet) :
+                                              new HashSet<>(memoryGame.getSubjectSet());
         
-        if (subjectNameSet != null && ! subjectNameSet.isEmpty()) {
-            subjectSet = memoryGame.getSubjectSet().stream()
-                                   .filter(subject -> ! subjectNameSet.contains(subject.getSubject()))
-                                   .collect(Collectors.toSet());
-        } else {
-            subjectSet = new HashSet<>(memoryGame.getSubjectSet());
-        }
-        
-        subjectSet.forEach(subject -> subject.removeMemoryGame(memoryGame));
-        subjectSet = subjectSet.stream()
-                               .filter(SubjectEntity::noMemoryGame)
-                               .collect(Collectors.toSet());
-        
+        subjectSet.removeIf(subject -> subject.removeMemoryGame(memoryGame).hasMemoryGame());
         subjectRepository.deleteAll(subjectSet);
     }
     
-    public void _deleteAllSubjectNotUsed(MemoryGameEntity memoryGame) {
+    private void _deleteAllSubjectNotUsed(@NonNull MemoryGameEntity memoryGame) {
         _deleteAllSubjectNotUsed(memoryGame, null);
     }
 }
+
+
+//        subjectSet = Optional.ofNullable(subjectNameSet)
+//                             .filter(CollectionUtil::isNotEmpty)
+//                             .map(subjectNameSet1 -> memoryGame.getSubjectSetNotUsed(subjectNameSet1).stream())
+//                             .orElse(memoryGame.getSubjectSet().stream())
+//                             .filter(subject -> subject.removeMemoryGame(memoryGame).noMemoryGame())
+//                             .collect(Collectors.toSet());
+
+
+//        subjectSet = subjectSet.stream().filter(subject -> subject.removeMemoryGame(memoryGame).noMemoryGame())
+//                               .collect(Collectors.toSet());

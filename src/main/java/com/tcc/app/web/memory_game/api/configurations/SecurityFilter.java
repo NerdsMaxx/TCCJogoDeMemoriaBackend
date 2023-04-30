@@ -27,11 +27,11 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String jwtToken = getToken(request);
+        final String jwtToken = getToken(request);
         
         if (jwtToken != null) {
-            String subject = tokenService.getSubject(jwtToken);
-            UserDetails userDetails = userRepository.findByUsernameOrEmail(subject);
+            final String subject = tokenService.getSubject(jwtToken);
+            final UserDetails userDetails = userRepository.findByUsernameOrEmail(subject);
             final var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
                                                                                userDetails.getAuthorities());
             

@@ -39,6 +39,11 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(noPermissionException.getMessage());
     }
     
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity unusualException(Exception ignored) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("Deu algo errado! Favor contatar o administrador!");
+    }
+    
 //    @ExceptionHandler(Exception.class)
 //    public ResponseEntity exceptionCommon(Exception exception) {
 //        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());

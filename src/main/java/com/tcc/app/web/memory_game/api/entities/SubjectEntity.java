@@ -1,5 +1,6 @@
 package com.tcc.app.web.memory_game.api.entities;
 
+import com.tcc.app.web.memory_game.api.custom.Default;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.util.Set;
 
 @Getter
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Default))
 @EqualsAndHashCode(of = {"subject"})
 
 public class SubjectEntity {
@@ -34,5 +35,9 @@ public class SubjectEntity {
     
     public boolean noMemoryGame() {
         return memoryGameSet.isEmpty();
+    }
+    
+    public boolean hasMemoryGame() {
+        return ! noMemoryGame();
     }
 }
