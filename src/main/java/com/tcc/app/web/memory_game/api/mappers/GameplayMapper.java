@@ -3,12 +3,14 @@ package com.tcc.app.web.memory_game.api.mappers;
 import com.tcc.app.web.memory_game.api.dtos.requests.PlayerScoreRequestDto;
 import com.tcc.app.web.memory_game.api.dtos.responses.*;
 import com.tcc.app.web.memory_game.api.entities.CodeGameplayEntity;
+import com.tcc.app.web.memory_game.api.entities.GameplayEntity;
 import com.tcc.app.web.memory_game.api.entities.MemoryGameEntity;
 import com.tcc.app.web.memory_game.api.entities.PlayerGameplayEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,7 @@ public interface GameplayMapper {
     PlayerAddedResponseDto toPlayerAddedResponseDto(PlayerGameplayEntity playerGameplay);
     
     @Mapping(source = "player.username", target = "player")
+    @Mapping(source = "gameplay.memoryGame.creator.username", target = "creator")
     PlayerResultResponseDto toResultPlayerResponseDto(PlayerGameplayEntity playerGameplay);
     
     @Mapping(source = "playerGameplaySet", target = "playerSet")
@@ -31,7 +34,7 @@ public interface GameplayMapper {
                                                   String memoryGame,
                                                   String creator);
     
-    default CodesResponseDto toCodesResponseDto(Set<CodeGameplayEntity> codeGameplaySet) {
+    default CodesResponseDto toCodesResponseDto(List<CodeGameplayEntity> codeGameplaySet) {
         final Set<MemoryGameWithCodeResponseDto> codes;
         codes = codeGameplaySet.stream()
                                .map(code -> {
@@ -51,5 +54,10 @@ public interface GameplayMapper {
     
     @Mapping(source = "gameplay.memoryGame.creator.username", target = "creator")
     @Mapping(source = "gameplay.memoryGame.memoryGame", target = "memoryGame")
-    PreviousGameplaysResponseDto toPreviousGameplaysResponseDTO(PlayerGameplayEntity playerGameplay);
+    @Mapping(source = "player.username", target = "player")
+    PreviousGameplaysPlayerResponseDto toPreviousGameplaysPlayerResponseDTO(PlayerGameplayEntity playerGameplay);
+    
+    @Mapping(source = "id", target = "gameplayId")
+    @Mapping(source = "memoryGame.memoryGame", target = "memoryGame")
+    PreviousGameplaysCreatorResponseDto toPreviousGameplaysCreatorResponseDto(GameplayEntity gameplay);
 }

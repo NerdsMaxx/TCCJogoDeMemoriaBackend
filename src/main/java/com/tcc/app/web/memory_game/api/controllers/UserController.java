@@ -7,7 +7,6 @@ import com.tcc.app.web.memory_game.api.mappers.UserMapper;
 import com.tcc.app.web.memory_game.api.services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -33,8 +32,8 @@ public class UserController {
     
     @PostMapping("/mudar-senha")
     public ResponseEntity changePassword(@RequestBody @Valid ResetPasswordRequestDto changePasswordRequestDto) {
-        UserEntity user = userService.changePassword(changePasswordRequestDto);
+        userService.changePassword(changePasswordRequestDto);
         
-        return ResponseEntity.ok(userMapper.toUserResponseDto(user));
+        return ResponseEntity.ok("Senha alterada com sucesso!");
     }
 }

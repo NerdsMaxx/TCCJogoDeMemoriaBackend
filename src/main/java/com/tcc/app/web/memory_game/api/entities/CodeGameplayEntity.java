@@ -34,6 +34,10 @@ public class CodeGameplayEntity {
     @Column(name = "end_time", nullable = false)
     private final LocalDateTime endTime = LocalDateTime.now().plusHours(2);
     
+    public boolean codeExpired() {
+        return LocalDateTime.now().isAfter(endTime);
+    }
+    
     public CodeGameplayEntity sumOnePlayer() {
         ++ numbersPlayerMoment;
         return this;

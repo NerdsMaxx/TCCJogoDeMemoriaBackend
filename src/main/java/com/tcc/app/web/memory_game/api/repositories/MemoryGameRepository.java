@@ -49,6 +49,7 @@ public interface MemoryGameRepository extends JpaRepository<MemoryGameEntity,Lon
            "JOIN gm.memoryGame mg " +
            "LEFT JOIN mg.subjectSet sub " +
            "WHERE plg.player = :player " +
+           "AND plg.player != mg.creator " +
            "AND (sub.subject LIKE :subject% " +
            "OR mg.memoryGame LIKE :memoryGameName%) ")
     Set<MemoryGameEntity> findAllBySubjectOrMemoryGameNameForPlayer(UserEntity player, String subject, String memoryGameName);

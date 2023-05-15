@@ -1,25 +1,28 @@
 package com.tcc.app.web.memory_game.api.utils;
 
-import com.tcc.app.web.memory_game.api.custom.Pair;
+import com.tcc.app.web.memory_game.api.repositories.CodeGameplayRepository;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
+@Component
+@Scope("singleton")
 public final class GameplayUtil {
+    private final CodeGameplayRepository codeGameplayRepository;
     
-    private static final Random random = new Random();
-    private static final List<Pair<String,LocalDateTime>> codeList = new ArrayList<>();
-    private static final char[] charList = {
+    public GameplayUtil(CodeGameplayRepository codeGameplayRepository) {
+        this.codeGameplayRepository = codeGameplayRepository;
+    }
+    
+    private final Random random = new Random();
+    private final char[] charList = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
     };
     
-    private GameplayUtil() {}
-    
-    public static String generateCode() {
+    public String generateCode() {
         final StringBuilder codeBuilder = new StringBuilder();
         String code = "";
         
@@ -31,13 +34,7 @@ public final class GameplayUtil {
             }
             
             code = codeBuilder.toString();
-            
-            final String finalCode = code;
-            contains = codeList.stream().anyMatch(code1 -> code1.v1().equals(finalCode));
-        } while (contains);
-        
-        codeList.add(new Pair<>(code, LocalDateTime.now().plusHours(2)));
-        codeList.removeIf(code1 -> LocalDateTime.now().isAfter(code1.v2()));
+        } while (codeGameplayRepository.existsByCode(code));
         
         return code;
     }

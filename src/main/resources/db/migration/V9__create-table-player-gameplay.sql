@@ -4,6 +4,9 @@ CREATE TABLE player_gameplay (
     score INT NOT NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP,
+    number_right_options INT NOT NULL,
+    number_wrong_options INT NOT NULL,
+    number_attempts INT NOT NULL,
     CONSTRAINT fk_player_id
         FOREIGN KEY (player_id)
             REFERENCES user_mg(id),

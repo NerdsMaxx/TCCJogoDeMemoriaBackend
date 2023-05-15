@@ -21,8 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.NoPermissionException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 @Service
 @Transactional
@@ -110,9 +113,9 @@ public class MemoryGameService {
         final Set<String> subjectNameSet = memoryGameRequestDto.subjectSet();
         if (subjectNameSet != null) {
             final Set<SubjectEntity> subjectFoundSet = subjectRepository.findBySubjectSet(subjectNameSet);
-            final Set<SubjectEntity> subjectSet = memoryGameRequestDto.subjectSet().stream()
-                                                                      .map(SubjectEntity::new)
-                                                                      .collect(Collectors.toSet());
+            final Set<SubjectEntity> subjectSet = subjectNameSet.stream()
+                                                                .map(SubjectEntity::new)
+                                                                .collect(Collectors.toSet());
             
             memoryGame.addSubjectSet(subjectSet, subjectFoundSet);
         }

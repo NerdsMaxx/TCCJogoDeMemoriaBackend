@@ -21,13 +21,26 @@ public interface PlayerGameplayRepository extends JpaRepository<PlayerGameplayEn
     @Query("SELECT plgm " +
            "FROM PlayerGameplayEntity plgm " +
            "JOIN plgm.gameplay gm " +
-           "WHERE gm = :gameplay")
-    Set<PlayerGameplayEntity> findAllWithScoresByGameplay(GameplayEntity gameplay);
+           "WHERE gm.id = :gameplayId " +
+           "AND plgm.endTime IS NOT NULL " +
+           "ORDER BY plgm.startTime DESC")
+    List<PlayerGameplayEntity> findAllWithScoresByGameplayId(Long gameplayId);
+    
+    @Query("SELECT plgm " +
+           "FROM PlayerGameplayEntity plgm " +
+           "JOIN plgm.gameplay gm " +
+           "WHERE gm.id = :gameplayId " +
+           "AND plgm.player = :player " +
+           "AND gm.alone = true " +
+           "AND plgm.endTime IS NOT NULL " +
+           "ORDER BY plgm.startTime DESC")
+    Optional<PlayerGameplayEntity> findByPlayerAndGameplayId(UserEntity player, Long gameplayId);
     
     @Query("SELECT plgm " +
            "FROM PlayerGameplayEntity plgm " +
            "JOIN plgm.player pl " +
            "WHERE pl = :player " +
-           "AND plgm.endTime IS NOT NULL")
-    Set<PlayerGameplayEntity> findAllByPlayer(UserEntity player);
+           "AND plgm.endTime IS NOT NULL " +
+           "ORDER BY plgm.startTime DESC")
+   List<PlayerGameplayEntity> findAllByPlayer(UserEntity player);
 }

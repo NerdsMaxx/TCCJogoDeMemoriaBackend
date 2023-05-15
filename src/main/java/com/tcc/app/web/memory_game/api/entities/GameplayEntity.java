@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -14,7 +15,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor(force = true)
 @RequiredArgsConstructor(onConstructor = @__(@Default))
-@EqualsAndHashCode(of = {"alone", "memoryGame", "startTime", "numbersPlayer"})
+@EqualsAndHashCode(of = {"alone", "memoryGame", "usedCode", "startTime", "lastTime", "numbersPlayer"})
 
 public class GameplayEntity {
     
@@ -25,21 +26,32 @@ public class GameplayEntity {
     @Column(nullable = false)
     private final @NonNull Boolean alone;
     
+    @Column(name = "start_time", nullable = false)
+    private final LocalDateTime startTime = LocalDateTime.now();
+    
+    @Column(name = "numbers_player", nullable = false)
+    private Integer numbersPlayer = 0;
+    
+    @Column(name = "used_code")
+    private @NonNull String usedCode;
+    
+    @Column(name = "last_time")
+    private LocalDateTime lastTime;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memory_game_id")
     private final @NonNull MemoryGameEntity memoryGame;
     
-    @Column(name = "start_time", nullable = false)
-    private final LocalDateTime startTime = LocalDateTime.now();
-    
-    @Column
-    private Integer numbersPlayer = 0;
-    
     @OneToOne(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
-    private @Setter CodeGameplayEntity codeGameplay;
+    private CodeGameplayEntity codeGameplay;
     
     @OneToMany(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
+    
+    public GameplayEntity setCodeGameplay(CodeGameplayEntity codeGameplay) {
+        this.codeGameplay = codeGameplay;
+        return this;
+    }
     
     public GameplayEntity sumOnePlayer() {
         ++ this.numbersPlayer;
@@ -54,6 +66,12 @@ public class GameplayEntity {
     public GameplayEntity updatePlayerGameplay(@NonNull PlayerGameplayEntity playerGameplay) {
         playerGameplaySet.removeIf(playerGameplay1 -> playerGameplay1.equals(playerGameplay));
         playerGameplaySet.add(playerGameplay);
+        
+        final LocalDateTime endTime = playerGameplay.getEndTime();
+        if(lastTime == null || endTime.isAfter(lastTime)) {
+            lastTime = endTime;
+        }
+        
         return this;
     }
 }

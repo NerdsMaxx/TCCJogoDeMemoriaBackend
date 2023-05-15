@@ -29,7 +29,7 @@ public class PlayerGameplayEntity {
     private @Setter @NonNull Integer score = 0;
     
     @Column(name = "start_time", nullable = false)
-    private final LocalDateTime startTime = LocalDateTime.now();
+    private LocalDateTime startTime = LocalDateTime.now();
     
     @Column(name = "end_time")
     private LocalDateTime endTime;
@@ -54,8 +54,17 @@ public class PlayerGameplayEntity {
     @JoinColumn(name = "gameplay_id", nullable = false)
     private final @NonNull GameplayEntity gameplay;
     
+    public PlayerGameplayEntity startAgain() {
+        startTime = LocalDateTime.now();
+        return this;
+    }
+    
     public PlayerGameplayEntity finishGameplay() {
         endTime = LocalDateTime.now();
         return this;
+    }
+    
+    public boolean notFinishGameplay() {
+        return endTime == null;
     }
 }

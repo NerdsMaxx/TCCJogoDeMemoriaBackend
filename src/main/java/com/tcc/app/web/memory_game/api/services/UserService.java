@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.NoPermissionException;
+import java.awt.color.ProfileDataException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,11 +37,12 @@ public class UserService {
     
     
     public UserEntity save(UserRequestDto userRequestDto) {
-        UserEntity user = userMapper.toUserEntity(userRequestDto);
-        
-        if (userRepository.findByUsernameOrEmail(userRequestDto.username()) != null) {
+       UserEntity user = userRepository.findByUsernameOrEmail(userRequestDto.username());
+        if (user != null) {
             throw new EntityExistsException("Este usuário já está adicionado.");
         }
+        
+        user = userMapper.toUserEntity(userRequestDto);
         
         Set<UserTypeEnum> type = userRequestDto.type().stream()
                                                .map(UserTypeEnum::getType)
@@ -63,6 +66,11 @@ public class UserService {
     
     public UserEntity changePassword(ResetPasswordRequestDto resetPasswordRequestDto) {
         UserEntity user = userRepository.findByUsernameOrEmail(resetPasswordRequestDto.username());
+        
+        if(passwordEncoder.matches(resetPasswordRequestDto.newPassword(), user.getPassword())){
+            throw new ProfileDataException("A senha não pode ser igual a anterior!");
+        }
+        
         user.setPassword(passwordEncoder.encode(resetPasswordRequestDto.newPassword()));
         
         return userRepository.save(user);
@@ -89,7 +97,7 @@ public class UserService {
     public UserEntity getCurrentCreator() throws NoPermissionException {
         final UserEntity user = getCurrentUser();
         
-        if (! user.isCreator()) {
+        if (user.isNotCreator()) {
             throw new NoPermissionException("Este usuário não é criador.");
         }
         
@@ -99,7 +107,7 @@ public class UserService {
     public UserEntity getCurrentPlayer() throws NoPermissionException {
         final UserEntity user = getCurrentUser();
         
-        if (! user.isPlayer()) {
+        if (user.isNotPlayer()) {
             throw new NoPermissionException("Este usuário não é jogador.");
         }
         

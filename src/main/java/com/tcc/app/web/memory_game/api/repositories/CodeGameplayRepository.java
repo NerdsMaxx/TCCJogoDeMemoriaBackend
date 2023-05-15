@@ -3,18 +3,21 @@ package com.tcc.app.web.memory_game.api.repositories;
 import com.tcc.app.web.memory_game.api.entities.CodeGameplayEntity;
 import com.tcc.app.web.memory_game.api.entities.GameplayEntity;
 import com.tcc.app.web.memory_game.api.entities.UserEntity;
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface CodeGameplayRepository extends JpaRepository<CodeGameplayEntity,Long> {
     
     Optional<CodeGameplayEntity> findByCode(String code);
+    
+    boolean existsByCode(String code);
     
     @Query("SELECT gply " +
            "FROM CodeGameplayEntity cg " +
@@ -30,7 +33,7 @@ public interface CodeGameplayRepository extends JpaRepository<CodeGameplayEntity
            "JOIN mg.creator cr " +
            "WHERE cr = :creator " +
            "AND gply.alone = false")
-    Set<CodeGameplayEntity> findCodeSetByCreator(UserEntity creator);
+    List<CodeGameplayEntity> findCodeListByCreator(UserEntity creator);
     
     @Modifying
     @Query("DELETE FROM " +

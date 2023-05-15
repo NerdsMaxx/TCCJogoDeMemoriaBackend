@@ -2,12 +2,13 @@ package com.tcc.app.web.memory_game.api.services;
 
 import com.tcc.app.web.memory_game.api.repositories.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -18,7 +19,8 @@ public class AuthenticationService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        return userRepository.findByUsernameOrEmail(usernameOrEmail);
+        return Optional.ofNullable(userRepository.findByUsernameOrEmail(usernameOrEmail))
+                       .orElseThrow(() -> new UsernameNotFoundException("ignored"));
     }
     
 }
