@@ -43,15 +43,15 @@ public class GameplayEntity {
     private final @NonNull MemoryGameEntity memoryGame;
     
     @OneToOne(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
-    private CodeGameplayEntity codeGameplay;
+    private @Setter CodeGameplayEntity codeGameplay;
     
     @OneToMany(mappedBy = "gameplay", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<PlayerGameplayEntity> playerGameplaySet = new HashSet<>();
     
-    public GameplayEntity setCodeGameplay(CodeGameplayEntity codeGameplay) {
-        this.codeGameplay = codeGameplay;
-        return this;
-    }
+//    public GameplayEntity setCodeGameplay(CodeGameplayEntity codeGameplay) {
+//        this.codeGameplay = codeGameplay;
+//        return this;
+//    }
     
     public GameplayEntity sumOnePlayer() {
         ++ this.numbersPlayer;
